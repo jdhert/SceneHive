@@ -1,0 +1,20 @@
+# Build outputs
+build/
+.gradle/
+bin/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Frontend (별도 빌드)
+frontend/
+
+# Misc
+*.md
+*.log
