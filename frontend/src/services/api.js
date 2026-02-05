@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -38,6 +38,7 @@ export const authService = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   refresh: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
+  verifyEmail: (data) => api.post('/auth/verify-email', data),
   getMe: () => api.get('/users/me'),
 };
 
