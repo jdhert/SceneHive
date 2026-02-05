@@ -1,15 +1,15 @@
 package com.example.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class RefreshTokenRequest {
-
+/**
+ * 토큰 갱신 요청 DTO (Record)
+ *
+ * 변경점:
+ * - 기존: getRefreshToken()
+ * - Record: refreshToken()
+ */
+public record RefreshTokenRequest(
     @NotBlank(message = "Refresh token은 필수입니다")
-    private String refreshToken;
-}
+    String refreshToken
+) {}

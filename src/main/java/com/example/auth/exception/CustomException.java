@@ -1,9 +1,7 @@
 package com.example.auth.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@Getter
 public class CustomException extends RuntimeException {
 
     private final HttpStatus status;
@@ -16,5 +14,9 @@ public class CustomException extends RuntimeException {
     public CustomException(String message) {
         super(message);
         this.status = HttpStatus.BAD_REQUEST;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 }
