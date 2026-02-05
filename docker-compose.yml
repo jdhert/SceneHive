@@ -10,14 +10,22 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-testuser}
       POSTGRES_DB: ${DB_NAME:-postgres}
     ports:
-      - "5432:5432"
+      - "5433:5432" # 외부 5433 → 내부 5432 (로컬 PostgreSQL과 충돌 방지)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U testuser"]
+      test: [ "CMD-SHELL", "pg_isready -U testuser" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
 
   # Spring Boot Backend
   backend:
@@ -32,6 +40,15 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-testuser}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-testuser}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+      MAIL_HOST: "smtp.gmail.com"
+      MAIL_PORT: "587"
+      MAIL_USERNAME: "${MAIL_USERNAME}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD}"
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_PORT: "${REDIS_PORT}"
     depends_on:
       db:
         condition: service_healthy
@@ -51,3 +68,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

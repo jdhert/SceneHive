@@ -1,18 +1,22 @@
 # Build stage
-FROM gradle:8.5-jdk17 AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 
-# Gradle 파일 복사
-COPY build.gradle settings.gradle ./
+# Gradle Wrapper 복사
+COPY gradlew ./
 COPY gradle ./gradle
+RUN chmod +x gradlew
+
+# Gradle 파일 복사
+COPY build.gradle settings.gradle gradle.properties ./
 
 # 의존성 다운로드 (캐싱 활용)
-RUN gradle dependencies --no-daemon || true
+RUN ./gradlew dependencies --no-daemon || true
 
 # 소스 복사 및 빌드
 COPY src ./src
-RUN gradle build -x test --no-daemon
+RUN ./gradlew clean build -x test --no-daemon
 
 # Production stage
 FROM eclipse-temurin:17-jre-alpine
