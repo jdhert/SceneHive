@@ -27,6 +27,10 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
   security:
     oauth2:
       client:
@@ -45,3 +49,25 @@ jwt:
 
 server:
   port: 8081
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  async:
+    mail:
+      core-pool-size: 2
+      max-pool-size: 4
+      queue-capacity: 200
+      keep-alive-seconds: 60
+      thread-name-prefix: mail-async-
+      retry:
+        max-attempts: 5
+        initial-delay-seconds: 5
+        max-delay-seconds: 300
+        backoff-multiplier: 2.0
+        batch-size: 20
+        poll-interval-ms: 3000
+  file-storage:
+    upload-dir: ./uploads
+    avatar-dir: avatars
+    allowed-types: image/jpeg,image/png,image/gif,image/webp
+    max-avatar-size: 5242880

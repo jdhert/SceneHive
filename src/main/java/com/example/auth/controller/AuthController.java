@@ -39,8 +39,27 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/users/me")
-    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(authService.getCurrentUser(userDetails.getUsername()));
+    @PostMapping("/auth/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody PasswordResetRequest request) {
+        authService.requestPasswordReset(request.email());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/auth/unlock-account")
+    public ResponseEntity<Void> unlockAccount(@RequestParam String token) {
+        authService.unlockAccount(token);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/auth/resend-unlock-email")
+    public ResponseEntity<Void> resendUnlockEmail(@RequestBody PasswordResetRequest request) {
+        authService.resendUnlockEmail(request.email());
+        return ResponseEntity.ok().build();
     }
 }

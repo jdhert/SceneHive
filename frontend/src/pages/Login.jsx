@@ -10,8 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [isLocked, setIsLocked] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState('')
+  const [isResending, setIsResending] = useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -32,9 +36,29 @@ function Login() {
       window.location.href = '/home'
     } catch (err) {
       console.error('Login error:', err)
-      setError(err.response?.data?.message || '로그인에 실패했습니다.')
+      const status = err.response?.status
+      const message = err.response?.data?.message || '로그인에 실패했습니다.'
+      setError(message)
+      setIsLocked(status === 423)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResendUnlock = async () => {
+    if (!email) {
+      setError('이메일을 입력해주세요.')
+      return
+    }
+    setIsResending(true)
+    setResendSuccess('')
+    try {
+      await authService.resendUnlockEmail(email)
+      setResendSuccess('잠금 해제 이메일이 재발송되었습니다. 메일함을 확인해주세요.')
+    } catch (err) {
+      setError(err.response?.data?.message || '이메일 재발송에 실패했습니다.')
+    } finally {
+      setIsResending(false)
     }
   }
 
@@ -90,8 +114,30 @@ function Login() {
 
         <CardContent className="space-y-6">
           {error && (
-            <div className="p-3 rounded-md bg-red-500/20 text-red-100 text-sm">
+            <div className={`p-3 rounded-md text-sm ${
+              isLocked
+                ? 'bg-orange-500/20 border border-orange-500/30 text-orange-100'
+                : 'bg-red-500/20 text-red-100'
+            }`}>
+              {isLocked && (
+                <p className="font-bold mb-1">Account Locked</p>
+              )}
               {error}
+              {isLocked && (
+                <button
+                  type="button"
+                  onClick={handleResendUnlock}
+                  disabled={isResending}
+                  className="mt-2 block w-full text-center py-1.5 rounded bg-white/10 hover:bg-white/20 text-orange-100 text-xs transition-colors"
+                >
+                  {isResending ? '발송 중...' : '잠금 해제 이메일 재발송'}
+                </button>
+              )}
+            </div>
+          )}
+          {resendSuccess && (
+            <div className="p-3 rounded-md bg-green-500/20 text-green-100 text-sm">
+              {resendSuccess}
             </div>
           )}
 
@@ -115,15 +161,55 @@ function Login() {
               <Label htmlFor="password" className="text-sm font-medium text-white">
                 Password
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="border-white/40 bg-white/10 placeholder:text-white/50 text-white focus:ring-2 focus:ring-white/50"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="border-white/40 bg-white/10 placeholder:text-white/50 text-white focus:ring-2 focus:ring-white/50 pr-16"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+                >
+                  {showPassword ? (
+                    <svg
+                      aria-hidden="true"
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 3l18 18" />
+                      <path d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58" />
+                      <path d="M9.88 5.09A9.77 9.77 0 0 1 12 5c5 0 8.27 3.11 9.5 5.5a10.94 10.94 0 0 1-4.09 4.44" />
+                      <path d="M6.61 6.61A10.6 10.6 0 0 0 2.5 10.5c1.23 2.39 4.5 5.5 9.5 5.5 1.52 0 2.93-.27 4.2-.77" />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M2.5 12c1.23-2.39 4.5-5.5 9.5-5.5s8.27 3.11 9.5 5.5c-1.23 2.39-4.5 5.5-9.5 5.5s-8.27-3.11-9.5-5.5z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <Button
@@ -167,9 +253,9 @@ function Login() {
           </div>
 
           <div className="text-center space-y-2">
-            <a href="#" className="text-sm text-white/70 hover:text-white">
+            <Link to="/forgot-password" className="text-sm text-white/70 hover:text-white">
               Forgot your password?
-            </a>
+            </Link>
             <p className="text-sm text-white/70">
               Don't have an account?{' '}
               <Link to="/register" className="text-white hover:underline font-medium">
