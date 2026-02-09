@@ -1,63 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authService } from '../services/api'
+import { useUser } from '../contexts/UserContext'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-// Sample aircraft data
-const sampleAircraftData = [
-  { id: 1, model: 'Boeing 737-800', registration: 'HL8012', airline: 'Korean Air', status: 'In Flight', destination: 'Tokyo (NRT)' },
-  { id: 2, model: 'Airbus A350-900', registration: 'HL7578', airline: 'Asiana Airlines', status: 'Landed', destination: 'Los Angeles (LAX)' },
-  { id: 3, model: 'Boeing 777-300ER', registration: 'HL8208', airline: 'Korean Air', status: 'In Flight', destination: 'New York (JFK)' },
-  { id: 4, model: 'Airbus A321neo', registration: 'HL8366', airline: 'Jin Air', status: 'Boarding', destination: 'Osaka (KIX)' },
-  { id: 5, model: 'Boeing 787-9', registration: 'HL8082', airline: 'Korean Air', status: 'Scheduled', destination: 'Paris (CDG)' },
-  { id: 6, model: 'Airbus A330-300', registration: 'HL7792', airline: 'Asiana Airlines', status: 'In Flight', destination: 'Bangkok (BKK)' },
-]
+import { Card, CardContent } from '@/components/ui/card'
+import UserMenu from '../components/layout/UserMenu'
 
 function Home() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [aircraftData] = useState(sampleAircraftData)
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      fetchUser()
-    } else {
-      setLoading(false)
-    }
-  }, [])
-
-  const fetchUser = async () => {
-    try {
-      const response = await authService.getMe()
-      setUser(response.data)
-    } catch (err) {
-      console.error('Failed to fetch user:', err)
-      // 비로그인 상태로 유지 (리다이렉트 하지 않음)
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    navigate('/login')
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'In Flight': return 'bg-green-500'
-      case 'Landed': return 'bg-blue-500'
-      case 'Boarding': return 'bg-yellow-500'
-      case 'Scheduled': return 'bg-gray-500'
-      default: return 'bg-gray-400'
-    }
-  }
+  const { user, isLoading: loading } = useUser()
 
   if (loading) {
     return (
@@ -68,115 +18,157 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       {/* Header */}
-      <header className="border-b border-white/10" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
+      <header className="border-b border-white/10" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
+            <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+              <span className="text-2xl">💻</span>
             </div>
-            <h1 className="text-xl font-bold text-white">Aircraft Tracker</h1>
+            <h1 className="text-xl font-bold text-white">DevCollab</h1>
           </div>
           <div className="flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-white/70 text-sm">Welcome, {user.name}</span>
                 <Button
-                  onClick={handleLogout}
-                  variant="outline"
-                  className="border-white/30 bg-white/10 text-white hover:bg-white/20"
+                  onClick={() => navigate('/workspaces')}
+                  className="bg-white/20 hover:bg-white/30 text-white"
                 >
-                  Logout
+                  워크스페이스
                 </Button>
+                <UserMenu />
               </>
             ) : (
-              <Button
-                onClick={() => navigate('/login')}
-                variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
-              >
-                Login
-              </Button>
+              <>
+                <Button
+                  onClick={() => navigate('/login')}
+                  variant="outline"
+                  className="border-white/30 bg-transparent text-white hover:bg-white/20"
+                >
+                  로그인
+                </Button>
+                <Button
+                  onClick={() => navigate('/register')}
+                  className="bg-white text-indigo-600 hover:bg-white/90"
+                >
+                  회원가입
+                </Button>
+              </>
             )}
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-white">{aircraftData.length}</div>
-              <div className="text-white/60 text-sm">Total Aircraft</div>
+      {/* Hero Section */}
+      <section className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <h2 className="text-5xl font-bold text-white mb-6">
+          개발자를 위한<br />실시간 협업 플랫폼
+        </h2>
+        <p className="text-xl text-white/70 mb-10 max-w-2xl mx-auto">
+          코드 스니펫 공유, 마크다운 메모, 실시간 채팅으로<br />
+          팀과 함께 더 효율적으로 개발하세요.
+        </p>
+        {user ? (
+          <Button
+            onClick={() => navigate('/workspaces')}
+            size="lg"
+            className="bg-white text-indigo-600 hover:bg-white/90 text-lg px-8 py-6"
+          >
+            워크스페이스 시작하기 →
+          </Button>
+        ) : (
+          <Button
+            onClick={() => navigate('/register')}
+            size="lg"
+            className="bg-white text-indigo-600 hover:bg-white/90 text-lg px-8 py-6"
+          >
+            무료로 시작하기 →
+          </Button>
+        )}
+      </section>
+
+      {/* Features Section */}
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <h3 className="text-2xl font-bold text-white text-center mb-12">주요 기능</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="text-4xl mb-4">💬</div>
+              <h4 className="text-xl font-bold text-white mb-2">실시간 채팅</h4>
+              <p className="text-white/60">
+                WebSocket 기반의 실시간 메시징으로<br />
+                팀원과 즉시 소통하세요
+              </p>
             </CardContent>
           </Card>
-          <Card style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-green-400">{aircraftData.filter(a => a.status === 'In Flight').length}</div>
-              <div className="text-white/60 text-sm">In Flight</div>
+
+          <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="text-4xl mb-4">📝</div>
+              <h4 className="text-xl font-bold text-white mb-2">코드 스니펫</h4>
+              <p className="text-white/60">
+                Syntax Highlighting 지원<br />
+                코드를 쉽게 공유하고 복사하세요
+              </p>
             </CardContent>
           </Card>
-          <Card style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-blue-400">{aircraftData.filter(a => a.status === 'Landed').length}</div>
-              <div className="text-white/60 text-sm">Landed</div>
-            </CardContent>
-          </Card>
-          <Card style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <CardContent className="pt-6">
-              <div className="text-3xl font-bold text-yellow-400">{aircraftData.filter(a => a.status === 'Boarding').length}</div>
-              <div className="text-white/60 text-sm">Boarding</div>
+
+          <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="text-4xl mb-4">📄</div>
+              <h4 className="text-xl font-bold text-white mb-2">마크다운 메모</h4>
+              <p className="text-white/60">
+                GitHub Flavored Markdown 지원<br />
+                자동 저장으로 안전하게 기록하세요
+              </p>
             </CardContent>
           </Card>
         </div>
+      </section>
 
-        {/* Aircraft Table */}
-        <Card style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-              Aircraft Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-4 text-white/70 font-medium">Model</th>
-                    <th className="text-left py-3 px-4 text-white/70 font-medium">Registration</th>
-                    <th className="text-left py-3 px-4 text-white/70 font-medium">Airline</th>
-                    <th className="text-left py-3 px-4 text-white/70 font-medium">Status</th>
-                    <th className="text-left py-3 px-4 text-white/70 font-medium">Destination</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aircraftData.map((aircraft) => (
-                    <tr key={aircraft.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <td className="py-3 px-4 text-white">{aircraft.model}</td>
-                      <td className="py-3 px-4 text-white font-mono">{aircraft.registration}</td>
-                      <td className="py-3 px-4 text-white">{aircraft.airline}</td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getStatusColor(aircraft.status)}`}>
-                          {aircraft.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-white/80">{aircraft.destination}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+      {/* Tech Stack Section */}
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <h3 className="text-2xl font-bold text-white text-center mb-8">기술 스택</h3>
+        <div className="flex flex-wrap justify-center gap-4">
+          {['Spring Boot', 'React', 'WebSocket', 'PostgreSQL', 'Redis', 'Docker', 'Kafka'].map((tech) => (
+            <span
+              key={tech}
+              className="px-4 py-2 rounded-full text-sm font-medium text-white"
+              style={{ background: 'rgba(255,255,255,0.2)' }}
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      {!user && (
+        <section className="max-w-7xl mx-auto px-4 py-16 text-center">
+          <Card className="border-0" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+            <CardContent className="py-12">
+              <h3 className="text-2xl font-bold text-white mb-4">지금 바로 시작하세요</h3>
+              <p className="text-white/60 mb-6">무료로 워크스페이스를 만들고 팀원을 초대하세요</p>
+              <Button
+                onClick={() => navigate('/register')}
+                size="lg"
+                className="bg-indigo-900 hover:bg-indigo-800 text-white"
+              >
+                회원가입
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-8 mt-8">
+        <div className="max-w-7xl mx-auto px-4 text-center text-white/50 text-sm">
+          <p>DevCollab - Developer Collaboration Platform</p>
+          <p className="mt-2">Portfolio Project | Spring Boot + React + WebSocket</p>
+        </div>
+      </footer>
     </div>
   )
 }
