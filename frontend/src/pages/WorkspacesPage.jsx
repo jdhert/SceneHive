@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import UserMenu from '../components/layout/UserMenu'
+import NotificationBell from '../components/notification/NotificationBell'
 
 function WorkspacesPage() {
   const navigate = useNavigate()
@@ -91,7 +92,10 @@ function WorkspacesPage() {
             </div>
             <span className="text-lg font-bold text-white">DevCollab</span>
           </button>
-          <UserMenu />
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <UserMenu />
+          </div>
         </div>
       </header>
 

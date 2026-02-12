@@ -7,6 +7,7 @@ import ChatContainer from '../components/chat/ChatContainer'
 import { SnippetContainer } from '../components/snippet'
 import { MemoContainer } from '../components/memo'
 import UserMenu from '../components/layout/UserMenu'
+import NotificationBell from '../components/notification/NotificationBell'
 import Avatar from '../components/user/Avatar'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
@@ -210,6 +211,7 @@ function WorkspacePage() {
             >
               {isOwner ? '워크스페이스 삭제' : '나가기'}
             </Button>
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>
