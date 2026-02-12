@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { UserProvider } from './contexts/UserContext';
+import { UserProvider, useUser } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -18,14 +18,24 @@ import ProfileEditPage from './pages/ProfileEditPage';
 import SettingsPage from './pages/SettingsPage';
 import UnlockAccountPage from './pages/UnlockAccountPage';
 
+function RouteLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      <div className="text-white text-xl">Loading...</div>
+    </div>
+  );
+}
+
 function PrivateRoute({ children }) {
-  const token = localStorage.getItem('accessToken');
-  return token ? children : <Navigate to="/login" />;
+  const { user, isLoading } = useUser();
+  if (isLoading) return <RouteLoading />;
+  return user ? children : <Navigate to="/login" />;
 }
 
 function PublicRoute({ children }) {
-  const token = localStorage.getItem('accessToken');
-  return token ? <Navigate to="/home" /> : children;
+  const { user, isLoading } = useUser();
+  if (isLoading) return <RouteLoading />;
+  return user ? <Navigate to="/home" /> : children;
 }
 
 function App() {

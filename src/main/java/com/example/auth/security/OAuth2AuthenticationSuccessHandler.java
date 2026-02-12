@@ -1,6 +1,7 @@
 package com.example.auth.security;
 
 import com.example.auth.service.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,10 +24,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final RefreshTokenCookieProvider refreshTokenCookieProvider;
+    private final String frontendUrl;
 
-    public OAuth2AuthenticationSuccessHandler(JwtService jwtService, UserDetailsService userDetailsService) {
+    public OAuth2AuthenticationSuccessHandler(JwtService jwtService,
+                                             UserDetailsService userDetailsService,
+                                             RefreshTokenCookieProvider refreshTokenCookieProvider,
+                                             @Value("${app.frontend-url:http://localhost:3000}") String frontendUrl) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.refreshTokenCookieProvider = refreshTokenCookieProvider;
+        this.frontendUrl = frontendUrl;
     }
 
     @Override
@@ -46,15 +54,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String accessToken = jwtService.generateAccessToken(userDetails);
             String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-            String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/oauth2/redirect")
+            var cookie = refreshTokenCookieProvider.create(refreshToken, request.isSecure());
+            response.addHeader("Set-Cookie", cookie.toString());
+
+            String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/redirect")
                     .queryParam("accessToken", accessToken)
-                    .queryParam("refreshToken", refreshToken)
                     .build().toUriString();
 
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
         } catch (Exception e) {
             log.error("OAuth2 Login failed: {}", e.getMessage());
-            response.sendRedirect("http://localhost:3000/login?error=oauth2__failed");
+            response.sendRedirect(frontendUrl + "/login?error=oauth2__failed");
         }
     }
 }

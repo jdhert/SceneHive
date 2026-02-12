@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import { userService } from '../services/api'
+import { authService, userService } from '../services/api'
+import { getAccessToken, setAccessToken, clearAccessToken } from '../lib/accessToken'
 
 const UserContext = createContext(null)
 
@@ -9,26 +10,44 @@ export function UserProvider({ children }) {
   const autoOnlineRef = useRef(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      fetchUser()
-    } else {
-      setIsLoading(false)
+    const initializeAuth = async () => {
+      try {
+        setIsLoading(true)
+        const refreshResponse = await authService.refresh()
+        const token = refreshResponse.data?.accessToken
+        if (token) {
+          setAccessToken(token)
+          await fetchUser({ suppressLoading: true })
+        } else {
+          setUser(null)
+        }
+      } catch (err) {
+        clearAccessToken()
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
     }
+
+    initializeAuth()
   }, [])
 
-  const fetchUser = async () => {
+  const fetchUser = async ({ suppressLoading = false } = {}) => {
     try {
-      setIsLoading(true)
+      if (!suppressLoading) setIsLoading(true)
       const response = await userService.getMe()
       setUser(response.data)
       localStorage.setItem('user', JSON.stringify(response.data))
     } catch (err) {
       console.error('Failed to fetch user:', err)
-      setUser(null)
-      localStorage.removeItem('user')
+      const status = err.response?.status
+      if (status === 401 || status === 403) {
+        clearAccessToken()
+        setUser(null)
+        localStorage.removeItem('user')
+      }
     } finally {
-      setIsLoading(false)
+      if (!suppressLoading) setIsLoading(false)
     }
   }
 
@@ -48,7 +67,7 @@ export function UserProvider({ children }) {
 
   useEffect(() => {
     const handleUnload = () => {
-      const token = localStorage.getItem('accessToken')
+      const token = getAccessToken()
       if (!token) return
 
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8081/api'
@@ -85,11 +104,11 @@ export function UserProvider({ children }) {
   const logout = async () => {
     try {
       await userService.updateStatus('OFFLINE')
+      await authService.logout()
     } catch (err) {
       // ignore logout status failures
     } finally {
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
+      clearAccessToken()
       localStorage.removeItem('user')
       setUser(null)
       window.location.href = '/login'

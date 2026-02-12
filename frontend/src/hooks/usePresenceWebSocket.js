@@ -3,13 +3,14 @@ import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { WS_URL } from '../lib/ws'
 import { useUser } from '../contexts/UserContext'
+import { useAccessToken } from './useAccessToken'
 
 export function usePresenceWebSocket() {
   const clientRef = useRef(null)
   const { fetchUser } = useUser()
+  const token = useAccessToken()
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
     if (!token) return
 
     const client = new Client({
@@ -44,5 +45,5 @@ export function usePresenceWebSocket() {
         client.deactivate()
       }
     }
-  }, [])
+  }, [token])
 }

@@ -112,4 +112,8 @@ public class JwtService {
     public long getAccessTokenExpiration() {
         return jwtConfig.getAccessTokenExpiration();
     }
+
+    public long getRefreshTokenExpiration() {
+        return jwtConfig.getRefreshTokenExpiration();
+    }
 }

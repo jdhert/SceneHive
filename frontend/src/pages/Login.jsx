@@ -2,10 +2,32 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authService } from '../services/api'
 import { hashPassword } from '../lib/crypto'
+import { setAccessToken } from '../lib/accessToken'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+const resolveOAuthBaseUrl = () => {
+  const origin = window.location.origin
+  const envBase = import.meta.env.VITE_OAUTH_BASE_URL
+  const apiUrl = import.meta.env.VITE_API_URL
+  const candidate = envBase || (apiUrl ? apiUrl.replace(/\/api\/?$/, '') : '')
+
+  if (!candidate) return origin
+
+  try {
+    const url = new URL(candidate, origin)
+    if (!url.port && window.location.port && ['localhost', '127.0.0.1'].includes(url.hostname)) {
+      url.port = window.location.port
+    }
+    return url.origin
+  } catch (err) {
+    return origin
+  }
+}
+
+const OAUTH_BASE_URL = resolveOAuthBaseUrl()
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -29,15 +51,14 @@ function Login() {
       console.log('Login response:', response)
       console.log('Response data:', response.data)
 
-      localStorage.setItem('accessToken', response.data.accessToken)
-      localStorage.setItem('refreshToken', response.data.refreshToken)
+      setAccessToken(response.data.accessToken)
       console.log('Tokens saved, navigating to /home...')
 
       window.location.href = '/home'
     } catch (err) {
       console.error('Login error:', err)
       const status = err.response?.status
-      const message = err.response?.data?.message || '로그인에 실패했습니다.'
+      const message = err.response?.data?.message || 'Login failed.'
       setError(message)
       setIsLocked(status === 423)
     } finally {
@@ -47,27 +68,26 @@ function Login() {
 
   const handleResendUnlock = async () => {
     if (!email) {
-      setError('이메일을 입력해주세요.')
+      setError('Please enter your email.')
       return
     }
     setIsResending(true)
     setResendSuccess('')
     try {
       await authService.resendUnlockEmail(email)
-      setResendSuccess('잠금 해제 이메일이 재발송되었습니다. 메일함을 확인해주세요.')
+      setResendSuccess('Unlock email has been sent. Please check your inbox.')
     } catch (err) {
-      setError(err.response?.data?.message || '이메일 재발송에 실패했습니다.')
+      setError(err.response?.data?.message || 'Failed to resend unlock email.')
     } finally {
       setIsResending(false)
     }
   }
 
   const handleSocialLogin = (provider) => {
-    const API_BASE_URL = 'http://localhost:8081' // Should ideally come from env
     if (provider === 'Google') {
-      window.location.href = `${API_BASE_URL}/oauth2/authorization/google`
+      window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/google`
     } else if (provider === 'Apple') {
-      window.location.href = `${API_BASE_URL}/oauth2/authorization/apple`
+      window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/apple`
     }
   }
 
@@ -130,7 +150,7 @@ function Login() {
                   disabled={isResending}
                   className="mt-2 block w-full text-center py-1.5 rounded bg-white/10 hover:bg-white/20 text-orange-100 text-xs transition-colors"
                 >
-                  {isResending ? '발송 중...' : '잠금 해제 이메일 재발송'}
+                  {isResending ? 'Sending...' : 'Resend unlock email'}
                 </button>
               )}
             </div>
@@ -175,7 +195,7 @@ function Login() {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <svg

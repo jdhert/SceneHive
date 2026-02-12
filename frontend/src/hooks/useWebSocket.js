@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { WS_URL } from '../lib/ws'
+import { useAccessToken } from './useAccessToken'
 
 export function useWebSocket(workspaceId) {
+  const token = useAccessToken()
   const [connected, setConnected] = useState(false)
   const [connectionState, setConnectionState] = useState('idle')
   const [connectionError, setConnectionError] = useState('')
@@ -12,7 +14,6 @@ export function useWebSocket(workspaceId) {
   const reconnectAttemptsRef = useRef(0)
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
     if (!token || !workspaceId) {
       setConnected(false)
       setConnectionState('disabled')
@@ -80,7 +81,7 @@ export function useWebSocket(workspaceId) {
         client.deactivate()
       }
     }
-  }, [workspaceId])
+  }, [workspaceId, token])
 
   const sendMessage = useCallback(
     (content, type = 'TEXT') => {

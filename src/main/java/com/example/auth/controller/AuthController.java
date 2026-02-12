@@ -2,10 +2,11 @@ package com.example.auth.controller;
 
 import com.example.auth.dto.*;
 import com.example.auth.service.AuthService;
+import com.example.auth.security.RefreshTokenCookieProvider;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, RefreshTokenCookieProvider refreshTokenCookieProvider) {
         this.authService = authService;
+        this.refreshTokenCookieProvider = refreshTokenCookieProvider;
     }
 
     @PostMapping("/auth/register")
@@ -24,13 +27,37 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        AuthResponse response = authService.login(request);
+        String refreshToken = response.refreshToken();
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            var cookie = refreshTokenCookieProvider.create(refreshToken, httpRequest.isSecure());
+            response = AuthResponse.ofLogin(response.accessToken(), null, response.expiresIn());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request));
+    public ResponseEntity<AuthResponse> refreshToken(
+            @CookieValue(name = RefreshTokenCookieProvider.REFRESH_COOKIE_NAME, required = false) String refreshToken,
+            @RequestBody(required = false) RefreshTokenRequest request
+    ) {
+        String token = refreshToken;
+        if ((token == null || token.isBlank()) && request != null) {
+            token = request.refreshToken();
+        }
+        return ResponseEntity.ok(authService.refreshToken(token));
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
+        var cookie = refreshTokenCookieProvider.clear(httpRequest.isSecure());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
     @PostMapping("/auth/verify-email")

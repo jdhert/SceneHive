@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { setAccessToken } from '../lib/accessToken';
+import { authService } from '../services/api';
 
 function OAuth2RedirectHandler() {
     const navigate = useNavigate();
@@ -8,16 +10,26 @@ function OAuth2RedirectHandler() {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const accessToken = params.get('accessToken');
-        const refreshToken = params.get('refreshToken');
         const error = params.get('error');
 
         if (accessToken) {
-            localStorage.setItem('accessToken', accessToken);
-            if (refreshToken) {
-                localStorage.setItem('refreshToken', refreshToken);
-            }
+            setAccessToken(accessToken);
             // Redirect to home or dashboard
             navigate('/home', { replace: true });
+        } else if (!error) {
+            authService.refresh()
+                .then((response) => {
+                    const token = response.data?.accessToken;
+                    if (token) {
+                        setAccessToken(token);
+                        navigate('/home', { replace: true });
+                    } else {
+                        navigate('/login', { replace: true, state: { error: 'Social login failed' } });
+                    }
+                })
+                .catch(() => {
+                    navigate('/login', { replace: true, state: { error: 'Social login failed' } });
+                });
         } else {
             // Handle error or missing tokens
             console.error('OAuth2 Login Failed', error);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
+import { clearAccessToken } from '../lib/accessToken';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -22,10 +23,15 @@ function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      // ignore logout failures
+    } finally {
+      clearAccessToken();
+      navigate('/login');
+    }
   };
 
   if (loading) {

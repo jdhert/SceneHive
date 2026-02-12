@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { workspaceService } from '../services/api'
 import { Button } from '@/components/ui/button'
@@ -12,12 +12,13 @@ import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { WS_URL } from '../lib/ws'
 import { useUser } from '../contexts/UserContext'
-
+import { useAccessToken } from '../hooks/useAccessToken'
 
 function WorkspacePage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useUser()
+  const token = useAccessToken()
   const [workspace, setWorkspace] = useState(null)
   const [members, setMembers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -61,7 +62,6 @@ function WorkspacePage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
     if (!token || !id) return
 
     const client = new Client({
@@ -84,7 +84,7 @@ function WorkspacePage() {
         client.deactivate()
       }
     }
-  }, [id, fetchMembers])
+  }, [id, fetchMembers, token])
 
   const handleCopyInviteCode = () => {
     if (workspace?.inviteCode) {
