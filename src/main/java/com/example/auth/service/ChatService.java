@@ -2,14 +2,15 @@ package com.example.auth.service;
 
 import com.example.auth.dto.chat.ChatMessageRequest;
 import com.example.auth.dto.chat.ChatMessageResponse;
-import com.example.auth.entity.ChatMessage;
-import com.example.auth.entity.User;
-import com.example.auth.entity.Workspace;
+import com.example.auth.dto.notification.CreateNotificationRequest;
+import com.example.auth.entity.*;
 import com.example.auth.exception.CustomException;
 import com.example.auth.repository.ChatMessageRepository;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.repository.WorkspaceMemberRepository;
 import com.example.auth.repository.WorkspaceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,26 +18,36 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class ChatService {
 
+    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
+    private static final Pattern MENTION_PATTERN = Pattern.compile("@(\\S+)");
+
     private final ChatMessageRepository chatMessageRepository;
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final ChatPresenceTracker chatPresenceTracker;
 
     public ChatService(ChatMessageRepository chatMessageRepository,
                       WorkspaceRepository workspaceRepository,
                       WorkspaceMemberRepository memberRepository,
-                      UserRepository userRepository) {
+                      UserRepository userRepository,
+                      NotificationService notificationService,
+                      ChatPresenceTracker chatPresenceTracker) {
         this.chatMessageRepository = chatMessageRepository;
         this.workspaceRepository = workspaceRepository;
         this.memberRepository = memberRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.chatPresenceTracker = chatPresenceTracker;
     }
 
     @Transactional
@@ -60,7 +71,54 @@ public class ChatService {
                 .build();
 
         ChatMessage savedMessage = chatMessageRepository.save(message);
+
+        // 워크스페이스 멤버에게 알림 전송 (발신자 제외)
+        notifyWorkspaceMembers(workspace, sender, request.content());
+
         return ChatMessageResponse.from(savedMessage);
+    }
+
+    private void notifyWorkspaceMembers(Workspace workspace, User sender, String content) {
+        try {
+            List<WorkspaceMember> members = memberRepository.findAllByWorkspaceId(workspace.getId());
+            String preview = content.length() > 100 ? content.substring(0, 100) + "..." : content;
+            Set<String> mentionedNames = parseMentions(content);
+            String relatedUrl = "/workspaces/" + workspace.getId();
+
+            for (WorkspaceMember member : members) {
+                User user = member.getUser();
+                if (user.getId().equals(sender.getId())) continue;
+
+                if (mentionedNames.contains(user.getName())) {
+                    // 멘션 알림 — 채팅방에 있어도 전송
+                    notificationService.createAndSend(new CreateNotificationRequest(
+                            user.getId(), sender.getId(), workspace.getId(),
+                            NotificationType.MENTION,
+                            sender.getName() + "님이 회원님을 멘션했습니다",
+                            preview, relatedUrl
+                    ));
+                } else if (!chatPresenceTracker.isUserActive(workspace.getId(), user.getEmail())) {
+                    // 일반 채팅 알림 — 채팅방에 없을 때만
+                    notificationService.createAndSend(new CreateNotificationRequest(
+                            user.getId(), sender.getId(), workspace.getId(),
+                            NotificationType.NEW_CHAT_MESSAGE,
+                            sender.getName() + "님이 메시지를 보냈습니다",
+                            preview, relatedUrl
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send chat notifications for workspace {}", workspace.getId(), e);
+        }
+    }
+
+    private Set<String> parseMentions(String content) {
+        Set<String> mentions = new HashSet<>();
+        Matcher matcher = MENTION_PATTERN.matcher(content);
+        while (matcher.find()) {
+            mentions.add(matcher.group(1));
+        }
+        return mentions;
     }
 
     @Transactional(readOnly = true)
