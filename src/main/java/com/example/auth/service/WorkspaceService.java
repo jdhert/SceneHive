@@ -241,7 +241,7 @@ public class WorkspaceService {
     @Transactional(readOnly = true)
     public List<Long> getWorkspaceIdsForUser(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("?ъ슜?먮? 李얠쓣 ???놁뒿?덈떎", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
         return memberRepository.findWorkspaceIdsByUserId(user.getId());
     }
 }
