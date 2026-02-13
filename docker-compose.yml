@@ -58,14 +58,16 @@ services:
     volumes:
       - uploads_data:/app/uploads
 
-  # React Frontend (Nginx)
+  # Next.js Frontend (Standalone)
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend-next
       dockerfile: Dockerfile
     container_name: auth-frontend
     ports:
-      - "3000:80"
+      - "3000:3000"
+    environment:
+      BACKEND_URL: http://backend:8081
     depends_on:
       - backend
     restart: unless-stopped

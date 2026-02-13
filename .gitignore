@@ -15,6 +15,11 @@ META-INF/
 # Frontend - Node
 frontend/node_modules/
 frontend/build/
+frontend/dist/
+
+# Frontend-next - Node
+frontend-next/node_modules/
+frontend-next/.next/
 frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
