@@ -57,7 +57,7 @@ function WorkspacePage() {
       setWorkspace(workspaceRes.data)
       setMembers(Array.isArray(membersRes.data) ? membersRes.data : [])
     } catch (err) {
-      setError('?뚰겕?ㅽ럹?댁뒪瑜?遺덈윭?ㅻ뒗???ㅽ뙣?덉뒿?덈떎.')
+      setError('워크스페이스를 불러오는 데 실패했습니다.')
     } finally {
       setIsLoading(false)
     }
@@ -91,7 +91,7 @@ function WorkspacePage() {
   const handleCopyInviteCode = () => {
     if (workspace?.inviteCode) {
       navigator.clipboard.writeText(workspace.inviteCode)
-      alert('초대 코드媛 복사?섏뿀?듬땲??')
+      alert('초대 코드가 복사되었습니다.')
     }
   }
 
@@ -99,7 +99,7 @@ function WorkspacePage() {
     try {
       const response = await workspaceService.regenerateInvite(id)
       setWorkspace({ ...workspace, inviteCode: response.data.inviteCode })
-      alert('?덈줈??초대 코드媛 ?앹꽦?섏뿀?듬땲??')
+      alert('새로운 초대 코드가 생성되었습니다.')
     } catch (err) {
       setError('초대 코드 생성에 실패했습니다.')
     }
@@ -110,8 +110,8 @@ function WorkspacePage() {
   const handleLeaveWorkspace = async () => {
     if (!workspace) return
     const confirmMessage = isOwner
-      ? '?뚰겕?ㅽ럹?댁뒪瑜???젣?섏떆寃좎뒿?덇퉴? ???묒뾽? ?섎룎由????놁뒿?덈떎.'
-      : '?뚰겕?ㅽ럹?댁뒪?먯꽌 ?섍??쒓쿋?듬땲源?'
+      ? '워크스페이스를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+      : '워크스페이스에서 나가시겠습니까?'
     if (!window.confirm(confirmMessage)) return
 
     try {
@@ -153,7 +153,7 @@ function WorkspacePage() {
               onClick={() => navigate('/workspaces')}
               className="mt-4 bg-white/20 hover:bg-white/30 text-white"
             >
-              ?뚰겕?ㅽ럹?댁뒪 紐⑸줉?쇰줈
+              워크스페이스 목록으로
             </Button>
           </CardContent>
         </Card>
@@ -180,7 +180,7 @@ function WorkspacePage() {
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <span className="text-lg">DC</span>
+                <span className="text-lg">💻</span>
               </div>
               <span className="text-lg font-bold text-white hidden md:inline">DevCollab</span>
             </button>
@@ -234,7 +234,8 @@ function WorkspacePage() {
                   복사
                 </Button>
                 <Button size="sm" variant="outline" onClick={handleRegenerateInvite}>
-                  재생성                </Button>
+                  재생성
+                </Button>
               </div>
               <Button
                 size="sm"
@@ -242,7 +243,7 @@ function WorkspacePage() {
                 onClick={() => setShowInviteCode(false)}
                 className="w-full"
               >
-                ?リ린
+                닫기
               </Button>
             </CardContent>
           </Card>
@@ -351,6 +352,3 @@ function WorkspacePage() {
 }
 
 export default WorkspacePage
-
-
-

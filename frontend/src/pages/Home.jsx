@@ -11,7 +11,10 @@ function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+      >
         <div className="text-white text-xl">Loading...</div>
       </div>
     )
@@ -67,7 +70,7 @@ function Home() {
         </h2>
         <p className="text-xl text-white/70 mb-10 max-w-2xl mx-auto">
           코드 스니펫 공유, 마크다운 메모, 실시간 채팅으로<br />
-          팀과 함께 더 효율적으로 개발하세요.
+          팀워크를 효율적으로 만들어 보세요.
         </p>
         {user ? (
           <Button
@@ -75,7 +78,7 @@ function Home() {
             size="lg"
             className="bg-white text-indigo-600 hover:bg-white/90 text-lg px-8 py-6"
           >
-            워크스페이스 시작하기 →
+            워크스페이스 시작하기
           </Button>
         ) : (
           <Button
@@ -83,7 +86,7 @@ function Home() {
             size="lg"
             className="bg-white text-indigo-600 hover:bg-white/90 text-lg px-8 py-6"
           >
-            무료로 시작하기 →
+            무료로 시작하기
           </Button>
         )}
       </section>
@@ -98,7 +101,18 @@ function Home() {
               <h4 className="text-xl font-bold text-white mb-2">실시간 채팅</h4>
               <p className="text-white/60">
                 WebSocket 기반의 실시간 메시징으로<br />
-                팀원과 즉시 소통하세요
+                팀원들과 즉시 소통하세요.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
+            <CardContent className="pt-8 pb-8 text-center">
+              <div className="text-4xl mb-4">🧩</div>
+              <h4 className="text-xl font-bold text-white mb-2">코드 스니펫</h4>
+              <p className="text-white/60">
+                Syntax Highlighting 지원<br />
+                코드를 쉽게 공유하고 복사하세요.
               </p>
             </CardContent>
           </Card>
@@ -106,21 +120,10 @@ function Home() {
           <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
             <CardContent className="pt-8 pb-8 text-center">
               <div className="text-4xl mb-4">📝</div>
-              <h4 className="text-xl font-bold text-white mb-2">코드 스니펫</h4>
-              <p className="text-white/60">
-                Syntax Highlighting 지원<br />
-                코드를 쉽게 공유하고 복사하세요
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
-            <CardContent className="pt-8 pb-8 text-center">
-              <div className="text-4xl mb-4">📄</div>
               <h4 className="text-xl font-bold text-white mb-2">마크다운 메모</h4>
               <p className="text-white/60">
                 GitHub Flavored Markdown 지원<br />
-                자동 저장으로 안전하게 기록하세요
+                깔끔하고 체계적으로 기록하세요.
               </p>
             </CardContent>
           </Card>

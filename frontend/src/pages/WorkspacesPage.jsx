@@ -34,7 +34,7 @@ function WorkspacesPage() {
       const response = await workspaceService.getAll()
       setWorkspaces(response.data)
     } catch (err) {
-      setError('워크스페이스 목록을 불러오는데 실패했습니다.')
+      setError('워크스페이스 목록을 불러오는 데 실패했습니다.')
     } finally {
       setIsLoading(false)
     }
@@ -148,7 +148,7 @@ function WorkspacesPage() {
           >
             <CardContent>
               <p className="text-white/70 text-lg">아직 참여 중인 워크스페이스가 없습니다.</p>
-              <p className="text-white/50 mt-2">새 워크스페이스를 만들거나 초대 코드로 참여하세요.</p>
+              <p className="text-white/50 mt-2">새 워크스페이스를 만들거나 초대 코드로 참여하세요</p>
             </CardContent>
           </Card>
         ) : (
@@ -254,7 +254,7 @@ function WorkspacesPage() {
             <CardHeader>
               <CardTitle className="text-white">워크스페이스 참여</CardTitle>
               <CardDescription className="text-white/60">
-                초대 코드를 입력하여 워크스페이스에 참여하세요
+                초대 코드를 입력하여 워크스페이스에 참여하세요.
               </CardDescription>
             </CardHeader>
             <CardContent>
