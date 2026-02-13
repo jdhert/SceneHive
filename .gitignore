@@ -35,3 +35,6 @@ Thumbs.db
 # Temp
 *.tmp
 *.temp
+
+# Agent handoff archive
+AGENTS_ARCHIVE.md
