@@ -25,4 +25,7 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
 
     @Query("SELECT m FROM Memo m JOIN FETCH m.author WHERE m.workspace.id = :workspaceId AND (LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(m.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY m.updatedAt DESC")
     List<Memo> searchByKeyword(@Param("workspaceId") Long workspaceId, @Param("keyword") String keyword);
+
+    @Query("SELECT m FROM Memo m JOIN FETCH m.author WHERE m.workspace.id IN :workspaceIds ORDER BY m.updatedAt DESC")
+    Page<Memo> findRecentByWorkspaceIds(@Param("workspaceIds") List<Long> workspaceIds, Pageable pageable);
 }

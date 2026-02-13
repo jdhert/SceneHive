@@ -6,6 +6,7 @@ import type {
   CreateMemoRequest,
   CreateSnippetRequest,
   CreateWorkspaceRequest,
+  DashboardResponse,
   LoginRequest,
   Memo,
   Notification,
@@ -109,6 +110,10 @@ export const settingsService = {
 export const searchService = {
   search: (workspaceId: number, query: string, type: SearchType = 'ALL') =>
     api.get<SearchResponse>(`/workspaces/${workspaceId}/search`, { params: { query, type } }),
+};
+
+export const dashboardService = {
+  get: (limit = 10) => api.get<DashboardResponse>('/dashboard', { params: { limit } }),
 };
 
 export const notificationService = {

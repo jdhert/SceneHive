@@ -28,4 +28,7 @@ public interface CodeSnippetRepository extends JpaRepository<CodeSnippet, Long> 
 
     @Query("SELECT cs FROM CodeSnippet cs JOIN FETCH cs.author WHERE cs.workspace.id = :workspaceId AND (LOWER(cs.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(cs.code) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(cs.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) ORDER BY cs.createdAt DESC")
     List<CodeSnippet> searchByKeyword(@Param("workspaceId") Long workspaceId, @Param("keyword") String keyword);
+
+    @Query("SELECT cs FROM CodeSnippet cs JOIN FETCH cs.author WHERE cs.workspace.id IN :workspaceIds ORDER BY cs.createdAt DESC")
+    Page<CodeSnippet> findRecentByWorkspaceIds(@Param("workspaceIds") List<Long> workspaceIds, Pageable pageable);
 }

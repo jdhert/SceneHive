@@ -193,6 +193,13 @@ export interface SearchResponse {
 
 export type SearchType = 'ALL' | 'CHAT' | 'SNIPPET' | 'MEMO';
 
+export interface DashboardResponse {
+  workspaces: Workspace[];
+  recentMessages: ChatMessage[];
+  recentSnippets: CodeSnippet[];
+  recentMemos: Memo[];
+}
+
 // === API Pagination ===
 export interface Page<T> {
   content: T[];
