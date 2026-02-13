@@ -1,6 +1,20 @@
 import React from 'react'
 import Avatar from '../user/Avatar'
 
+function renderContent(content) {
+  const parts = content.split(/(@\S+)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('@')) {
+      return (
+        <span key={i} className="text-indigo-300 font-medium">
+          {part}
+        </span>
+      )
+    }
+    return part
+  })
+}
+
 function MessageItem({ message, showAvatar }) {
   const formatTime = (dateString) => {
     const date = new Date(dateString)
@@ -38,7 +52,7 @@ function MessageItem({ message, showAvatar }) {
               : ''
           }`}
         >
-          {message.content}
+          {message.type === 'CODE' ? message.content : renderContent(message.content)}
         </div>
       </div>
     </div>

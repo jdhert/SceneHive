@@ -93,7 +93,7 @@ function ChatContainer({ workspaceId, members = [] }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <ChatInput onSend={handleSendMessage} disabled={!connected} />
+      <ChatInput onSend={handleSendMessage} disabled={!connected} members={safeMembers} />
     </div>
   )
 }
