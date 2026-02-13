@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ChatContainer from '../components/chat/ChatContainer'
 import { SnippetContainer } from '../components/snippet'
 import { MemoContainer } from '../components/memo'
+import SearchContainer from '../components/search/SearchContainer'
 import UserMenu from '../components/layout/UserMenu'
 import NotificationBell from '../components/notification/NotificationBell'
 import Avatar from '../components/user/Avatar'
@@ -257,7 +258,7 @@ function WorkspacePage() {
         >
           {/* Tabs */}
           <nav className="space-y-1 mb-6">
-            {['chat', 'snippets', 'memos'].map((tab) => (
+            {['chat', 'snippets', 'memos', 'search'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -270,6 +271,7 @@ function WorkspacePage() {
                 {tab === 'chat' && '채팅'}
                 {tab === 'snippets' && '코드 스니펫'}
                 {tab === 'memos' && '메모'}
+                {tab === 'search' && '검색'}
               </button>
             ))}
           </nav>
@@ -329,6 +331,17 @@ function WorkspacePage() {
               }}
             >
               <MemoContainer workspaceId={id} />
+            </div>
+          )}
+          {activeTab === 'search' && (
+            <div
+              className="h-full"
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              <SearchContainer workspaceId={id} onNavigate={setActiveTab} />
             </div>
           )}
         </main>

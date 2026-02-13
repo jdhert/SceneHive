@@ -21,4 +21,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
     @Query("SELECT cm FROM ChatMessage cm JOIN FETCH cm.sender WHERE cm.workspace.id = :workspaceId AND cm.id < :beforeId ORDER BY cm.createdAt DESC")
     Page<ChatMessage> findByWorkspaceIdAndIdLessThan(@Param("workspaceId") Long workspaceId, @Param("beforeId") Long beforeId, Pageable pageable);
+
+    @Query("SELECT cm FROM ChatMessage cm JOIN FETCH cm.sender WHERE cm.workspace.id = :workspaceId AND LOWER(cm.content) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY cm.createdAt DESC")
+    List<ChatMessage> searchByKeyword(@Param("workspaceId") Long workspaceId, @Param("keyword") String keyword);
 }
