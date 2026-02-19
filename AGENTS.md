@@ -159,6 +159,25 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-02-19 17:50:27 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): TMDB 확장 진행사항 문서 업데이트 및 히스토리 동기화
+- Scope (In/Out): In: AGENTS.md, PROJECT_GUIDE.md / Out: 앱 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed: AGENTS.md, PROJECT_GUIDE.md
+- Commands Run: Get-Content -Path AGENTS.md, PROJECT_GUIDE.md -Encoding UTF8; git status --short; git branch --show-current; Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz"
+- Tests Run + Result: Not run (문서 작업)
+- Open Risks: Untracked 항목(.ref-v0-movie-community-service/, src/test/) 처리 정책 미확정
+- Blockers: None
+- Next 3 Actions:
+  1) 통합 검색 랭킹 기준(인물/영화/TV 가중치) 확정
+  2) 상세 페이지 데이터 fallback(ko→en) 정책을 검색 결과에도 동일 적용할지 결정
+  3) Phase 6 테스트 범위(최소 smoke/E2E) 우선순위 재정의
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-02-19 14:19:04 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -249,7 +268,6 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
 
 
 

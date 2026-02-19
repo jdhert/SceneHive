@@ -349,6 +349,9 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
 | `6963ace` | **Phase 3 Backend**: 프로필, 설정, 파일 스토리지 |
 | `7452518` | **Phase 3 Frontend**: 프로필, 설정, 테마 시스템 |
 | `14df6d0` | 계정 잠금, 비밀번호 리셋, 비동기 이메일, 인프라 |
+| `8bd971f` | 인물 검색 및 인물 상세 페이지 기능 추가 |
+| `cf0d5f8` | 통합검색(영화/TV/인물) 및 TV 상세 조회 기능 추가 |
+| `f9493aa` | 영화 상세 UX 개선(추천/정보 확장) 및 설정 페이지 오류 수정 |
 
 ### 미커밋 변경사항 (현재 작업 중)
 - **Phase 4**: 통합 검색, 알림 시스템, Entity Lombok 통일, 프레전스 WebSocket
@@ -360,6 +363,13 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
   - 영화 상세 페이지 추가 (`/movies/[movieId]`, `/api/movies/[movieId]`)
   - 한국어 데이터 부재 시 영어 fallback 적용 (줄거리/태그라인/트레일러)
   - 추천 fallback 체인 적용 (`recommendations` → `similar` → `discover` → `popular`)
+
+### 최근 반영 완료 사항 (2026-02-19)
+- 인물 검색/상세 페이지 추가: `/people`, `/people/[personId]`, `/api/people/search`, `/api/people/[personId]`
+- 통합 검색 확장: `/search`에서 영화/TV/인물 단일 진입점 제공 (`/api/search/multi`)
+- TV 상세 페이지 추가: `/tv/[tvId]`, `/api/tv/[tvId]`
+- 영화 상세 정보 보강: 추천/유사작 fallback 체인, 출연진/스태프 노출, 상세 UI 개선
+- 홈/상세 fallback 고도화: 한국어 데이터 부재 시 영어 데이터 대체 전략 적용
 
 ---
 
