@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
@@ -23,6 +23,14 @@ type Cast = {
   id: number;
   name: string;
   character: string;
+  profile_path: string | null;
+};
+
+type Crew = {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
   profile_path: string | null;
 };
 
@@ -75,6 +83,7 @@ type MovieDetail = {
   genres: Genre[];
   credits?: {
     cast: Cast[];
+    crew: Crew[];
   };
   videos?: {
     results: Video[];
@@ -117,9 +126,58 @@ export default function MovieDetailPage() {
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAllCast, setShowAllCast] = useState(false);
+  const [showAllCrew, setShowAllCrew] = useState(false);
+  const recommendationsRef = useRef<HTMLDivElement | null>(null);
 
   const movieId = useMemo(() => Number(params.movieId), [params.movieId]);
-  const topCast = useMemo(() => movie?.credits?.cast?.slice(0, 8) ?? [], [movie]);
+  const castList = useMemo(() => movie?.credits?.cast ?? [], [movie]);
+  const crewList = useMemo(() => {
+    const crew = movie?.credits?.crew ?? [];
+    if (!crew.length) return [];
+
+    const priorityJobs = [
+      'Director',
+      'Screenplay',
+      'Writer',
+      'Producer',
+      'Original Music Composer',
+      'Director of Photography',
+      'Editor',
+      'Sound Designer',
+      'Sound',
+    ];
+
+    const result: Crew[] = [];
+    const seen = new Set<string>();
+
+    for (const job of priorityJobs) {
+      const matched = crew.filter((person) => person.job === job);
+      for (const person of matched) {
+        const key = `${person.id}:${person.job}:${person.department}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push(person);
+      }
+    }
+
+    for (const person of crew) {
+      const key = `${person.id}:${person.job}:${person.department}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(person);
+    }
+
+    return result;
+  }, [movie]);
+  const visibleCast = useMemo(
+    () => (showAllCast ? castList : castList.slice(0, 8)),
+    [castList, showAllCast]
+  );
+  const visibleCrew = useMemo(
+    () => (showAllCrew ? crewList : crewList.slice(0, 8)),
+    [crewList, showAllCrew]
+  );
   const trailer = useMemo(
     () =>
       movie?.videos?.results?.find(
@@ -127,7 +185,22 @@ export default function MovieDetailPage() {
       ) ?? null,
     [movie]
   );
-  const recommendations = useMemo(() => movie?.recommendations?.results?.slice(0, 6) ?? [], [movie]);
+  const trailerEmbedUrl = useMemo(
+    () =>
+      trailer
+        ? `https://www.youtube-nocookie.com/embed/${trailer.key}?rel=0&modestbranding=1`
+        : null,
+    [trailer]
+  );
+  const recommendations = useMemo(() => movie?.recommendations?.results?.slice(0, 12) ?? [], [movie]);
+
+  const scrollRecommendations = (direction: 'left' | 'right') => {
+    if (!recommendationsRef.current) return;
+    recommendationsRef.current.scrollBy({
+      left: direction === 'left' ? -640 : 640,
+      behavior: 'smooth',
+    });
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -310,7 +383,7 @@ export default function MovieDetailPage() {
                     <Button asChild
                       className="text-white font-semibold"
                       style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
-                      <Link href="/search">다른 영화 검색</Link>
+                      <Link href="/search">통합 검색으로</Link>
                     </Button>
                     {trailer ? (
                       <Button asChild variant="outline"
@@ -343,6 +416,31 @@ export default function MovieDetailPage() {
                 </div>
               </div>
             </section>
+
+            {trailerEmbedUrl ? (
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+                <h3 className="text-lg font-bold text-white">트레일러</h3>
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                  {trailer?.name || 'YouTube Trailer'}
+                </p>
+                <div
+                  className="mt-3 rounded-xl overflow-hidden border"
+                  style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(0,0,0,0.35)' }}
+                >
+                  <div className="aspect-video w-full">
+                    <iframe
+                      src={trailerEmbedUrl}
+                      title={`${movie.title} trailer`}
+                      className="w-full h-full"
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              </section>
+            ) : null}
 
             <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
@@ -388,12 +486,17 @@ export default function MovieDetailPage() {
               </div>
             </section>
 
-            {topCast.length > 0 ? (
+            {castList.length > 0 ? (
               <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-4">주요 출연진</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
-                  {topCast.map((cast) => (
-                    <article key={cast.id} className="rounded-lg border p-2" style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}>
+                  {visibleCast.map((cast) => (
+                    <Link
+                      key={cast.id}
+                      href={`/people/${cast.id}`}
+                      className="rounded-lg border p-2 block"
+                      style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                    >
                       <div className="w-full aspect-square rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {cast.profile_path ? (
                           <img src={imageUrl(cast.profile_path, 'w500')} alt={cast.name} className="w-full h-full object-cover" />
@@ -405,24 +508,103 @@ export default function MovieDetailPage() {
                       </div>
                       <p className="text-xs font-semibold text-white mt-2 line-clamp-1">{cast.name}</p>
                       <p className="text-xs mt-1 line-clamp-2" style={{ color: 'rgba(255,255,255,0.58)' }}>{cast.character || '역할 정보 없음'}</p>
-                    </article>
+                    </Link>
                   ))}
                 </div>
+                {castList.length > 8 ? (
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowAllCast((prev) => !prev)}
+                      style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                    >
+                      {showAllCast ? '출연진 접기' : `출연진 더보기 (${castList.length - 8}명)`}
+                    </Button>
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+
+            {crewList.length > 0 ? (
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+                <h3 className="text-lg font-bold text-white mb-4">주요 스태프</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+                  {visibleCrew.map((crew) => (
+                    <Link
+                      key={`${crew.id}-${crew.job}-${crew.department}`}
+                      href={`/people/${crew.id}`}
+                      className="rounded-lg border p-2 block"
+                      style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                    >
+                      <div className="w-full aspect-square rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        {crew.profile_path ? (
+                          <img src={imageUrl(crew.profile_path, 'w500')} alt={crew.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            NO IMAGE
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold text-white mt-2 line-clamp-1">{crew.name}</p>
+                      <p className="text-xs mt-1 line-clamp-1" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                        직무: {crew.job || '정보 없음'}
+                      </p>
+                      <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                        부서: {crew.department || '정보 없음'}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+                {crewList.length > 8 ? (
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowAllCrew((prev) => !prev)}
+                      style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                    >
+                      {showAllCrew ? '스태프 접기' : `스태프 더보기 (${crewList.length - 8}명)`}
+                    </Button>
+                  </div>
+                ) : null}
               </section>
             ) : null}
 
             {recommendations.length > 0 ? (
               <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
-                <h3 className="text-lg font-bold text-white mb-4">비슷한 영화 추천</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-white">비슷한 영화 추천</h3>
+                  <div className="hidden md:flex items-center gap-2">
+                    <button
+                      type="button"
+                      aria-label="recommendations left"
+                      onClick={() => scrollRecommendations('left')}
+                      className="h-9 w-9 rounded-full border flex items-center justify-center"
+                      style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="recommendations right"
+                      onClick={() => scrollRecommendations('right')}
+                      className="h-9 w-9 rounded-full border flex items-center justify-center"
+                      style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div ref={recommendationsRef} className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar">
                   {recommendations.map((item) => (
                     <Link
                       key={item.id}
                       href={`/movies/${item.id}`}
-                      className="group rounded-lg border p-2 block"
+                      className="group rounded-lg border p-2 block w-40 md:w-48 shrink-0"
                       style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
-                      <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="w-full h-56 md:h-72 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {item.poster_path ? (
                           <img src={imageUrl(item.poster_path, 'w500')} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         ) : (

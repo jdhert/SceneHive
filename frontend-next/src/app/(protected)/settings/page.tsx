@@ -88,7 +88,6 @@ export default function SettingsPage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwError('');
-    setPwSuccess(false);
     if (pwForm.newPw !== pwForm.confirm) {
       setPwError('새 비밀번호가 일치하지 않습니다.');
       return;
