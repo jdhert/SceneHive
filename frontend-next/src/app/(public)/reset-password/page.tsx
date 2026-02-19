@@ -10,6 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+const BG = '#0B0B14';
+const AMBER = '#F59E0B';
+const AMBER_DARK = '#D97706';
+
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,14 +34,16 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4"
-        style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: BG }}>
         <Card className="w-full max-w-md border-0"
-          style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
           <CardContent className="py-12 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Invalid Reset Link</h2>
-            <p className="text-white/60 mb-6">유효하지 않거나 만료된 링크입니다.</p>
-            <Link href="/forgot-password" className="text-white underline text-sm">비밀번호 재설정 다시 요청</Link>
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-white mb-3">유효하지 않은 링크</h2>
+            <p className="mb-6 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>유효하지 않거나 만료된 링크입니다.</p>
+            <Link href="/forgot-password" className="text-sm hover:underline" style={{ color: AMBER }}>
+              비밀번호 재설정 다시 요청
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -64,41 +70,61 @@ function ResetPasswordContent() {
     }
   };
 
+  const inputStyle = { borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' };
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <Card className="w-full max-w-md border-0"
-        style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
-        <CardHeader className="text-center space-y-2">
+    <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: BG }}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/3 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+      </div>
+
+      <Card className="w-full max-w-md relative z-10 border-0"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
+        <CardHeader className="text-center space-y-3 pb-2">
+          <div className="flex justify-center mb-2"><span className="text-3xl">🎬</span></div>
           <CardTitle className="text-3xl font-bold text-white">
-            {success ? 'Password Reset!' : 'Reset Password'}
+            {success ? '비밀번호 변경 완료' : '새 비밀번호 설정'}
           </CardTitle>
-          <CardDescription className="text-white/70">
+          <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>
             {success ? '3초 후 로그인 페이지로 이동합니다.' : '새 비밀번호를 입력하세요.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {error && <div className="p-3 rounded-md bg-red-500/20 text-red-100 text-sm">{error}</div>}
+          {error && (
+            <div className="p-3 rounded-md text-sm"
+              style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
+              {error}
+            </div>
+          )}
           {success ? (
             <div className="text-center">
-              <div className="p-3 rounded-md bg-green-500/20 text-green-100 text-sm mb-4">비밀번호가 성공적으로 변경되었습니다.</div>
-              <Link href="/login" className="text-white underline text-sm">로그인으로 이동</Link>
+              <div className="p-3 rounded-md text-sm mb-4"
+                style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#86EFAC' }}>
+                비밀번호가 성공적으로 변경되었습니다.
+              </div>
+              <Link href="/login" className="text-sm hover:underline" style={{ color: AMBER }}>
+                로그인으로 이동
+              </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-white">New Password</Label>
-                <Input id="password" type="password" placeholder="Enter new password" value={password} onChange={(e) => setPassword(e.target.value)}
-                  className="border-white/40 bg-white/10 placeholder:text-white/50 text-white" minLength={8} required />
-                <p className="text-xs text-white/50">Must be at least 8 characters</p>
+                <Label htmlFor="password" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호</Label>
+                <Input id="password" type="password" placeholder="새 비밀번호를 입력하세요 (8자 이상)"
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  style={inputStyle} minLength={8} required />
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>최소 8자 이상 입력하세요</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-white">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="border-white/40 bg-white/10 placeholder:text-white/50 text-white" minLength={8} required />
+                <Label htmlFor="confirmPassword" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>비밀번호 확인</Label>
+                <Input id="confirmPassword" type="password" placeholder="비밀번호를 다시 입력하세요"
+                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={inputStyle} minLength={8} required />
               </div>
-              <Button type="submit" className="w-full font-bold py-5 bg-indigo-900 hover:bg-indigo-800 text-white" disabled={isLoading}>
-                {isLoading ? 'Resetting...' : 'Reset Password'}
+              <Button type="submit" className="w-full font-bold py-5 text-white" disabled={isLoading}
+                style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: isLoading ? 'none' : '0 4px 15px rgba(245,158,11,0.3)' }}>
+                {isLoading ? '변경 중...' : '비밀번호 변경'}
               </Button>
             </form>
           )}
@@ -110,7 +136,11 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><div className="text-white">Loading...</div></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: AMBER }} />
+      </div>
+    }>
       <ResetPasswordContent />
     </Suspense>
   );

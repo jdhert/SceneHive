@@ -10,6 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+const BG = '#0B0B14';
+const AMBER = '#F59E0B';
+const AMBER_DARK = '#D97706';
+
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '', name: '' });
@@ -38,51 +42,63 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: BG }}>
+      {/* Ambient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full opacity-50 animate-pulse"
-          style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }} />
-        <div className="absolute top-3/4 right-1/4 w-24 h-24 rounded-full opacity-40 animate-pulse"
-          style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)', animationDelay: '1s' }} />
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+        <div className="absolute top-3/4 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-8"
+          style={{ background: 'radial-gradient(circle, #B45309, transparent)', animationDelay: '1s' }} />
       </div>
 
       <Card className="w-full max-w-md relative z-10 border-0"
-        style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold text-white">Create Account</CardTitle>
-          <CardDescription className="text-white/70">Sign up to get started</CardDescription>
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
+        <CardHeader className="text-center space-y-3 pb-2">
+          <div className="flex justify-center mb-2">
+            <span className="text-3xl">🎬</span>
+          </div>
+          <CardTitle className="text-3xl font-bold text-white">SceneHive 가입</CardTitle>
+          <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>영화 팬들과 함께하세요</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {error && <div className="p-3 rounded-md bg-red-500/20 text-red-100 text-sm">{error}</div>}
+          {error && (
+            <div className="p-3 rounded-md text-sm"
+              style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-white">Full Name</Label>
-              <Input id="name" name="name" type="text" placeholder="Enter your name" value={form.name} onChange={handleChange}
-                className="border-white/40 bg-white/10 placeholder:text-white/50 text-white focus:ring-2 focus:ring-white/50" required />
+              <Label htmlFor="name" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>이름</Label>
+              <Input id="name" name="name" type="text" placeholder="이름을 입력하세요" value={form.name} onChange={handleChange}
+                style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-white">Email Address</Label>
-              <Input id="email" name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange}
-                className="border-white/40 bg-white/10 placeholder:text-white/50 text-white focus:ring-2 focus:ring-white/50" required />
+              <Label htmlFor="email" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>이메일 주소</Label>
+              <Input id="email" name="email" type="email" placeholder="이메일을 입력하세요" value={form.email} onChange={handleChange}
+                style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-white">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="Create a password" value={form.password} onChange={handleChange}
-                className="border-white/40 bg-white/10 placeholder:text-white/50 text-white focus:ring-2 focus:ring-white/50" minLength={6} required />
-              <p className="text-xs text-white/50">Must be at least 6 characters</p>
+              <Label htmlFor="password" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>비밀번호</Label>
+              <Input id="password" name="password" type="password" placeholder="비밀번호를 입력하세요 (6자 이상)" value={form.password} onChange={handleChange}
+                style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                minLength={6} required />
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>최소 6자 이상 입력하세요</p>
             </div>
-            <Button type="submit" className="w-full font-bold py-5 bg-indigo-900 hover:bg-indigo-800 text-white" disabled={isLoading}>
-              {isLoading ? 'Creating Account...' : 'Sign Up'}
+            <Button type="submit" className="w-full font-bold py-5 text-white" disabled={isLoading}
+              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: isLoading ? 'none' : `0 4px 15px rgba(245,158,11,0.3)` }}>
+              {isLoading ? '가입 중...' : '회원가입'}
             </Button>
           </form>
 
           <div className="text-center">
-            <p className="text-sm text-white/70">
-              Already have an account?{' '}
-              <Link href="/login" className="text-white hover:underline font-medium">Sign in</Link>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              이미 계정이 있으신가요?{' '}
+              <Link href="/login" className="font-medium hover:underline" style={{ color: AMBER }}>로그인</Link>
             </p>
           </div>
         </CardContent>

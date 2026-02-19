@@ -7,6 +7,10 @@ import api from '@/lib/api-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+const BG = '#0B0B14';
+const AMBER = '#F59E0B';
+const AMBER_DARK = '#D97706';
+
 function UnlockAccountContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -32,30 +36,48 @@ function UnlockAccountContent() {
   }, [token]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <Card className="w-full max-w-md border-0"
-        style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
+    <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: BG }}>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/3 left-1/3 w-80 h-80 rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+      </div>
+
+      <Card className="w-full max-w-md relative z-10 border-0"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         <CardContent className="py-12 text-center">
           {status === 'loading' && (
             <>
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
-              <p className="text-white">계정 잠금 해제 중...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: AMBER }} />
+              <p style={{ color: 'rgba(255,255,255,0.65)' }}>계정 잠금 해제 중...</p>
             </>
           )}
           {status === 'success' && (
             <>
-              <div className="p-4 rounded-lg bg-green-500/20 text-green-100 mb-6">{message}</div>
+              <div className="text-4xl mb-4">🔓</div>
+              <div className="p-4 rounded-lg text-sm mb-6"
+                style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#86EFAC' }}>
+                {message}
+              </div>
               <Link href="/login">
-                <Button className="bg-indigo-900 hover:bg-indigo-800 text-white">로그인으로 이동</Button>
+                <Button className="font-bold text-white"
+                  style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
+                  로그인으로 이동
+                </Button>
               </Link>
             </>
           )}
           {status === 'error' && (
             <>
-              <div className="p-4 rounded-lg bg-red-500/20 text-red-100 mb-6">{message}</div>
+              <div className="text-4xl mb-4">⚠️</div>
+              <div className="p-4 rounded-lg text-sm mb-6"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
+                {message}
+              </div>
               <Link href="/login">
-                <Button className="bg-white/20 hover:bg-white/30 text-white">로그인으로 이동</Button>
+                <Button className="font-medium text-white"
+                  style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  로그인으로 이동
+                </Button>
               </Link>
             </>
           )}
@@ -67,7 +89,11 @@ function UnlockAccountContent() {
 
 export default function UnlockAccountPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: AMBER }} />
+      </div>
+    }>
       <UnlockAccountContent />
     </Suspense>
   );
