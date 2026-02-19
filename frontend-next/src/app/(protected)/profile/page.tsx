@@ -9,6 +9,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import Avatar from '@/components/user/avatar';
 import StatusBadge from '@/components/user/status-badge';
 import UserMenu from '@/components/layout/user-menu';
+import NotificationBell from '@/components/notification/notification-bell';
+
+const BG = '#0B0B14';
+const AMBER = '#F59E0B';
+const AMBER_DARK = '#D97706';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -16,8 +21,8 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: AMBER }} />
       </div>
     );
   }
@@ -25,58 +30,66 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <header className="border-b border-white/10 px-6 py-4" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+    <div className="min-h-screen" style={{ background: BG }}>
+      <header className="border-b flex-shrink-0"
+        style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.9)', backdropFilter: 'blur(10px)' }}>
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/home" className="flex items-center gap-2 hover:opacity-80">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"><span className="text-lg">💻</span></div>
-              <span className="text-lg font-bold text-white hidden md:inline">DevCollab</span>
+            <Link href="/workspaces" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <span className="text-xl">🎬</span>
+              <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
             </Link>
-            <span className="text-white/30">|</span>
-            <h1 className="text-xl font-bold text-white">프로필</h1>
+            <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>
+            <h1 className="text-lg font-semibold text-white">프로필</h1>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto p-6">
-        <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
+        <Card className="border-0"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
           <CardContent className="p-8">
             <div className="flex flex-col items-center text-center mb-8">
               <Avatar user={user} size="xl" showStatus />
               <h2 className="text-2xl font-bold text-white mt-4">{user.name}</h2>
-              <StatusBadge status={user.status} size="lg" showLabel />
-              <p className="text-white/50 text-sm mt-1">{user.email}</p>
+              <div className="mt-2">
+                <StatusBadge status={user.status} size="lg" showLabel />
+              </div>
+              <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>{user.email}</p>
             </div>
 
-            <div className="space-y-4 text-white/70 text-sm">
+            <div className="space-y-3 text-sm border-t pt-6" style={{ borderColor: 'rgba(245,158,11,0.1)' }}>
               {user.jobTitle && (
                 <div className="flex justify-between">
-                  <span className="text-white/50">직책</span>
-                  <span>{user.jobTitle}{user.company ? ` @ ${user.company}` : ''}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)' }}>직책</span>
+                  <span style={{ color: 'rgba(255,255,255,0.8)' }}>{user.jobTitle}{user.company ? ` @ ${user.company}` : ''}</span>
                 </div>
               )}
               {user.bio && (
                 <div>
-                  <span className="text-white/50 block mb-1">소개</span>
-                  <p className="text-white/80">{user.bio}</p>
+                  <span className="block mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>소개</span>
+                  <p style={{ color: 'rgba(255,255,255,0.75)' }}>{user.bio}</p>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-white/50">가입일</span>
-                <span>{new Date(user.createdAt).toLocaleDateString('ko-KR')}</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>가입일</span>
+                <span style={{ color: 'rgba(255,255,255,0.8)' }}>{new Date(user.createdAt).toLocaleDateString('ko-KR')}</span>
               </div>
               {user.lastSeenAt && (
                 <div className="flex justify-between">
-                  <span className="text-white/50">마지막 접속</span>
-                  <span>{new Date(user.lastSeenAt).toLocaleString('ko-KR')}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)' }}>마지막 접속</span>
+                  <span style={{ color: 'rgba(255,255,255,0.8)' }}>{new Date(user.lastSeenAt).toLocaleString('ko-KR')}</span>
                 </div>
               )}
             </div>
 
             <div className="mt-8 text-center">
-              <Button onClick={() => router.push('/profile/edit')} className="bg-indigo-900 hover:bg-indigo-800 text-white">
+              <Button onClick={() => router.push('/profile/edit')} className="font-bold text-white"
+                style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: '0 4px 15px rgba(245,158,11,0.3)' }}>
                 프로필 편집
               </Button>
             </div>

@@ -12,6 +12,12 @@ import UserMenu from '@/components/layout/user-menu';
 import NotificationBell from '@/components/notification/notification-bell';
 import type { Workspace } from '@/types';
 
+const BG = '#0B0B14';
+const AMBER = '#F59E0B';
+const AMBER_DARK = '#D97706';
+const CARD_BG = 'rgba(255,255,255,0.05)';
+const CARD_BORDER = '1px solid rgba(245,158,11,0.15)';
+
 export default function WorkspacesPage() {
   const router = useRouter();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -36,7 +42,7 @@ export default function WorkspacesPage() {
       const response = await workspaceService.getAll();
       setWorkspaces(response.data);
     } catch {
-      setError('워크스페이스 목록을 불러오는 데 실패했습니다.');
+      setError('클럽 목록을 불러오는 데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +58,7 @@ export default function WorkspacesPage() {
       setCreateForm({ name: '', description: '' });
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || '워크스페이스 생성에 실패했습니다.');
+      setError(axiosErr.response?.data?.message || '영화 클럽 생성에 실패했습니다.');
     } finally {
       setIsCreating(false);
     }
@@ -68,19 +74,31 @@ export default function WorkspacesPage() {
       setInviteCode('');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || '워크스페이스 참여에 실패했습니다.');
+      setError(axiosErr.response?.data?.message || '영화 클럽 참여에 실패했습니다.');
     } finally {
       setIsJoining(false);
     }
   };
 
+  const inputStyle = {
+    borderColor: 'rgba(245,158,11,0.25)',
+    background: 'rgba(255,255,255,0.06)',
+    color: 'white',
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <header className="border-b border-white/10" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+    <div className="min-h-screen" style={{ background: BG }}>
+      {/* Ambient orb */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full blur-3xl opacity-8"
+          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+      </div>
+
+      <header className="relative z-10 border-b" style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.85)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"><span className="text-lg">💻</span></div>
-            <span className="text-lg font-bold text-white">DevCollab</span>
+            <span className="text-xl">🎬</span>
+            <span className="text-lg font-bold" style={{ color: AMBER }}>SceneHive</span>
           </Link>
           <div className="flex items-center gap-4">
             <NotificationBell />
@@ -89,51 +107,68 @@ export default function WorkspacesPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="relative z-10 max-w-6xl mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Workspaces</h1>
-            <p className="text-white/70 mt-1">협업 공간을 선택하거나 새로 만드세요</p>
+            <h1 className="text-3xl font-bold text-white">영화 클럽</h1>
+            <p className="mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>클럽을 선택하거나 새로 만드세요</p>
           </div>
           <div className="flex gap-3">
-            <Button onClick={() => setShowJoinModal(true)} variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20">초대 코드로 참여</Button>
-            <Button onClick={() => setShowCreateModal(true)} className="bg-indigo-900 hover:bg-indigo-800 text-white">+ 새 워크스페이스</Button>
+            <Button onClick={() => setShowJoinModal(true)} variant="outline"
+              className="font-medium"
+              style={{ borderColor: 'rgba(245,158,11,0.35)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+              초대 코드로 참여
+            </Button>
+            <Button onClick={() => setShowCreateModal(true)}
+              className="font-bold text-white"
+              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
+              + 새 클럽 만들기
+            </Button>
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-500/20 text-red-100">
+          <div className="mb-6 p-4 rounded-lg text-sm"
+            style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
             {error}
-            <button onClick={() => setError('')} className="ml-4 underline">닫기</button>
+            <button onClick={() => setError('')} className="ml-4 underline opacity-70">닫기</button>
           </div>
         )}
 
         {isLoading ? (
-          <div className="text-center text-white py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto" />
-            <p className="mt-4">로딩 중...</p>
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: AMBER }} />
+            <p className="mt-4" style={{ color: 'rgba(255,255,255,0.5)' }}>로딩 중...</p>
           </div>
         ) : workspaces.length === 0 ? (
-          <Card className="border-0 text-center py-12" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
+          <Card className="border-0 text-center py-12"
+            style={{ background: CARD_BG, border: CARD_BORDER }}>
             <CardContent>
-              <p className="text-white/70 text-lg">아직 참여 중인 워크스페이스가 없습니다.</p>
-              <p className="text-white/50 mt-2">새 워크스페이스를 만들거나 초대 코드로 참여하세요</p>
+              <div className="text-4xl mb-4">🎬</div>
+              <p className="text-lg text-white">아직 참여 중인 영화 클럽이 없습니다.</p>
+              <p className="mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>새 클럽을 만들거나 초대 코드로 참여하세요</p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {workspaces.map((workspace) => (
-              <Card key={workspace.id} className="border-0 cursor-pointer transition-all hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(20px)' }}
+              <Card key={workspace.id}
+                className="border-0 cursor-pointer transition-all hover:scale-105"
+                style={{ background: CARD_BG, border: CARD_BORDER }}
                 onClick={() => router.push(`/workspaces/${workspace.id}`)}>
                 <CardHeader>
-                  <CardTitle className="text-white">{workspace.name}</CardTitle>
-                  <CardDescription className="text-white/60">{workspace.description || '설명 없음'}</CardDescription>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">🎬</span>
+                    <CardTitle className="text-white">{workspace.name}</CardTitle>
+                  </div>
+                  <CardDescription style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    {workspace.description || '설명 없음'}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-between text-sm text-white/50">
+                  <div className="flex justify-between text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
                     <span>멤버 {workspace.memberCount}명</span>
-                    <span>소유자: {workspace.owner?.name}</span>
+                    <span>개설자: {workspace.owner?.name}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -142,25 +177,37 @@ export default function WorkspacesPage() {
         )}
       </div>
 
+      {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md border-0" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(40px)' }}>
-            <CardHeader><CardTitle className="text-white">새 워크스페이스 만들기</CardTitle></CardHeader>
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <Card className="w-full max-w-md border-0"
+            style={{ background: 'rgba(18,16,26,0.97)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(40px)' }}>
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2"><span>🎬</span> 새 영화 클럽 만들기</CardTitle>
+            </CardHeader>
             <CardContent>
               <form onSubmit={handleCreateWorkspace} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-white">이름</Label>
-                  <Input id="name" value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                    placeholder="워크스페이스 이름" className="border-white/40 bg-white/10 text-white placeholder:text-white/50" required />
+                  <Label htmlFor="name" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>클럽 이름</Label>
+                  <Input id="name" value={createForm.name}
+                    onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                    placeholder="예: 봉준호 감독 팬클럽" style={inputStyle} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-white">설명 (선택)</Label>
-                  <Input id="description" value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                    placeholder="워크스페이스 설명" className="border-white/40 bg-white/10 text-white placeholder:text-white/50" />
+                  <Label htmlFor="description" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>설명 (선택)</Label>
+                  <Input id="description" value={createForm.description}
+                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                    placeholder="클럽 소개를 입력하세요" style={inputStyle} />
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1 border-white/30 bg-white/10 text-white hover:bg-white/20">취소</Button>
-                  <Button type="submit" disabled={isCreating} className="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white">{isCreating ? '생성 중...' : '만들기'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1"
+                    style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'transparent', color: 'rgba(245,158,11,0.8)' }}>
+                    취소
+                  </Button>
+                  <Button type="submit" disabled={isCreating} className="flex-1 font-bold text-white"
+                    style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
+                    {isCreating ? '생성 중...' : '만들기'}
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -168,23 +215,32 @@ export default function WorkspacesPage() {
         </div>
       )}
 
+      {/* Join Modal */}
       {showJoinModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md border-0" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(40px)' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.7)' }}>
+          <Card className="w-full max-w-md border-0"
+            style={{ background: 'rgba(18,16,26,0.97)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(40px)' }}>
             <CardHeader>
-              <CardTitle className="text-white">워크스페이스 참여</CardTitle>
-              <CardDescription className="text-white/60">초대 코드를 입력하여 워크스페이스에 참여하세요.</CardDescription>
+              <CardTitle className="text-white">영화 클럽 참여</CardTitle>
+              <CardDescription style={{ color: 'rgba(255,255,255,0.45)' }}>초대 코드를 입력하여 클럽에 참여하세요.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleJoinWorkspace} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="inviteCode" className="text-white">초대 코드</Label>
-                  <Input id="inviteCode" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)}
-                    placeholder="초대 코드 입력" className="border-white/40 bg-white/10 text-white placeholder:text-white/50" required />
+                  <Label htmlFor="inviteCode" className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>초대 코드</Label>
+                  <Input id="inviteCode" value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                    placeholder="초대 코드 입력" style={inputStyle} required />
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setShowJoinModal(false)} className="flex-1 border-white/30 bg-white/10 text-white hover:bg-white/20">취소</Button>
-                  <Button type="submit" disabled={isJoining} className="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white">{isJoining ? '참여 중...' : '참여하기'}</Button>
+                  <Button type="button" variant="outline" onClick={() => setShowJoinModal(false)} className="flex-1"
+                    style={{ borderColor: 'rgba(245,158,11,0.25)', background: 'transparent', color: 'rgba(245,158,11,0.8)' }}>
+                    취소
+                  </Button>
+                  <Button type="submit" disabled={isJoining} className="flex-1 font-bold text-white"
+                    style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
+                    {isJoining ? '참여 중...' : '참여하기'}
+                  </Button>
                 </div>
               </form>
             </CardContent>
