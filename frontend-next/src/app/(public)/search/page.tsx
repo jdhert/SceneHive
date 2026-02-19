@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, Suspense, useEffect, useState } from 'react';
+import { FormEvent, Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Star } from 'lucide-react';
@@ -14,13 +14,22 @@ const AMBER = '#F59E0B';
 const AMBER_DARK = '#B45309';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 
-type Movie = {
+type MediaType = 'movie' | 'person' | 'tv';
+type FilterType = 'all' | MediaType;
+
+type MultiSearchItem = {
   id: number;
-  title: string;
-  overview: string;
-  poster_path: string | null;
-  vote_average: number;
-  release_date: string;
+  media_type: MediaType;
+  title?: string;
+  name?: string;
+  overview?: string;
+  poster_path?: string | null;
+  profile_path?: string | null;
+  vote_average?: number;
+  release_date?: string;
+  first_air_date?: string;
+  known_for_department?: string;
+  popularity?: number;
 };
 
 type SearchPayload = {
@@ -28,10 +37,10 @@ type SearchPayload = {
   page: number;
   total_pages: number;
   total_results: number;
-  results: Movie[];
+  results: MultiSearchItem[];
 };
 
-function posterUrl(path: string | null) {
+function imageUrl(path: string | null | undefined) {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/w500${path}`;
 }
@@ -46,6 +55,22 @@ function toExcerpt(text: string, max = 88) {
   if (!text) return '줄거리 정보가 없습니다.';
   if (text.length <= max) return text;
   return `${text.slice(0, max).trim()}...`;
+}
+
+function getItemTitle(item: MultiSearchItem) {
+  return item.media_type === 'movie' ? (item.title || '제목 없음') : (item.name || '이름 없음');
+}
+
+function getItemHref(item: MultiSearchItem) {
+  if (item.media_type === 'movie') return `/movies/${item.id}`;
+  if (item.media_type === 'person') return `/people/${item.id}`;
+  return `/tv/${item.id}`;
+}
+
+function getItemTypeLabel(type: MediaType) {
+  if (type === 'movie') return '영화';
+  if (type === 'person') return '인물';
+  return 'TV';
 }
 
 export default function MovieSearchPage() {
@@ -72,13 +97,33 @@ function MovieSearchPageContent() {
   const initialQuery = searchParams.get('q') ?? '';
   const [query, setQuery] = useState(initialQuery);
   const [searchedQuery, setSearchedQuery] = useState(initialQuery);
-  const [results, setResults] = useState<Movie[]>([]);
+  const [results, setResults] = useState<MultiSearchItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(initialQuery.trim().length >= 2);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
-  const runSearch = async (searchText: string) => {
+  const personResults = useMemo(
+    () => results.filter((item) => item.media_type === 'person'),
+    [results]
+  );
+  const movieResults = useMemo(
+    () => results.filter((item) => item.media_type === 'movie'),
+    [results]
+  );
+  const tvResults = useMemo(
+    () => results.filter((item) => item.media_type === 'tv'),
+    [results]
+  );
+  const filteredResults = useMemo(() => {
+    if (activeFilter === 'all') return results;
+    return results.filter((item) => item.media_type === activeFilter);
+  }, [results, activeFilter]);
+
+  const runSearch = async (searchText: string, page = 1, append = false) => {
     const normalized = searchText.trim();
     setSearchedQuery(normalized);
     setError(null);
@@ -87,24 +132,48 @@ function MovieSearchPageContent() {
       setHasSearched(false);
       setResults([]);
       setTotalCount(0);
+      setTotalPages(0);
+      setCurrentPage(1);
       return;
     }
 
     try {
       setIsLoading(true);
       setHasSearched(true);
-      const response = await fetch(`/api/movies/search?q=${encodeURIComponent(normalized)}`);
+      const response = await fetch(`/api/search/multi?q=${encodeURIComponent(normalized)}&page=${page}`);
       if (!response.ok) {
         throw new Error('검색 중 오류가 발생했습니다.');
       }
       const data = (await response.json()) as SearchPayload;
-      setResults(data.results ?? []);
+      setResults((prev) => {
+        const incoming = data.results ?? [];
+        if (!append) return incoming;
+
+        const existing = new Set(prev.map((item) => `${item.media_type}:${item.id}`));
+        const merged = [...prev];
+        for (const item of incoming) {
+          const key = `${item.media_type}:${item.id}`;
+          if (existing.has(key)) continue;
+          existing.add(key);
+          merged.push(item);
+        }
+        return merged;
+      });
       setTotalCount(data.total_results ?? 0);
+      setTotalPages(data.total_pages ?? 0);
+      setCurrentPage(data.page ?? page);
+      if (!append) {
+        setActiveFilter('all');
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
       setError(message);
-      setResults([]);
-      setTotalCount(0);
+      if (!append) {
+        setResults([]);
+        setTotalCount(0);
+        setTotalPages(0);
+        setCurrentPage(1);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +181,7 @@ function MovieSearchPageContent() {
 
   useEffect(() => {
     if (initialQuery.trim().length >= 2) {
-      runSearch(initialQuery);
+      runSearch(initialQuery, 1, false);
     }
   }, [initialQuery]);
 
@@ -120,7 +189,14 @@ function MovieSearchPageContent() {
     event.preventDefault();
     const normalized = query.trim();
     router.replace(normalized ? `/search?q=${encodeURIComponent(normalized)}` : '/search');
-    await runSearch(normalized);
+    setActiveFilter('all');
+    await runSearch(normalized, 1, false);
+  };
+
+  const onLoadMore = async () => {
+    if (isLoading) return;
+    if (!searchedQuery.trim() || currentPage >= totalPages) return;
+    await runSearch(searchedQuery, currentPage + 1, true);
   };
 
   if (isUserLoading) {
@@ -141,7 +217,7 @@ function MovieSearchPageContent() {
               <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
             </Link>
             <span className="text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              영화 검색
+              통합 검색
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -176,9 +252,9 @@ function MovieSearchPageContent() {
           className="rounded-2xl border p-5 md:p-6"
           style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}
         >
-          <h2 className="text-2xl md:text-3xl font-black text-white">영화 검색</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-white">통합 검색</h2>
           <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-            영화 제목으로 검색하면 TMDB 기반 정보를 확인할 수 있습니다.
+            영화, 인물, TV 시리즈를 한 번에 검색할 수 있습니다.
           </p>
 
           <form className="mt-5 flex gap-2" onSubmit={onSubmit}>
@@ -187,7 +263,7 @@ function MovieSearchPageContent() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="예: 인터스텔라, 기생충, 듄"
+                placeholder="예: 인터스텔라, Leonardo DiCaprio, Breaking Bad"
                 className="w-full h-11 rounded-lg pl-10 pr-3 text-sm bg-transparent border text-white"
                 style={{ borderColor: 'rgba(245,158,11,0.24)' }}
               />
@@ -231,35 +307,88 @@ function MovieSearchPageContent() {
                   결과가 없습니다.
                 </p>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
-                  {results.map((movie) => (
-                    <Link key={movie.id} href={`/movies/${movie.id}`} className="group block">
-                      <div
-                        className="rounded-xl overflow-hidden border"
-                        style={{ borderColor: 'rgba(245,158,11,0.18)', background: 'rgba(255,255,255,0.03)' }}
+                <div>
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter('all')}
+                      className="px-3 py-1.5 rounded-full text-xs border"
+                      style={{
+                        borderColor: activeFilter === 'all' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'all' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'all' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                      }}
+                    >
+                      All ({results.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter('person')}
+                      className="px-3 py-1.5 rounded-full text-xs border"
+                      style={{
+                        borderColor: activeFilter === 'person' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'person' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'person' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                      }}
+                    >
+                      Person ({personResults.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter('movie')}
+                      className="px-3 py-1.5 rounded-full text-xs border"
+                      style={{
+                        borderColor: activeFilter === 'movie' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'movie' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'movie' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                      }}
+                    >
+                      Movie ({movieResults.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter('tv')}
+                      className="px-3 py-1.5 rounded-full text-xs border"
+                      style={{
+                        borderColor: activeFilter === 'tv' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'tv' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'tv' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                      }}
+                    >
+                      TV ({tvResults.length})
+                    </button>
+                  </div>
+
+                  {filteredResults.length === 0 ? (
+                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.62)' }}>
+                      선택한 카테고리에 결과가 없습니다.
+                    </p>
+                  ) : activeFilter === 'all' ? (
+                    <div className="space-y-7">
+                      <SearchResultSection title={`Person (${personResults.length})`} items={personResults} />
+                      <SearchResultSection title={`Movie (${movieResults.length})`} items={movieResults} />
+                      <SearchResultSection title={`TV (${tvResults.length})`} items={tvResults} />
+                    </div>
+                  ) : (
+                    <SearchResultSection
+                      title={`${getItemTypeLabel(activeFilter)} (${filteredResults.length})`}
+                      items={filteredResults}
+                    />
+                  )}
+
+                  {currentPage < totalPages ? (
+                    <div className="mt-6 flex justify-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isLoading}
+                        onClick={onLoadMore}
+                        style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
                       >
-                        {movie.poster_path ? (
-                          <img
-                            src={posterUrl(movie.poster_path)}
-                            alt={movie.title}
-                            className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full aspect-[2/3] flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                            NO POSTER
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="mt-2 text-sm font-semibold text-white line-clamp-2">{movie.title}</h3>
-                      <p className="text-xs mt-1 inline-flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                        <Star className="w-3.5 h-3.5" style={{ fill: AMBER, color: AMBER }} />
-                        {movie.vote_average.toFixed(1)} · {toYear(movie.release_date)}
-                      </p>
-                      <p className="text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.52)' }}>
-                        {toExcerpt(movie.overview)}
-                      </p>
-                    </Link>
-                  ))}
+                        {isLoading ? '불러오는 중...' : `더보기 (24개)`}
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>
@@ -267,5 +396,63 @@ function MovieSearchPageContent() {
         </section>
       </main>
     </div>
+  );
+}
+
+function SearchResultSection({ title, items }: { title: string; items: MultiSearchItem[] }) {
+  if (!items.length) return null;
+
+  return (
+    <section>
+      <h3 className="text-base font-semibold text-white mb-3">{title}</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
+        {items.map((item) => (
+          <SearchResultCard key={`${item.media_type}-${item.id}`} item={item} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SearchResultCard({ item }: { item: MultiSearchItem }) {
+  return (
+    <Link href={getItemHref(item)} className="group block">
+      <div
+        className="rounded-xl overflow-hidden border"
+        style={{ borderColor: 'rgba(245,158,11,0.18)', background: 'rgba(255,255,255,0.03)' }}
+      >
+        {(item.poster_path || item.profile_path) ? (
+          <img
+            src={imageUrl(item.poster_path || item.profile_path)}
+            alt={getItemTitle(item)}
+            className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full aspect-[2/3] flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            NO POSTER
+          </div>
+        )}
+      </div>
+      <h3 className="mt-2 text-sm font-semibold text-white line-clamp-2">{getItemTitle(item)}</h3>
+      <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+        <span
+          className="inline-flex items-center px-2 py-0.5 rounded-full mr-2"
+          style={{ background: 'rgba(245,158,11,0.12)', color: 'rgba(245,158,11,0.92)' }}
+        >
+          {getItemTypeLabel(item.media_type)}
+        </span>
+        {item.media_type === 'person' ? (
+          <span>{item.known_for_department || '분야 정보 없음'}</span>
+        ) : (
+          <span className="inline-flex items-center gap-1">
+            <Star className="w-3.5 h-3.5" style={{ fill: AMBER, color: AMBER }} />
+            {(item.vote_average ?? 0).toFixed(1)} · {toYear(item.release_date || item.first_air_date)}
+          </span>
+        )}
+      </div>
+      <p className="text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.52)' }}>
+        {toExcerpt(item.overview || (item.media_type === 'person' ? '인물 소개 정보가 없습니다.' : '줄거리 정보가 없습니다.'))}
+      </p>
+    </Link>
   );
 }

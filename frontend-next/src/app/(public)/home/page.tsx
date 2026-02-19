@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Star } from 'lucide-react';
 import { useUser } from '@/providers/user-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -157,7 +157,10 @@ export default function HomePage() {
             <Button asChild variant="outline"
               className="font-medium"
               style={{ borderColor: 'rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)', color: 'rgba(245,158,11,0.95)' }}>
-              <Link href="/search">영화 검색</Link>
+              <Link href="/search" className="inline-flex items-center gap-1.5">
+                <Search className="w-4 h-4" />
+                통합 검색
+              </Link>
             </Button>
             {user ? (
               <>
