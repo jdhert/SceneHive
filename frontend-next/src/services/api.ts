@@ -100,6 +100,8 @@ export const userService = {
   deleteAvatar: () => api.delete('/users/me/avatar'),
   getUserById: (id: number) => api.get<User>(`/users/${id}`),
   updateStatus: (status: string) => api.put<User>('/users/me/status', { status }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.put('/users/me/password', { currentPassword, newPassword }),
 };
 
 export const settingsService = {

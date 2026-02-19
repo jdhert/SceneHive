@@ -4,12 +4,20 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/providers/theme-provider';
-import { settingsService } from '@/services/api';
+import { settingsService, userService } from '@/services/api';
+import { hashPassword } from '@/lib/crypto';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ThemeToggle from '@/components/settings/theme-toggle';
 import UserMenu from '@/components/layout/user-menu';
+import NotificationBell from '@/components/notification/notification-bell';
 import type { UserSettings } from '@/types';
+
+const BG = '#0B0B14';
+const AMBER = '#F59E0B';
+const AMBER_DARK = '#D97706';
 
 function ToggleItem({ label, description, checked, onChange }: {
   label: string; description: string; checked?: boolean; onChange: () => void;
@@ -17,11 +25,12 @@ function ToggleItem({ label, description, checked, onChange }: {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-white text-sm">{label}</p>
-        <p className="text-white/40 text-xs">{description}</p>
+        <p className="text-sm text-white">{label}</p>
+        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{description}</p>
       </div>
       <button onClick={onChange}
-        className={`w-12 h-6 rounded-full transition-colors relative ${checked ? 'bg-purple-500' : 'bg-white/20'}`}>
+        className="w-12 h-6 rounded-full transition-colors relative"
+        style={{ background: checked ? AMBER : 'rgba(255,255,255,0.15)' }}>
         <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${checked ? 'translate-x-6' : 'translate-x-0.5'}`} />
       </button>
     </div>
@@ -33,6 +42,14 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Password change state
+  const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const inputStyle = { borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' };
 
   useEffect(() => {
     settingsService.getSettings()
@@ -67,56 +84,145 @@ export default function SettingsPage() {
     catch (err) { console.error('Failed to save language:', err); }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess(false);
+    if (pwForm.newPw !== pwForm.confirm) {
+      setPwError('새 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    if (pwForm.newPw.length < 8) {
+      setPwError('새 비밀번호는 최소 8자 이상이어야 합니다.');
+      return;
+    }
+    setPwLoading(true);
+    try {
+      const [hashedCurrent, hashedNew] = await Promise.all([
+        hashPassword(pwForm.current),
+        hashPassword(pwForm.newPw),
+      ]);
+      await userService.changePassword(hashedCurrent, hashedNew);
+      setPwSuccess(true);
+      setPwForm({ current: '', newPw: '', confirm: '' });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setPwError(axiosErr.response?.data?.message || '비밀번호 변경에 실패했습니다.');
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: AMBER }} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <header className="border-b border-white/20 px-6 py-4" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+    <div className="min-h-screen" style={{ background: BG }}>
+      <header className="border-b flex-shrink-0"
+        style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.9)', backdropFilter: 'blur(10px)' }}>
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/home" className="flex items-center gap-2 hover:opacity-80">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"><span className="text-lg">💻</span></div>
-              <span className="text-lg font-bold text-white hidden md:inline">DevCollab</span>
+            <Link href="/workspaces" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <span className="text-xl">🎬</span>
+              <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
             </Link>
-            <span className="text-white/30">|</span>
-            <Button variant="ghost" onClick={() => router.back()} className="text-white hover:bg-white/20">← 뒤로</Button>
-            <h1 className="text-xl font-bold text-white">설정</h1>
+            <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>
+            <Button variant="ghost" onClick={() => router.back()} className="text-sm"
+              style={{ color: 'rgba(255,255,255,0.5)' }}>← 뒤로</Button>
+            <h1 className="text-lg font-semibold text-white">설정</h1>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserMenu />
+          </div>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto p-6 space-y-6">
-        <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
-          <CardHeader><CardTitle className="text-white text-lg">외관</CardTitle></CardHeader>
+        {/* 외관 */}
+        <Card className="border-0"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.12)' }}>
+          <CardHeader>
+            <CardTitle className="text-white text-base">외관</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-white/80 text-sm block mb-2">테마</label>
+              <label className="text-sm block mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>테마</label>
               <ThemeToggle theme={theme} onChange={handleThemeChange} />
             </div>
             <div>
-              <label className="text-white/80 text-sm block mb-2">언어</label>
+              <label className="text-sm block mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>언어</label>
               <select value={settings?.language || 'ko'} onChange={(e) => handleLanguageChange(e.target.value)}
-                className="h-10 px-3 rounded-md bg-white/10 border border-white/20 text-white">
-                <option value="ko" className="bg-gray-800">한국어</option>
-                <option value="en" className="bg-gray-800">English</option>
+                className="h-10 px-3 rounded-md text-sm"
+                style={{ border: '1px solid rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' }}>
+                <option value="ko" className="bg-gray-900">한국어</option>
+                <option value="en" className="bg-gray-900">English</option>
               </select>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)' }}>
-          <CardHeader><CardTitle className="text-white text-lg">알림</CardTitle></CardHeader>
+        {/* 알림 */}
+        <Card className="border-0"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.12)' }}>
+          <CardHeader>
+            <CardTitle className="text-white text-base">알림</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             <ToggleItem label="이메일 알림" description="중요 업데이트를 이메일로 받습니다" checked={settings?.emailNotifications} onChange={() => handleToggle('emailNotifications')} />
             <ToggleItem label="푸시 알림" description="브라우저 푸시 알림을 받습니다" checked={settings?.pushNotifications} onChange={() => handleToggle('pushNotifications')} />
             <ToggleItem label="멘션 알림" description="@멘션 시 알림을 받습니다" checked={settings?.mentionNotifications} onChange={() => handleToggle('mentionNotifications')} />
+          </CardContent>
+        </Card>
+
+        {/* 비밀번호 변경 */}
+        <Card className="border-0"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.12)' }}>
+          <CardHeader>
+            <CardTitle className="text-white text-base">비밀번호 변경</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pwError && (
+              <div className="p-3 rounded-md text-sm mb-4"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
+                {pwError}
+              </div>
+            )}
+            {pwSuccess && (
+              <div className="p-3 rounded-md text-sm mb-4"
+                style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#86EFAC' }}>
+                비밀번호가 성공적으로 변경되었습니다.
+              </div>
+            )}
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>현재 비밀번호</Label>
+                <Input type="password" value={pwForm.current}
+                  onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })}
+                  style={inputStyle} required />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호</Label>
+                <Input type="password" placeholder="최소 8자 이상" value={pwForm.newPw}
+                  onChange={(e) => setPwForm({ ...pwForm, newPw: e.target.value })}
+                  style={inputStyle} required minLength={8} />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호 확인</Label>
+                <Input type="password" placeholder="새 비밀번호를 다시 입력하세요" value={pwForm.confirm}
+                  onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })}
+                  style={inputStyle} required minLength={8} />
+              </div>
+              <Button type="submit" disabled={pwLoading} className="font-bold text-white"
+                style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: pwLoading ? 'none' : '0 4px 15px rgba(245,158,11,0.3)' }}>
+                {pwLoading ? '변경 중...' : '비밀번호 변경'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </main>

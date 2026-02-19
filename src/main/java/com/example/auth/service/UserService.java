@@ -1,5 +1,6 @@
 package com.example.auth.service;
 
+import com.example.auth.dto.profile.ChangePasswordRequest;
 import com.example.auth.dto.profile.ProfileResponse;
 import com.example.auth.dto.profile.PublicProfileResponse;
 import com.example.auth.dto.profile.UpdateProfileRequest;
@@ -9,6 +10,7 @@ import com.example.auth.entity.UserStatus;
 import com.example.auth.exception.CustomException;
 import com.example.auth.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +20,11 @@ import java.time.LocalDateTime;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +95,19 @@ public class UserService {
 
         User updatedUser = userRepository.save(user);
         return ProfileResponse.from(updatedUser);
+    }
+
+    @Transactional
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new CustomException("현재 비밀번호가 올바르지 않습니다", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.example.auth.controller;
 
+import com.example.auth.dto.profile.ChangePasswordRequest;
 import com.example.auth.dto.profile.ProfileResponse;
 import com.example.auth.dto.profile.PublicProfileResponse;
 import com.example.auth.dto.profile.UpdateProfileRequest;
@@ -106,6 +107,14 @@ public class UserController {
     public ResponseEntity<PublicProfileResponse> getUserProfile(
             @PathVariable Long userId) {
         return ResponseEntity.ok(userService.getPublicProfile(userId));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(userDetails.getUsername(), request);
+        return ResponseEntity.noContent().build();
     }
 
     // Settings endpoints
