@@ -17,12 +17,14 @@
 
 ## 1. 프로젝트 고정 컨텍스트
 
-- 프로젝트: `DevCollab`
-- 도메인: 팀 협업 플랫폼
-- 핵심 기능: 워크스페이스, 실시간 채팅, 코드 스니펫, 메모, 통합 검색, 알림
+- 프로젝트: `SceneHive` (이전: DevCollab — 2026-02-19 리브랜딩)
+- 도메인: 영화 팬 커뮤니티 플랫폼
+- 핵심 기능: 영화 클럽(워크스페이스), 실시간 토론(채팅), 명대사 아카이브(스니펫), 리뷰·감상문(메모), 통합 검색, 알림
+- 색상 테마: Dark Cinema (`#0B0B14` 배경) + Amber 포인트 (`#F59E0B`)
 - 백엔드: Java 17+, Spring Boot 3.2.1, PostgreSQL, Redis, STOMP WebSocket
 - 프론트엔드: `frontend-next/` (Next.js 14, TypeScript, TanStack Query)
 - 레거시 프론트엔드: `frontend/`는 참고용이며 Docker 런타임 비사용
+- TMDB API 연동 예정 (영화 데이터 공공 API)
 
 ## 2. 표준 핸드오프 스냅샷 템플릿
 
@@ -152,9 +154,69 @@
 ## 10. 변경 이력
 
 - 2026-02-13: AGENTS 문서 한국어 전환, 최초 Snapshot 기입, 토큰/컨텍스트 종료 대응 규칙 추가
+- 2026-02-19: **SceneHive 리브랜딩** — DevCollab → SceneHive, Dark Cinema 테마 적용, 프로젝트 컨셉 영화 커뮤니티로 전환
 
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
+## Handoff Snapshot
+- Timestamp (KST): 2026-02-19 14:19:04 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): SceneHive TMDB 홈/검색/상세 고도화 및 fallback 안정화
+- Scope (In/Out): In: frontend-next/src/app/(public)/**, frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/**, docker-compose.yml, frontend-next/next.config.mjs, 문서 업데이트 / Out: Spring 백엔드 비즈니스 로직 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:
+  - frontend-next/src/app/(public)/home/page.tsx
+  - frontend-next/src/app/(public)/search/page.tsx
+  - frontend-next/src/app/(public)/movies/[movieId]/page.tsx
+  - frontend-next/src/app/api/movies/[movieId]/route.ts
+  - frontend-next/src/app/api/movies/search/route.ts
+  - frontend-next/src/app/api/movies/trending/route.ts
+  - frontend-next/src/app/api/movies/now-playing/route.ts
+  - frontend-next/src/app/api/movies/upcoming/route.ts
+  - frontend-next/src/app/api/movies/top-rated/route.ts
+  - frontend-next/src/app/api/movies/genres/route.ts
+  - frontend-next/src/lib/tmdb.ts
+  - frontend-next/src/app/globals.css
+  - frontend-next/next.config.mjs
+  - docker-compose.yml
+  - AGENTS.md, PROJECT_GUIDE.md
+- Commands Run: docker-compose up -d --no-deps --build frontend, curl.exe -s -i http://localhost:3000/api/movies/1316092, curl.exe -s -i http://localhost:3000/api/movies/trending
+- Tests Run + Result: Not run (빌드/배포 및 API 응답 수동 확인만 수행)
+- Open Risks: TMDB 원천 데이터가 비어있는 경우 일부 섹션은 여전히 제한적 표시 가능 / <img> 사용 관련 Next 경고 존재
+- Blockers: None
+- Next 3 Actions:
+  1) 영화 상세 페이지에서 추천/트레일러 fallback 결과 실제 케이스 점검
+  2) /api/movies 라우트 통합([category]) 리팩터링 여부 결정
+  3) Phase 6 테스트 코드 범위(backend/frontend/e2e) 재정렬
+- Resume Command: docker-compose up -d --no-deps --build frontend && curl.exe -s -i http://localhost:3000/api/movies/1316092
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-02-19 (리브랜딩 작업)
+- Agent Name: Claude Sonnet 4.5
+- Branch: main
+- Goal (1 line): SceneHive 리브랜딩 — Dark Cinema 테마, 한글화, 컨셉 전환
+- Scope (In/Out): In: frontend-next/src/app/, PROJECT_GUIDE.md, AGENTS.md / Out: 백엔드 로직, DB 스키마
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:
+  - frontend-next/src/app/layout.tsx (SceneHive 타이틀)
+  - frontend-next/src/app/globals.css (#0B0B14 배경)
+  - frontend-next/src/app/(public)/home/page.tsx (전면 SceneHive 디자인)
+  - frontend-next/src/app/(public)/login/page.tsx (Dark Cinema 테마, 한글화)
+  - frontend-next/src/app/(public)/register/page.tsx (Dark Cinema 테마, 한글화)
+  - AGENTS.md, PROJECT_GUIDE.md (컨셉 업데이트)
+- Commands Run: docker compose up --build frontend -d
+- Tests Run + Result: Not run (UI 리브랜딩)
+- Open Risks: Docker 재빌드 완료 후 화면 확인 필요 / user-menu 드롭다운은 여전히 밝은 색 (dark: 클래스 기반) — SceneHive 테마와 불일치 가능
+- Blockers: None
+- Next 3 Actions:
+  1) Docker 빌드 완료 후 http://localhost:3000 에서 SceneHive 화면 확인
+  2) 로그인/홈 화면 색상 및 레이아웃 검토
+  3) TMDB API 연동 계획 수립 (영화 클럽에 영화 정보 표시)
+- Resume Command: docker compose ps && curl -s http://localhost:3000 | head -5
+
 ## Handoff Snapshot
 - Timestamp (KST): 2026-02-13 11:32:56 +09:00
 - Agent Name: Codex
@@ -187,7 +249,6 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
 
 
 

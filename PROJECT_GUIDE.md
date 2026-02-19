@@ -1,4 +1,4 @@
-# DevCollab - Project Guide
+# SceneHive - Project Guide
 
 > 이 문서는 AI 에이전트(Claude, Codex, Gemini 등)가 프로젝트를 이해하고 개발을 이어갈 수 있도록 작성되었습니다.
 
@@ -6,7 +6,16 @@
 
 ## 1. 프로젝트 개요
 
-**DevCollab**은 팀 협업 플랫폼입니다. 워크스페이스 기반으로 실시간 채팅, 코드 스니펫 공유, 메모 작성, 통합 검색 등의 기능을 제공합니다.
+**SceneHive**는 영화 팬을 위한 커뮤니티 플랫폼입니다.
+클럽(워크스페이스) 기반으로 실시간 토론, 명대사 아카이브(코드 스니펫), 리뷰·감상문(메모), 통합 검색 등의 기능을 제공합니다.
+
+**핵심 컨셉:**
+- 워크스페이스 = **영화 클럽**: 특정 영화/시리즈/감독 테마의 토론 공간
+- 코드 스니펫 → **명대사 아카이브**: 기억에 남는 대사 저장/공유
+- 메모 → **리뷰 & 감상문**: 마크다운 기반 심층 감상 기록
+- TMDB API 연동 진행 중: 홈 트렌딩/상영작/예정작/평점 상위, 영화 검색, 영화 상세(출연진/트레일러/추천) 데이터 제공
+
+**색상 테마:** Dark Cinema (배경 `#0B0B14`) + Amber/Gold 포인트 (`#F59E0B`)
 
 ---
 
@@ -41,6 +50,7 @@
 | react-markdown | 10 | 마크다운 렌더링 |
 | react-syntax-highlighter | 16 | 코드 하이라이팅 |
 | Lucide React | 0.563 | 아이콘 |
+| TMDB API | v3 | 영화 데이터 (포스터, 정보, 평점, 검색, 상세, 추천) |
 
 ### 인프라
 | 기술 | 용도 |
@@ -344,6 +354,12 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
 - **Phase 4**: 통합 검색, 알림 시스템, Entity Lombok 통일, 프레전스 WebSocket
 - **Phase 5**: Next.js 14 + TypeScript + TanStack Query 프론트엔드 마이그레이션 (`frontend-next/`)
 - **Docker**: frontend-next Standalone 모드로 전환 (Nginx → Next.js server.js)
+- **SceneHive TMDB 확장 (2026-02-19)**:
+  - 홈 페이지를 TMDB 데이터 중심으로 재구성 (`/home`)
+  - 영화 검색 페이지 추가 (`/search`, `/api/movies/search`)
+  - 영화 상세 페이지 추가 (`/movies/[movieId]`, `/api/movies/[movieId]`)
+  - 한국어 데이터 부재 시 영어 fallback 적용 (줄거리/태그라인/트레일러)
+  - 추천 fallback 체인 적용 (`recommendations` → `similar` → `discover` → `popular`)
 
 ---
 
@@ -463,6 +479,9 @@ FRONTEND_URL=http://localhost:3000
 - WebSocket 훅 마이그레이션 (dynamic import SockJS)
 - Docker Standalone 빌드 (`output: 'standalone'`)
 - `frontend/` (Vite+Nginx) → `frontend-next/` (Next.js Standalone) 전환
+- **SceneHive 리브랜딩**: Dark Cinema 테마 적용, 전 페이지 한글화 (home/login/register)
+  - 배경: `#0B0B14`, Amber 포인트 `#F59E0B`
+  - 용어 변경: 워크스페이스 → 영화 클럽, 코드 스니펫 → 명대사, 메모 → 리뷰
 
 **주요 아키텍처 변경:**
 - `react-router-dom` → Next.js App Router (파일 기반 라우팅)
@@ -573,13 +592,14 @@ FileStorageService                 →    file-service (파일 업로드/관리)
 - 채팅 메시지 페이지네이션 최적화 (커서 기반)
 
 **추가 기능 후보:**
-- 파일 첨부 (채팅, 메모에 파일 업로드)
+- **TMDB API 연동**: 영화 클럽에 TMDB 영화 ID 매핑, 포스터/평점/캐스팅 표시
+- 파일 첨부 (채팅, 리뷰에 이미지 업로드)
 - 스레드 답글 (채팅 메시지에 스레드)
 - DM (1:1 다이렉트 메시지)
-- 캘린더 / 일정 관리
-- 웹훅 연동 (GitHub, Jira 등 외부 서비스)
+- 영화 평점 / 별점 시스템
+- 관람 기록 / 위시리스트
 - 모바일 대응 (PWA 또는 React Native)
-- AI 기능 (채팅 요약, 코드 리뷰 봇)
+- AI 기능 (리뷰 요약, 영화 추천 봇)
 
 ---
 
@@ -606,8 +626,9 @@ FileStorageService                 →    file-service (파일 업로드/관리)
 - 기본값이 있는 필드에는 `@Builder.Default` 적용
 - API 응답은 대부분 DTO의 static `from()` 메서드로 Entity → DTO 변환
 - 프론트엔드 UI는 shadcn/ui 스타일 (Tailwind + Radix UI) — TypeScript
-- 글래스모피즘 디자인 (`bg-white/20 backdrop-blur-lg`)
+- **Dark Cinema 테마**: 배경 `#0B0B14`, Amber 포인트 `#F59E0B`, 카드 `rgba(255,255,255,0.05)`
 - 한국어 UI (에러 메시지, 버튼 텍스트 등)
 - 프론트엔드 디렉토리: `frontend-next/` (Next.js 14 + TypeScript)
 - 이전 프론트엔드: `frontend/` (React + Vite + JS) — Docker에서 사용 안 함
 - Docker 프록시: `next.config.mjs` rewrites (환경변수 `BACKEND_URL`로 백엔드 주소 설정)
+- 서비스명: **SceneHive** (이전: DevCollab) — 영화 커뮤니티 플랫폼으로 컨셉 전환
