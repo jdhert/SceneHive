@@ -49,7 +49,6 @@ export default function SettingsPage() {
   const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState('');
-  const [pwSuccess, setPwSuccess] = useState(false);
 
   const inputStyle = { borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' };
 
@@ -105,10 +104,8 @@ export default function SettingsPage() {
         hashPassword(pwForm.newPw),
       ]);
       await userService.changePassword(hashedCurrent, hashedNew);
-      setPwSuccess(true);
       setPwForm({ current: '', newPw: '', confirm: '' });
-      // 비밀번호 변경 후 3초 뒤 전체 로그아웃 (백엔드가 쿠키 삭제, 프론트도 access token 초기화)
-      setTimeout(() => logout(), 3000);
+      logout();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setPwError(axiosErr.response?.data?.message || '비밀번호 변경에 실패했습니다.');
@@ -197,13 +194,7 @@ export default function SettingsPage() {
                 {pwError}
               </div>
             )}
-            {pwSuccess && (
-              <div className="p-3 rounded-md text-sm mb-4"
-                style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#86EFAC' }}>
-                비밀번호가 변경되었습니다. 3초 후 자동으로 로그아웃됩니다.
-              </div>
-            )}
-            <form onSubmit={handlePasswordChange} className="space-y-4">
+<form onSubmit={handlePasswordChange} className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>현재 비밀번호</Label>
                 <Input type="password" value={pwForm.current}
