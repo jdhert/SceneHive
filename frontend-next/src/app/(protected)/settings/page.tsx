@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/providers/theme-provider';
+import { useUser } from '@/providers/user-provider';
 import { settingsService, userService } from '@/services/api';
 import { hashPassword } from '@/lib/crypto';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ function ToggleItem({ label, description, checked, onChange }: {
 export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { logout } = useUser();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -105,6 +107,8 @@ export default function SettingsPage() {
       await userService.changePassword(hashedCurrent, hashedNew);
       setPwSuccess(true);
       setPwForm({ current: '', newPw: '', confirm: '' });
+      // 비밀번호 변경 후 3초 뒤 전체 로그아웃 (백엔드가 쿠키 삭제, 프론트도 access token 초기화)
+      setTimeout(() => logout(), 3000);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setPwError(axiosErr.response?.data?.message || '비밀번호 변경에 실패했습니다.');
@@ -196,7 +200,7 @@ export default function SettingsPage() {
             {pwSuccess && (
               <div className="p-3 rounded-md text-sm mb-4"
                 style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#86EFAC' }}>
-                비밀번호가 성공적으로 변경되었습니다.
+                비밀번호가 변경되었습니다. 3초 후 자동으로 로그아웃됩니다.
               </div>
             )}
             <form onSubmit={handlePasswordChange} className="space-y-4">

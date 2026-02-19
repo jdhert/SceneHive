@@ -204,8 +204,19 @@ public class AuthService {
         }
 
         String email = jwtService.extractUsername(refreshToken);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
+        // 비밀번호 변경 이후 발급된 토큰인지 검증
+        String pwdChangedKey = "user:pwd-changed:" + email;
+        String pwdChangedAt = redisService.getData(pwdChangedKey);
+        if (pwdChangedAt != null) {
+            long tokenIssuedAt = jwtService.extractIssuedAt(refreshToken).getTime();
+            long changedAt = Long.parseLong(pwdChangedAt);
+            if (tokenIssuedAt <= changedAt) {
+                throw new CustomException("비밀번호가 변경되어 다시 로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
+            }
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         String newAccessToken = jwtService.generateAccessToken(userDetails);
 
         return AuthResponse.ofRefresh(newAccessToken, jwtService.getAccessTokenExpiration() / 1000);

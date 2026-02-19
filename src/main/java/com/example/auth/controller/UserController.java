@@ -7,11 +7,14 @@ import com.example.auth.dto.profile.UpdateProfileRequest;
 import com.example.auth.dto.profile.UpdateStatusRequest;
 import com.example.auth.dto.settings.UpdateSettingsRequest;
 import com.example.auth.dto.settings.UserSettingsResponse;
+import com.example.auth.security.RefreshTokenCookieProvider;
 import com.example.auth.service.FileStorageService;
 import com.example.auth.service.UserService;
 import com.example.auth.service.UserSettingsService;
 import com.example.auth.service.WorkspaceService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,16 +34,19 @@ public class UserController {
     private final FileStorageService fileStorageService;
     private final WorkspaceService workspaceService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
     public UserController(UserService userService, UserSettingsService settingsService,
                           FileStorageService fileStorageService,
                           WorkspaceService workspaceService,
-                          SimpMessagingTemplate messagingTemplate) {
+                          SimpMessagingTemplate messagingTemplate,
+                          RefreshTokenCookieProvider refreshTokenCookieProvider) {
         this.userService = userService;
         this.settingsService = settingsService;
         this.fileStorageService = fileStorageService;
         this.workspaceService = workspaceService;
         this.messagingTemplate = messagingTemplate;
+        this.refreshTokenCookieProvider = refreshTokenCookieProvider;
     }
 
     @GetMapping("/me")
@@ -112,9 +118,14 @@ public class UserController {
     @PutMapping("/me/password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request,
+            HttpServletRequest httpRequest) {
         userService.changePassword(userDetails.getUsername(), request);
-        return ResponseEntity.noContent().build();
+        // 비밀번호 변경 후 현재 세션의 refresh token 쿠키도 즉시 삭제
+        var clearCookie = refreshTokenCookieProvider.clear(httpRequest.isSecure());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
+                .build();
     }
 
     // Settings endpoints

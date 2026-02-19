@@ -21,10 +21,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RedisService redisService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    // Redis key prefix for password change timestamp (TTL = 7 days = refresh token lifetime)
+    private static final String PWD_CHANGED_PREFIX = "user:pwd-changed:";
+    private static final long REFRESH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7L;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RedisService redisService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.redisService = redisService;
     }
 
     @Transactional(readOnly = true)
@@ -108,6 +114,14 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+
+        // 모든 세션 무효화: 비밀번호 변경 시각을 Redis에 저장
+        // refresh 요청 시 token.iat <= 이 값이면 401 반환
+        redisService.setDataExpire(
+                PWD_CHANGED_PREFIX + email,
+                String.valueOf(System.currentTimeMillis()),
+                REFRESH_TOKEN_TTL_SECONDS
+        );
     }
 
     @Transactional
