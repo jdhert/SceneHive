@@ -1,6 +1,7 @@
 package com.example.auth.security;
 
 import com.example.auth.service.JwtService;
+import com.example.auth.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,10 +27,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final RedisService redisService;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService, RedisService redisService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.redisService = redisService;
     }
 
     @Override
@@ -53,6 +56,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 final String userEmail = jwtService.extractUsername(jwt);
 
                 if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    String pwdChangedAt = redisService.getData("user:pwd-changed:" + userEmail);
+                    if (pwdChangedAt != null) {
+                        long tokenIat = jwtService.extractIssuedAt(jwt).getTime();
+                        if (tokenIat <= Long.parseLong(pwdChangedAt)) {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            return;
+                        }
+                    }
+
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
                     if (jwtService.isTokenValid(jwt, userDetails)) {
