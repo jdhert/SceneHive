@@ -407,6 +407,27 @@ export async function fetchTopRatedMovies() {
   return fillMissingMovieOverviews('/movie/top_rated', params, response);
 }
 
+export async function fetchMoviesByGenres(genreIds: number[], page = 1) {
+  const normalizedIds = Array.from(new Set(genreIds.filter((id) => id > 0)));
+  if (!normalizedIds.length) {
+    return {
+      page: 1,
+      results: [],
+      total_pages: 0,
+      total_results: 0,
+    } satisfies TmdbMovieListResponse;
+  }
+
+  const params = {
+    with_genres: normalizedIds.join(','),
+    sort_by: 'popularity.desc',
+    include_adult: 'false',
+    page,
+  };
+  const response = await tmdbFetch<TmdbMovieListResponse>('/discover/movie', params);
+  return fillMissingMovieOverviews('/discover/movie', params, response);
+}
+
 export async function fetchGenres() {
   return tmdbFetch<TmdbGenreListResponse>('/genre/movie/list');
 }
