@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Search, Star } from 'lucide-react';
@@ -14,6 +14,13 @@ const PANEL = '#0d1020';
 const AMBER = '#F59E0B';
 const AMBER_DARK = '#B45309';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
+const DRAG_MULTIPLIER = 1.35;
+const MOMENTUM_MULTIPLIER = 18;
+const MOMENTUM_DECAY = 0.9;
+const MOMENTUM_STOP_THRESHOLD = 0.4;
+const DRAG_START_THRESHOLD = 6;
+const EDGE_AUTO_SCROLL_ZONE = 88;
+const EDGE_AUTO_SCROLL_MAX_STEP = 14;
 
 type Movie = {
   id: number;
@@ -303,8 +310,9 @@ export default function HomePage() {
           </h3>
           <div className="flex flex-wrap gap-2">
             {genres.slice(0, 12).map((genre) => (
-              <span
+              <Link
                 key={genre.id}
+                href={`/genres/${genre.id}?name=${encodeURIComponent(genre.name)}`}
                 className="px-3 py-1.5 rounded-full text-sm"
                 style={{
                   background: 'rgba(245,158,11,0.12)',
@@ -313,7 +321,7 @@ export default function HomePage() {
                 }}
               >
                 {genre.name}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -363,6 +371,16 @@ function MovieCarouselSection({
   numbered?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const isPointerDownRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startXRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const pointerClientXRef = useRef(0);
+  const velocityRef = useRef(0);
+  const momentumFrameRef = useRef<number | null>(null);
+  const edgeAutoFrameRef = useRef<number | null>(null);
 
   if (!movies.length) return null;
 
@@ -372,6 +390,133 @@ function MovieCarouselSection({
       left: direction === 'left' ? -640 : 640,
       behavior: 'smooth',
     });
+  };
+
+  const stopMomentum = () => {
+    if (momentumFrameRef.current !== null) {
+      cancelAnimationFrame(momentumFrameRef.current);
+      momentumFrameRef.current = null;
+    }
+  };
+
+  const stopEdgeAutoScroll = () => {
+    if (edgeAutoFrameRef.current !== null) {
+      cancelAnimationFrame(edgeAutoFrameRef.current);
+      edgeAutoFrameRef.current = null;
+    }
+  };
+
+  const startEdgeAutoScroll = () => {
+    if (edgeAutoFrameRef.current !== null) return;
+
+    const step = () => {
+      if (!scrollRef.current || !isPointerDownRef.current || !hasDraggedRef.current) {
+        edgeAutoFrameRef.current = null;
+        return;
+      }
+
+      const rect = scrollRef.current.getBoundingClientRect();
+      const leftGap = pointerClientXRef.current - rect.left;
+      const rightGap = rect.right - pointerClientXRef.current;
+      let autoStep = 0;
+
+      if (leftGap < EDGE_AUTO_SCROLL_ZONE) {
+        const ratio = Math.max(0, (EDGE_AUTO_SCROLL_ZONE - leftGap) / EDGE_AUTO_SCROLL_ZONE);
+        autoStep = -EDGE_AUTO_SCROLL_MAX_STEP * ratio;
+      } else if (rightGap < EDGE_AUTO_SCROLL_ZONE) {
+        const ratio = Math.max(0, (EDGE_AUTO_SCROLL_ZONE - rightGap) / EDGE_AUTO_SCROLL_ZONE);
+        autoStep = EDGE_AUTO_SCROLL_MAX_STEP * ratio;
+      }
+
+      if (autoStep !== 0) {
+        scrollRef.current.scrollLeft += autoStep;
+      }
+
+      edgeAutoFrameRef.current = requestAnimationFrame(step);
+    };
+
+    edgeAutoFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const runMomentum = () => {
+    if (!scrollRef.current) return;
+    let velocity = velocityRef.current * MOMENTUM_MULTIPLIER;
+
+    const step = () => {
+      if (!scrollRef.current) return;
+      scrollRef.current.scrollLeft += velocity;
+      velocity *= MOMENTUM_DECAY;
+
+      if (Math.abs(velocity) > MOMENTUM_STOP_THRESHOLD) {
+        momentumFrameRef.current = requestAnimationFrame(step);
+      } else {
+        momentumFrameRef.current = null;
+      }
+    };
+
+    stopMomentum();
+    momentumFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0 || !scrollRef.current) return;
+    stopMomentum();
+    stopEdgeAutoScroll();
+    isPointerDownRef.current = true;
+    hasDraggedRef.current = false;
+    activePointerIdRef.current = event.pointerId;
+    startXRef.current = event.clientX;
+    lastXRef.current = event.clientX;
+    pointerClientXRef.current = event.clientX;
+    lastTimeRef.current = performance.now();
+    velocityRef.current = 0;
+    scrollRef.current.style.cursor = 'grabbing';
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current || !scrollRef.current || activePointerIdRef.current !== event.pointerId) return;
+    pointerClientXRef.current = event.clientX;
+    const deltaFromStart = event.clientX - startXRef.current;
+    if (Math.abs(deltaFromStart) > DRAG_START_THRESHOLD && !hasDraggedRef.current) {
+      hasDraggedRef.current = true;
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+      startEdgeAutoScroll();
+    }
+    if (!hasDraggedRef.current) {
+      return;
+    }
+    event.preventDefault();
+    const deltaX = event.clientX - lastXRef.current;
+    scrollRef.current.scrollLeft -= deltaX * DRAG_MULTIPLIER;
+
+    const now = performance.now();
+    const dt = now - lastTimeRef.current;
+    if (dt > 0) {
+      const dx = event.clientX - lastXRef.current;
+      const instantVelocity = -(dx / dt);
+      velocityRef.current = velocityRef.current * 0.75 + instantVelocity * 0.25;
+    }
+    lastXRef.current = event.clientX;
+    lastTimeRef.current = now;
+  };
+
+  const handlePointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (activePointerIdRef.current !== event.pointerId) return;
+    isPointerDownRef.current = false;
+    activePointerIdRef.current = null;
+    stopEdgeAutoScroll();
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (scrollRef.current) {
+      scrollRef.current.style.cursor = 'grab';
+    }
+    if (hasDraggedRef.current && Math.abs(velocityRef.current) > 0.01) {
+      runMomentum();
+    }
+    hasDraggedRef.current = false;
   };
 
   return (
@@ -406,7 +551,15 @@ function MovieCarouselSection({
           </button>
         </div>
       </div>
-      <div ref={scrollRef} className="flex gap-4 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask">
+      <div
+        ref={scrollRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        onDragStart={(event) => event.preventDefault()}
+        className="flex gap-4 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-pan-y"
+      >
         {movies.map((movie, index) => (
           <MoviePosterCard
             key={movie.id}
@@ -430,7 +583,12 @@ function MoviePosterCard({
   numbered: boolean;
 }) {
   return (
-    <Link href={`/movies/${movie.id}`} className="relative w-40 md:w-48 shrink-0 group block">
+    <Link
+      href={`/movies/${movie.id}`}
+      draggable={false}
+      onDragStart={(event) => event.preventDefault()}
+      className="relative w-40 md:w-48 shrink-0 group block"
+    >
       {numbered && (
         <span
           className="absolute -left-3 -bottom-1 text-7xl font-black leading-none z-10 select-none"
@@ -447,6 +605,7 @@ function MoviePosterCard({
           <img
             src={movieImage(movie.poster_path)}
             alt={movie.title}
+            draggable={false}
             className="w-full h-56 md:h-72 object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
