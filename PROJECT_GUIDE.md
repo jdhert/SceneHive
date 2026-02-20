@@ -299,6 +299,7 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
 | `/reset-password` | 비밀번호 재설정 | Public | - |
 | `/unlock-account` | 계정 잠금해제 | Public | - |
 | `/oauth2/redirect` | OAuth2 콜백 | Public | - |
+| `/genres/:genreId` | 장르별 영화 목록 (복수 장르 필터) | 불필요 | - |
 | `/dashboard` | 대시보드 | **필요** | - |
 | `/workspaces` | 워크스페이스 목록 | **필요** | - |
 | `/workspaces/:id` | 워크스페이스 상세 | **필요** | **STOMP** |
@@ -370,6 +371,13 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
 - TV 상세 페이지 추가: `/tv/[tvId]`, `/api/tv/[tvId]`
 - 영화 상세 정보 보강: 추천/유사작 fallback 체인, 출연진/스태프 노출, 상세 UI 개선
 - 홈/상세 fallback 고도화: 한국어 데이터 부재 시 영어 데이터 대체 전략 적용
+
+### 최근 반영 완료 사항 (2026-02-20)
+- 홈 캐러셀 드래그 UX 개선: 마우스 드래그/관성/엣지 자동 스크롤 지원 및 클릭 이동 동작 보정
+- 장르 목록 페이지 추가: `/genres/[genreId]`, `/api/movies/genre/[genreId]`
+- 장르 필터 고도화: 복수 장르 선택 지원, 기준 장르 고정 제거
+- 장르 결과 페이지네이션: 클라이언트 기준 24개 단위 반환/더보기
+- 복수 장르 필터 정책: OR(`|`)에서 AND(`,`)로 전환하여 선택 장르 동시 포함 작품만 노출
 
 ---
 

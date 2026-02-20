@@ -155,9 +155,35 @@
 
 - 2026-02-13: AGENTS 문서 한국어 전환, 최초 Snapshot 기입, 토큰/컨텍스트 종료 대응 규칙 추가
 - 2026-02-19: **SceneHive 리브랜딩** — DevCollab → SceneHive, Dark Cinema 테마 적용, 프로젝트 컨셉 영화 커뮤니티로 전환
+- 2026-02-20: 홈 캐러셀 드래그 UX 개선, 장르별 목록 페이지/복수 장르 필터(AND) 및 24개 단위 페이징 반영
 
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
+## Handoff Snapshot
+- Timestamp (KST): 2026-02-20 17:45:30 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 캐러셀 드래그 UX 및 장르 탐색(복수 선택/AND/24개 페이지) 기능 반영
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/(public)/genres/[genreId]/page.tsx, frontend-next/src/app/api/movies/genre/[genreId]/route.ts, frontend-next/src/lib/tmdb.ts, AGENTS.md, PROJECT_GUIDE.md / Out: Spring 백엔드 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:
+  - frontend-next/src/app/(public)/home/page.tsx
+  - frontend-next/src/app/(public)/genres/[genreId]/page.tsx
+  - frontend-next/src/app/api/movies/genre/[genreId]/route.ts
+  - frontend-next/src/lib/tmdb.ts
+  - AGENTS.md
+  - PROJECT_GUIDE.md
+- Commands Run: Get-Content -Path AGENTS.md, PROJECT_GUIDE.md -Encoding UTF8; git status --short; rg -n "fetchMoviesByGenre\(|fetchMoviesByGenres\(" frontend-next/src; docker-compose up -d --no-deps --build frontend; docker-compose logs --tail=120 frontend
+- Tests Run + Result: Not run (수동 기능 확인 + Docker 빌드/배포 확인만 수행)
+- Open Risks: drag/pointer 튜닝 값은 사용자 체감에 따라 추가 조정 가능
+- Blockers: None
+- Next 3 Actions:
+  1) 통합 검색 결과 정렬 가중치(정확도/인기도) 정책 확정
+  2) 장르 필터를 검색 페이지와 연결할지 UX 결정
+  3) TMDB 이미지 `<img>` 경고를 `next/image`로 정리할지 결정
+- Resume Command: git status --short && git branch --show-current
+
 ## Handoff Snapshot
 - Timestamp (KST): 2026-02-19 17:50:27 +09:00
 - Agent Name: Codex
@@ -268,6 +294,5 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
 
 
