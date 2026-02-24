@@ -30,6 +30,8 @@ type Movie = {
   backdrop_path: string | null;
   vote_average: number;
   release_date: string;
+  href?: string;
+  display_meta?: string;
 };
 
 type Genre = {
@@ -37,8 +39,33 @@ type Genre = {
   name: string;
 };
 
+type Tv = {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  vote_average: number;
+  first_air_date: string;
+};
+
+type Person = {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+  popularity: number;
+};
+
 type MovieListPayload = {
   results: Movie[];
+};
+
+type TvListPayload = {
+  results: Tv[];
+};
+
+type PersonListPayload = {
+  results: Person[];
 };
 
 type GenrePayload = {
@@ -66,6 +93,8 @@ export default function HomePage() {
   const router = useRouter();
   const { user, isLoading } = useUser();
   const [trending, setTrending] = useState<Movie[]>([]);
+  const [trendingTv, setTrendingTv] = useState<Tv[]>([]);
+  const [trendingPeople, setTrendingPeople] = useState<Person[]>([]);
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [upcoming, setUpcoming] = useState<Movie[]>([]);
   const [topRated, setTopRated] = useState<Movie[]>([]);
@@ -75,6 +104,35 @@ export default function HomePage() {
 
   const heroMovie = useMemo(() => trending[0] ?? null, [trending]);
   const trendingWithoutHero = useMemo(() => (trending.length > 1 ? trending.slice(1) : trending), [trending]);
+  const trendingTvAsMovies = useMemo(
+    () =>
+      trendingTv.map((show) => ({
+        id: show.id,
+        title: show.name,
+        overview: show.overview,
+        poster_path: show.poster_path,
+        backdrop_path: null,
+        vote_average: show.vote_average,
+        release_date: show.first_air_date,
+        href: `/tv/${show.id}`,
+      })),
+    [trendingTv]
+  );
+  const trendingPeopleAsMovies = useMemo(
+    () =>
+      trendingPeople.map((person) => ({
+        id: person.id,
+        title: person.name,
+        overview: `인기도 ${person.popularity.toFixed(1)}`,
+        poster_path: person.profile_path,
+        backdrop_path: null,
+        vote_average: 0,
+        release_date: '',
+        href: `/people/${person.id}`,
+        display_meta: `인물 · ${person.known_for_department || '분야 미정'}`,
+      })),
+    [trendingPeople]
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -84,31 +142,37 @@ export default function HomePage() {
         setIsMovieLoading(true);
         setMovieError(null);
 
-        const [trendingRes, nowPlayingRes, upcomingRes, topRatedRes, genresRes] = await Promise.all([
+        const [trendingRes, trendingTvRes, trendingPeopleRes, nowPlayingRes, upcomingRes, topRatedRes, genresRes] = await Promise.all([
           fetch('/api/movies/trending'),
+          fetch('/api/tv/trending'),
+          fetch('/api/people/trending'),
           fetch('/api/movies/now-playing'),
           fetch('/api/movies/upcoming'),
           fetch('/api/movies/top-rated'),
           fetch('/api/movies/genres'),
         ]);
 
-        const responses = [trendingRes, nowPlayingRes, upcomingRes, topRatedRes, genresRes];
+        const responses = [trendingRes, trendingTvRes, trendingPeopleRes, nowPlayingRes, upcomingRes, topRatedRes, genresRes];
         const hasFailure = responses.some((res) => !res.ok);
         if (hasFailure) {
           throw new Error('영화 데이터를 불러오지 못했습니다.');
         }
 
-        const [trendingData, nowPlayingData, upcomingData, topRatedData, genresData] = (await Promise.all([
+        const [trendingData, trendingTvData, trendingPeopleData, nowPlayingData, upcomingData, topRatedData, genresData] = (await Promise.all([
           trendingRes.json(),
+          trendingTvRes.json(),
+          trendingPeopleRes.json(),
           nowPlayingRes.json(),
           upcomingRes.json(),
           topRatedRes.json(),
           genresRes.json(),
-        ])) as [MovieListPayload, MovieListPayload, MovieListPayload, MovieListPayload, GenrePayload];
+        ])) as [MovieListPayload, TvListPayload, PersonListPayload, MovieListPayload, MovieListPayload, MovieListPayload, GenrePayload];
 
         if (!isMounted) return;
 
         setTrending(trendingData.results ?? []);
+        setTrendingTv(trendingTvData.results ?? []);
+        setTrendingPeople(trendingPeopleData.results ?? []);
         setNowPlaying(nowPlayingData.results ?? []);
         setUpcoming(upcomingData.results ?? []);
         setTopRated(topRatedData.results ?? []);
@@ -302,6 +366,18 @@ export default function HomePage() {
           title="Top Rated"
           subtitle="평점 상위작"
           movies={topRated}
+        />
+        <MovieCarouselSection
+          id="trending-tv"
+          title="Trending TV"
+          subtitle="지금 인기 있는 TV 시리즈"
+          movies={trendingTvAsMovies}
+        />
+        <MovieCarouselSection
+          id="trending-people"
+          title="Trending People"
+          subtitle="지금 주목받는 인물"
+          movies={trendingPeopleAsMovies}
         />
 
         <div className="mt-10">
@@ -584,7 +660,7 @@ function MoviePosterCard({
 }) {
   return (
     <Link
-      href={`/movies/${movie.id}`}
+      href={movie.href ?? `/movies/${movie.id}`}
       draggable={false}
       onDragStart={(event) => event.preventDefault()}
       className="relative w-40 md:w-48 shrink-0 group block"
@@ -617,7 +693,7 @@ function MoviePosterCard({
       <div className="mt-2">
         <h4 className="text-sm font-semibold leading-tight text-white">{movie.title}</h4>
         <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.62)' }}>
-          {yearFromDate(movie.release_date)} · 평점 {movie.vote_average.toFixed(1)}
+          {movie.display_meta ?? `${yearFromDate(movie.release_date)} · 평점 ${movie.vote_average.toFixed(1)}`}
         </p>
         <p className="text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.5)' }}>
           {shortText(movie.overview, 78)}

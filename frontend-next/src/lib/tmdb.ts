@@ -213,6 +213,13 @@ type TmdbMovieListResponse = {
   total_results: number;
 };
 
+type TmdbTvListResponse = {
+  page: number;
+  results: TmdbTv[];
+  total_pages: number;
+  total_results: number;
+};
+
 type TmdbPersonListResponse = {
   page: number;
   results: TmdbPerson[];
@@ -379,6 +386,14 @@ async function tmdbFetch<T>(
 export async function fetchTrendingMovies() {
   const response = await tmdbFetch<TmdbMovieListResponse>('/trending/movie/day');
   return fillMissingMovieOverviews('/trending/movie/day', {}, response);
+}
+
+export async function fetchTrendingTv() {
+  return tmdbFetch<TmdbTvListResponse>('/trending/tv/day');
+}
+
+export async function fetchTrendingPeople() {
+  return tmdbFetch<TmdbPersonListResponse>('/trending/person/day');
 }
 
 export async function fetchNowPlayingMovies() {
