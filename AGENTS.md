@@ -156,9 +156,50 @@
 - 2026-02-13: AGENTS 문서 한국어 전환, 최초 Snapshot 기입, 토큰/컨텍스트 종료 대응 규칙 추가
 - 2026-02-19: **SceneHive 리브랜딩** — DevCollab → SceneHive, Dark Cinema 테마 적용, 프로젝트 컨셉 영화 커뮤니티로 전환
 - 2026-02-20: 홈 캐러셀 드래그 UX 개선, 장르별 목록 페이지/복수 장르 필터(AND) 및 24개 단위 페이징 반영
+- 2026-02-24: 로그인 사용자 전용 Favorites MVP 추가 (영화/TV/인물 즐겨찾기 토글 + 대시보드 목록)
 
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
+## Handoff Snapshot
+- Timestamp (KST): 2026-02-24 17:47:57 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 로그인 사용자 Favorites MVP(영화/TV/인물) 및 대시보드 연동 반영
+- Scope (In/Out): In: src/main/java/com/example/auth/{entity,repository,service,controller,dto/favorite}/**, frontend-next/src/{components/favorite,queries/favorites.ts,services/api.ts,types/index.ts,app/(public)/**/[id]/page.tsx,app/(protected)/dashboard/page.tsx}, AGENTS.md, PROJECT_GUIDE.md / Out: 기존 워크스페이스/채팅 비즈니스 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:
+  - src/main/java/com/example/auth/entity/Favorite.java
+  - src/main/java/com/example/auth/entity/FavoriteType.java
+  - src/main/java/com/example/auth/repository/FavoriteRepository.java
+  - src/main/java/com/example/auth/service/FavoriteService.java
+  - src/main/java/com/example/auth/controller/FavoriteController.java
+  - src/main/java/com/example/auth/dto/favorite/FavoriteRequest.java
+  - src/main/java/com/example/auth/dto/favorite/FavoriteResponse.java
+  - frontend-next/src/components/favorite/favorite-toggle-button.tsx
+  - frontend-next/src/queries/favorites.ts
+  - frontend-next/src/services/api.ts
+  - frontend-next/src/types/index.ts
+  - frontend-next/src/app/(public)/movies/[movieId]/page.tsx
+  - frontend-next/src/app/(public)/tv/[tvId]/page.tsx
+  - frontend-next/src/app/(public)/people/[personId]/page.tsx
+  - frontend-next/src/app/(protected)/dashboard/page.tsx
+  - frontend-next/src/app/(public)/home/page.tsx
+  - frontend-next/src/lib/tmdb.ts
+  - frontend-next/src/app/api/people/trending/route.ts
+  - frontend-next/src/app/api/tv/trending/route.ts
+  - AGENTS.md
+  - PROJECT_GUIDE.md
+- Commands Run: Get-Content -Path AGENTS.md, PROJECT_GUIDE.md -Encoding UTF8; git status --short; rg -n "favorite|Favorite|wishlist|bookmark|like" src/main/java frontend-next/src; docker-compose up -d --build backend frontend; docker-compose ps; git add/commit/push
+- Tests Run + Result: Not run (도커 재빌드/재배포 및 수동 배포 확인만 수행)
+- Open Risks: Favorites 토글 동시 요청(연타) 시 최종 상태만 보장; 상세한 중복 방지 UX는 후속 개선 필요
+- Blockers: None
+- Next 3 Actions:
+  1) 즐겨찾기 목록 전용 페이지(`/favorites`) 추가 및 타입 필터 UX 보강
+  2) 즐겨찾기 API에 페이지네이션/정렬 옵션 추가
+  3) Favorites 서비스 단위 테스트 및 API 통합 테스트 추가
+- Resume Command: git status --short && git branch --show-current
+
 ## Handoff Snapshot
 - Timestamp (KST): 2026-02-20 17:45:30 +09:00
 - Agent Name: Codex
@@ -294,5 +335,4 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
 

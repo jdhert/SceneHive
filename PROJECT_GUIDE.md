@@ -379,6 +379,18 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
 - 장르 결과 페이지네이션: 클라이언트 기준 24개 단위 반환/더보기
 - 복수 장르 필터 정책: OR(`|`)에서 AND(`,`)로 전환하여 선택 장르 동시 포함 작품만 노출
 
+### 최근 반영 완료 사항 (2026-02-24)
+- 로그인 사용자 전용 Favorites MVP 추가:
+  - 백엔드 API: `POST/GET/DELETE /api/favorites`, `GET /api/favorites/exists`
+  - 대상 타입: `MOVIE`, `TV`, `PERSON`
+  - DB: `favorites` 테이블(유저-타입-타겟 유니크 제약) 기반 저장
+- 상세 페이지 즐겨찾기 토글 연결:
+  - `/movies/[movieId]`, `/tv/[tvId]`, `/people/[personId]`
+- 대시보드 확장:
+  - `/dashboard`에 `내 즐겨찾기` 섹션 추가 (최신순 카드 노출)
+- 홈 확장 마무리:
+  - `Trending TV`, `Trending People` 섹션 및 대응 API 라우트 반영
+
 ---
 
 ## 8. 빌드 & 실행
