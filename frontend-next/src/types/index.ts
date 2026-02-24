@@ -12,6 +12,7 @@ export type NotificationType =
   | 'WORKSPACE_LEAVE'
   | 'SNIPPET_CREATED'
   | 'MEMO_CREATED';
+export type FavoriteTargetType = 'MOVIE' | 'TV' | 'PERSON';
 
 // === Entities ===
 export interface User {
@@ -93,6 +94,15 @@ export interface Notification {
   relatedUrl?: string;
   createdAt: string;
   readAt?: string;
+}
+
+export interface FavoriteItem {
+  id: number;
+  targetType: FavoriteTargetType;
+  targetId: number;
+  displayName: string;
+  imagePath?: string | null;
+  createdAt: string;
 }
 
 export interface UserSettings {
@@ -182,6 +192,13 @@ export interface UpdateSettingsRequest {
   emailNotifications?: boolean;
   pushNotifications?: boolean;
   mentionNotifications?: boolean;
+}
+
+export interface CreateFavoriteRequest {
+  targetType: FavoriteTargetType;
+  targetId: number;
+  displayName: string;
+  imagePath?: string | null;
 }
 
 export interface SearchResponse {

@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Clock3, ExternalLink, PlayCircle, Star } fro
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
+import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
 
 const BG = '#070912';
 const PANEL = '#0d1020';
@@ -376,6 +377,12 @@ export default function MovieDetailPage() {
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3">
+                    <FavoriteToggleButton
+                      targetType="MOVIE"
+                      targetId={movie.id}
+                      displayName={movie.title}
+                      imagePath={movie.poster_path}
+                    />
                     <Button asChild variant="outline"
                       style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}>
                       <Link href="/home">홈으로</Link>

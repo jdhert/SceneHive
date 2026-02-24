@@ -3,10 +3,13 @@ import type {
   AuthResponse,
   ChatMessage,
   CodeSnippet,
+  CreateFavoriteRequest,
   CreateMemoRequest,
   CreateSnippetRequest,
   CreateWorkspaceRequest,
   DashboardResponse,
+  FavoriteItem,
+  FavoriteTargetType,
   LoginRequest,
   Memo,
   Notification,
@@ -125,4 +128,14 @@ export const notificationService = {
   markAsRead: (id: number) => api.put(`/notifications/${id}/read`),
   markAllAsRead: () => api.put('/notifications/read-all'),
   delete: (id: number) => api.delete(`/notifications/${id}`),
+};
+
+export const favoriteService = {
+  getAll: (type?: FavoriteTargetType) =>
+    api.get<FavoriteItem[]>('/favorites', { params: type ? { type } : undefined }),
+  exists: (type: FavoriteTargetType, targetId: number) =>
+    api.get<{ exists: boolean }>('/favorites/exists', { params: { type, targetId } }),
+  add: (data: CreateFavoriteRequest) => api.post<FavoriteItem>('/favorites', data),
+  remove: (type: FavoriteTargetType, targetId: number) =>
+    api.delete('/favorites', { params: { type, targetId } }),
 };

@@ -7,6 +7,7 @@ import { Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
+import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
 
 const BG = '#070912';
 const PANEL = '#0d1020';
@@ -282,6 +283,12 @@ export default function TvDetailPage() {
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3">
+                    <FavoriteToggleButton
+                      targetType="TV"
+                      targetId={tv.id}
+                      displayName={tv.name}
+                      imagePath={tv.poster_path}
+                    />
                     <Button asChild variant="outline"
                       style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}>
                       <Link href="/search">통합 검색으로</Link>
