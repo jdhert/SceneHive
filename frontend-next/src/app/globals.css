@@ -28,3 +28,8 @@ body {
   -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
   mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
 }
+
+.scroll-mask-start-soft {
+  -webkit-mask-image: linear-gradient(to right, black 0%, black 98%, transparent);
+  mask-image: linear-gradient(to right, black 0%, black 98%, transparent);
+}

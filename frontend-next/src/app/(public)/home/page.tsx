@@ -447,6 +447,7 @@ function MovieCarouselSection({
   numbered?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [isAtStart, setIsAtStart] = useState(true);
   const isPointerDownRef = useRef(false);
   const hasDraggedRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
@@ -466,6 +467,11 @@ function MovieCarouselSection({
       left: direction === 'left' ? -640 : 640,
       behavior: 'smooth',
     });
+  };
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    setIsAtStart(scrollRef.current.scrollLeft <= 2);
   };
 
   const stopMomentum = () => {
@@ -633,8 +639,11 @@ function MovieCarouselSection({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
+        onScroll={handleScroll}
         onDragStart={(event) => event.preventDefault()}
-        className="flex gap-4 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-pan-y"
+        className={`flex gap-4 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar cursor-grab select-none touch-pan-y ${
+          isAtStart ? 'scroll-mask-start-soft' : 'scroll-mask'
+        }`}
       >
         {movies.map((movie, index) => (
           <MoviePosterCard
