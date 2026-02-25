@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
@@ -14,6 +14,13 @@ const PANEL = '#0d1020';
 const AMBER = '#F59E0B';
 const AMBER_DARK = '#B45309';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
+const DRAG_MULTIPLIER = 1.35;
+const MOMENTUM_MULTIPLIER = 18;
+const MOMENTUM_DECAY = 0.9;
+const MOMENTUM_STOP_THRESHOLD = 0.4;
+const DRAG_START_THRESHOLD = 6;
+const EDGE_AUTO_SCROLL_ZONE = 88;
+const EDGE_AUTO_SCROLL_MAX_STEP = 14;
 
 type Genre = {
   id: number;
@@ -98,6 +105,17 @@ export default function TvDetailPage() {
   const [tv, setTv] = useState<TvDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const recommendationsRef = useRef<HTMLDivElement | null>(null);
+  const isPointerDownRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startXRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const pointerClientXRef = useRef(0);
+  const velocityRef = useRef(0);
+  const momentumFrameRef = useRef<number | null>(null);
+  const edgeAutoFrameRef = useRef<number | null>(null);
 
   const tvId = useMemo(() => Number(params.tvId), [params.tvId]);
   const topCast = useMemo(() => tv?.credits?.cast?.slice(0, 8) ?? [], [tv]);
@@ -115,6 +133,142 @@ export default function TvDetailPage() {
         : null,
     [trailer]
   );
+  const recommendations = useMemo(() => (tv?.recommendations?.results ?? []).slice(0, 12), [tv]);
+
+  const scrollRecommendations = (direction: 'left' | 'right') => {
+    if (!recommendationsRef.current) return;
+    recommendationsRef.current.scrollBy({
+      left: direction === 'left' ? -640 : 640,
+      behavior: 'smooth',
+    });
+  };
+
+  const stopMomentum = () => {
+    if (momentumFrameRef.current !== null) {
+      cancelAnimationFrame(momentumFrameRef.current);
+      momentumFrameRef.current = null;
+    }
+  };
+
+  const stopEdgeAutoScroll = () => {
+    if (edgeAutoFrameRef.current !== null) {
+      cancelAnimationFrame(edgeAutoFrameRef.current);
+      edgeAutoFrameRef.current = null;
+    }
+  };
+
+  const startEdgeAutoScroll = () => {
+    if (edgeAutoFrameRef.current !== null) return;
+
+    const step = () => {
+      if (!recommendationsRef.current || !isPointerDownRef.current || !hasDraggedRef.current) {
+        edgeAutoFrameRef.current = null;
+        return;
+      }
+
+      const rect = recommendationsRef.current.getBoundingClientRect();
+      const leftGap = pointerClientXRef.current - rect.left;
+      const rightGap = rect.right - pointerClientXRef.current;
+      let autoStep = 0;
+
+      if (leftGap < EDGE_AUTO_SCROLL_ZONE) {
+        const ratio = Math.max(0, (EDGE_AUTO_SCROLL_ZONE - leftGap) / EDGE_AUTO_SCROLL_ZONE);
+        autoStep = -EDGE_AUTO_SCROLL_MAX_STEP * ratio;
+      } else if (rightGap < EDGE_AUTO_SCROLL_ZONE) {
+        const ratio = Math.max(0, (EDGE_AUTO_SCROLL_ZONE - rightGap) / EDGE_AUTO_SCROLL_ZONE);
+        autoStep = EDGE_AUTO_SCROLL_MAX_STEP * ratio;
+      }
+
+      if (autoStep !== 0) {
+        recommendationsRef.current.scrollLeft += autoStep;
+      }
+
+      edgeAutoFrameRef.current = requestAnimationFrame(step);
+    };
+
+    edgeAutoFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const runMomentum = () => {
+    if (!recommendationsRef.current) return;
+    let velocity = velocityRef.current * MOMENTUM_MULTIPLIER;
+
+    const step = () => {
+      if (!recommendationsRef.current) return;
+      recommendationsRef.current.scrollLeft += velocity;
+      velocity *= MOMENTUM_DECAY;
+
+      if (Math.abs(velocity) > MOMENTUM_STOP_THRESHOLD) {
+        momentumFrameRef.current = requestAnimationFrame(step);
+      } else {
+        momentumFrameRef.current = null;
+      }
+    };
+
+    stopMomentum();
+    momentumFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const handleRecommendationsPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0 || !recommendationsRef.current) return;
+    stopMomentum();
+    stopEdgeAutoScroll();
+    isPointerDownRef.current = true;
+    hasDraggedRef.current = false;
+    activePointerIdRef.current = event.pointerId;
+    startXRef.current = event.clientX;
+    lastXRef.current = event.clientX;
+    pointerClientXRef.current = event.clientX;
+    lastTimeRef.current = performance.now();
+    velocityRef.current = 0;
+    recommendationsRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleRecommendationsPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current || !recommendationsRef.current || activePointerIdRef.current !== event.pointerId) return;
+    pointerClientXRef.current = event.clientX;
+    const deltaFromStart = event.clientX - startXRef.current;
+    if (Math.abs(deltaFromStart) > DRAG_START_THRESHOLD && !hasDraggedRef.current) {
+      hasDraggedRef.current = true;
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+      startEdgeAutoScroll();
+    }
+    if (!hasDraggedRef.current) {
+      return;
+    }
+    event.preventDefault();
+    const deltaX = event.clientX - lastXRef.current;
+    recommendationsRef.current.scrollLeft -= deltaX * DRAG_MULTIPLIER;
+
+    const now = performance.now();
+    const dt = now - lastTimeRef.current;
+    if (dt > 0) {
+      const dx = event.clientX - lastXRef.current;
+      const instantVelocity = -(dx / dt);
+      velocityRef.current = velocityRef.current * 0.75 + instantVelocity * 0.25;
+    }
+    lastXRef.current = event.clientX;
+    lastTimeRef.current = now;
+  };
+
+  const handleRecommendationsPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (activePointerIdRef.current !== event.pointerId) return;
+    isPointerDownRef.current = false;
+    activePointerIdRef.current = null;
+    stopEdgeAutoScroll();
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (recommendationsRef.current) {
+      recommendationsRef.current.style.cursor = 'grab';
+    }
+    if (hasDraggedRef.current && Math.abs(velocityRef.current) > 0.01) {
+      runMomentum();
+    }
+    hasDraggedRef.current = false;
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -152,6 +306,17 @@ export default function TvDetailPage() {
       isMounted = false;
     };
   }, [tvId]);
+
+  useEffect(() => {
+    return () => {
+      if (momentumFrameRef.current !== null) {
+        cancelAnimationFrame(momentumFrameRef.current);
+      }
+      if (edgeAutoFrameRef.current !== null) {
+        cancelAnimationFrame(edgeAutoFrameRef.current);
+      }
+    };
+  }, []);
 
   if (isUserLoading) {
     return (
@@ -268,13 +433,15 @@ export default function TvDetailPage() {
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     {tv.genres.map((genre) => (
-                      <span
+                      <Link
                         key={genre.id}
-                        className="px-2.5 py-1 rounded-full text-xs"
+                        href={`/genres/${genre.id}`}
+                        className="px-2.5 py-1 rounded-full text-xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
+                        title={`${genre.name} 장르 보기`}
                         style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)', color: 'rgba(245,158,11,0.92)' }}
                       >
                         {genre.name}
-                      </span>
+                      </Link>
                     ))}
                   </div>
 
@@ -395,20 +562,52 @@ export default function TvDetailPage() {
               </section>
             ) : null}
 
-            {(tv.recommendations?.results ?? []).length > 0 ? (
+            {recommendations.length > 0 ? (
               <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
-                <h3 className="text-lg font-bold text-white mb-4">비슷한 TV 시리즈</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-                  {(tv.recommendations?.results ?? []).slice(0, 6).map((item) => (
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-white">비슷한 TV 시리즈</h3>
+                  <div className="hidden md:flex items-center gap-2">
+                    <button
+                      type="button"
+                      aria-label="tv recommendations left"
+                      onClick={() => scrollRecommendations('left')}
+                      className="h-9 w-9 rounded-full border flex items-center justify-center"
+                      style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="tv recommendations right"
+                      onClick={() => scrollRecommendations('right')}
+                      className="h-9 w-9 rounded-full border flex items-center justify-center"
+                      style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div
+                  ref={recommendationsRef}
+                  onPointerDown={handleRecommendationsPointerDown}
+                  onPointerMove={handleRecommendationsPointerMove}
+                  onPointerUp={handleRecommendationsPointerEnd}
+                  onPointerCancel={handleRecommendationsPointerEnd}
+                  onDragStart={(event) => event.preventDefault()}
+                  className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-pan-y"
+                >
+                  {recommendations.map((item) => (
                     <Link
                       key={item.id}
                       href={`/tv/${item.id}`}
-                      className="group rounded-lg border p-2 block"
+                      draggable={false}
+                      onDragStart={(event) => event.preventDefault()}
+                      className="group rounded-lg border p-2 block w-40 md:w-48 shrink-0"
                       style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
-                      <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="w-full h-56 md:h-72 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {item.poster_path ? (
-                          <img src={imageUrl(item.poster_path, 'w500')} alt={item.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <img src={imageUrl(item.poster_path, 'w500')} alt={item.name} draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                             NO POSTER

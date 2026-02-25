@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
@@ -14,6 +14,13 @@ const PANEL = '#0d1020';
 const AMBER = '#F59E0B';
 const AMBER_DARK = '#B45309';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
+const DRAG_MULTIPLIER = 1.35;
+const MOMENTUM_MULTIPLIER = 18;
+const MOMENTUM_DECAY = 0.9;
+const MOMENTUM_STOP_THRESHOLD = 0.4;
+const DRAG_START_THRESHOLD = 6;
+const EDGE_AUTO_SCROLL_ZONE = 88;
+const EDGE_AUTO_SCROLL_MAX_STEP = 14;
 
 type Genre = {
   id: number;
@@ -130,6 +137,16 @@ export default function MovieDetailPage() {
   const [showAllCast, setShowAllCast] = useState(false);
   const [showAllCrew, setShowAllCrew] = useState(false);
   const recommendationsRef = useRef<HTMLDivElement | null>(null);
+  const isPointerDownRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startXRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const pointerClientXRef = useRef(0);
+  const velocityRef = useRef(0);
+  const momentumFrameRef = useRef<number | null>(null);
+  const edgeAutoFrameRef = useRef<number | null>(null);
 
   const movieId = useMemo(() => Number(params.movieId), [params.movieId]);
   const castList = useMemo(() => movie?.credits?.cast ?? [], [movie]);
@@ -203,6 +220,133 @@ export default function MovieDetailPage() {
     });
   };
 
+  const stopMomentum = () => {
+    if (momentumFrameRef.current !== null) {
+      cancelAnimationFrame(momentumFrameRef.current);
+      momentumFrameRef.current = null;
+    }
+  };
+
+  const stopEdgeAutoScroll = () => {
+    if (edgeAutoFrameRef.current !== null) {
+      cancelAnimationFrame(edgeAutoFrameRef.current);
+      edgeAutoFrameRef.current = null;
+    }
+  };
+
+  const startEdgeAutoScroll = () => {
+    if (edgeAutoFrameRef.current !== null) return;
+
+    const step = () => {
+      if (!recommendationsRef.current || !isPointerDownRef.current || !hasDraggedRef.current) {
+        edgeAutoFrameRef.current = null;
+        return;
+      }
+
+      const rect = recommendationsRef.current.getBoundingClientRect();
+      const leftGap = pointerClientXRef.current - rect.left;
+      const rightGap = rect.right - pointerClientXRef.current;
+      let autoStep = 0;
+
+      if (leftGap < EDGE_AUTO_SCROLL_ZONE) {
+        const ratio = Math.max(0, (EDGE_AUTO_SCROLL_ZONE - leftGap) / EDGE_AUTO_SCROLL_ZONE);
+        autoStep = -EDGE_AUTO_SCROLL_MAX_STEP * ratio;
+      } else if (rightGap < EDGE_AUTO_SCROLL_ZONE) {
+        const ratio = Math.max(0, (EDGE_AUTO_SCROLL_ZONE - rightGap) / EDGE_AUTO_SCROLL_ZONE);
+        autoStep = EDGE_AUTO_SCROLL_MAX_STEP * ratio;
+      }
+
+      if (autoStep !== 0) {
+        recommendationsRef.current.scrollLeft += autoStep;
+      }
+
+      edgeAutoFrameRef.current = requestAnimationFrame(step);
+    };
+
+    edgeAutoFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const runMomentum = () => {
+    if (!recommendationsRef.current) return;
+    let velocity = velocityRef.current * MOMENTUM_MULTIPLIER;
+
+    const step = () => {
+      if (!recommendationsRef.current) return;
+      recommendationsRef.current.scrollLeft += velocity;
+      velocity *= MOMENTUM_DECAY;
+
+      if (Math.abs(velocity) > MOMENTUM_STOP_THRESHOLD) {
+        momentumFrameRef.current = requestAnimationFrame(step);
+      } else {
+        momentumFrameRef.current = null;
+      }
+    };
+
+    stopMomentum();
+    momentumFrameRef.current = requestAnimationFrame(step);
+  };
+
+  const handleRecommendationsPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0 || !recommendationsRef.current) return;
+    stopMomentum();
+    stopEdgeAutoScroll();
+    isPointerDownRef.current = true;
+    hasDraggedRef.current = false;
+    activePointerIdRef.current = event.pointerId;
+    startXRef.current = event.clientX;
+    lastXRef.current = event.clientX;
+    pointerClientXRef.current = event.clientX;
+    lastTimeRef.current = performance.now();
+    velocityRef.current = 0;
+    recommendationsRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleRecommendationsPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current || !recommendationsRef.current || activePointerIdRef.current !== event.pointerId) return;
+    pointerClientXRef.current = event.clientX;
+    const deltaFromStart = event.clientX - startXRef.current;
+    if (Math.abs(deltaFromStart) > DRAG_START_THRESHOLD && !hasDraggedRef.current) {
+      hasDraggedRef.current = true;
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+      startEdgeAutoScroll();
+    }
+    if (!hasDraggedRef.current) {
+      return;
+    }
+    event.preventDefault();
+    const deltaX = event.clientX - lastXRef.current;
+    recommendationsRef.current.scrollLeft -= deltaX * DRAG_MULTIPLIER;
+
+    const now = performance.now();
+    const dt = now - lastTimeRef.current;
+    if (dt > 0) {
+      const dx = event.clientX - lastXRef.current;
+      const instantVelocity = -(dx / dt);
+      velocityRef.current = velocityRef.current * 0.75 + instantVelocity * 0.25;
+    }
+    lastXRef.current = event.clientX;
+    lastTimeRef.current = now;
+  };
+
+  const handleRecommendationsPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (activePointerIdRef.current !== event.pointerId) return;
+    isPointerDownRef.current = false;
+    activePointerIdRef.current = null;
+    stopEdgeAutoScroll();
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (recommendationsRef.current) {
+      recommendationsRef.current.style.cursor = 'grab';
+    }
+    if (hasDraggedRef.current && Math.abs(velocityRef.current) > 0.01) {
+      runMomentum();
+    }
+    hasDraggedRef.current = false;
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -241,6 +385,17 @@ export default function MovieDetailPage() {
       isMounted = false;
     };
   }, [movieId]);
+
+  useEffect(() => {
+    return () => {
+      if (momentumFrameRef.current !== null) {
+        cancelAnimationFrame(momentumFrameRef.current);
+      }
+      if (edgeAutoFrameRef.current !== null) {
+        cancelAnimationFrame(edgeAutoFrameRef.current);
+      }
+    };
+  }, []);
 
   if (isUserLoading) {
     return (
@@ -362,13 +517,15 @@ export default function MovieDetailPage() {
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     {movie.genres.map((genre) => (
-                      <span
+                      <Link
                         key={genre.id}
-                        className="px-2.5 py-1 rounded-full text-xs"
+                        href={`/genres/${genre.id}`}
+                        className="px-2.5 py-1 rounded-full text-xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
+                        title={`${genre.name} 장르 보기`}
                         style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)', color: 'rgba(245,158,11,0.92)' }}
                       >
                         {genre.name}
-                      </span>
+                      </Link>
                     ))}
                   </div>
 
@@ -603,17 +760,27 @@ export default function MovieDetailPage() {
                     </button>
                   </div>
                 </div>
-                <div ref={recommendationsRef} className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar">
+                <div
+                  ref={recommendationsRef}
+                  onPointerDown={handleRecommendationsPointerDown}
+                  onPointerMove={handleRecommendationsPointerMove}
+                  onPointerUp={handleRecommendationsPointerEnd}
+                  onPointerCancel={handleRecommendationsPointerEnd}
+                  onDragStart={(event) => event.preventDefault()}
+                  className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-pan-y"
+                >
                   {recommendations.map((item) => (
                     <Link
                       key={item.id}
                       href={`/movies/${item.id}`}
+                      draggable={false}
+                      onDragStart={(event) => event.preventDefault()}
                       className="group rounded-lg border p-2 block w-40 md:w-48 shrink-0"
                       style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="w-full h-56 md:h-72 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {item.poster_path ? (
-                          <img src={imageUrl(item.poster_path, 'w500')} alt={item.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <img src={imageUrl(item.poster_path, 'w500')} alt={item.title} draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                             NO POSTER
