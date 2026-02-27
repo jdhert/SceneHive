@@ -391,6 +391,16 @@ React 18 + Vite + JavaScript CSR SPA. `frontend-next/`로 마이그레이션 완
 - 홈 확장 마무리:
   - `Trending TV`, `Trending People` 섹션 및 대응 API 라우트 반영
 
+### 최근 반영 완료 사항 (2026-02-27)
+- 홈 히어로 섹션 리디자인:
+  - 레퍼런스 기반 full-bleed 메인 배너 스타일로 재구성
+  - 좌상단 브랜드(아이콘/로고) 클릭 시 `window.location.reload()`로 홈 화면 즉시 리렌더
+- 홈 CTA 개선:
+  - `Watch Trailer` 버튼이 영화 상세 페이지 이동이 아닌 `youtubeUrl` 직접 이동 동작으로 변경
+- 상세/검색 UI 톤 정리:
+  - 적용 페이지: `/movies/[movieId]`, `/tv/[tvId]`, `/people/[personId]`, `/search`
+  - 홈 화면과 동일한 색감/컴포넌트 톤으로 스타일 통일
+
 ---
 
 ## 8. 빌드 & 실행

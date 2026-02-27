@@ -157,9 +157,36 @@
 - 2026-02-19: **SceneHive 리브랜딩** — DevCollab → SceneHive, Dark Cinema 테마 적용, 프로젝트 컨셉 영화 커뮤니티로 전환
 - 2026-02-20: 홈 캐러셀 드래그 UX 개선, 장르별 목록 페이지/복수 장르 필터(AND) 및 24개 단위 페이징 반영
 - 2026-02-24: 로그인 사용자 전용 Favorites MVP 추가 (영화/TV/인물 즐겨찾기 토글 + 대시보드 목록)
+- 2026-02-27: 홈 히어로 레이아웃 재구성(full-bleed), 홈 트레일러 버튼 유튜브 링크 연결, 상세/통합검색 UI 톤 통일 반영
 
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
+## Handoff Snapshot
+- Timestamp (KST): 2026-02-27 17:58:17 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 히어로 개선 및 상세/검색 UI 톤 통일 작업을 문서 기준으로 동기화
+- Scope (In/Out): In: frontend-next/src/app/(public)/{home,movies/[movieId],tv/[tvId],people/[personId],search}/page.tsx, AGENTS.md, PROJECT_GUIDE.md / Out: Spring 백엔드 비즈니스 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:
+  - frontend-next/src/app/(public)/home/page.tsx
+  - frontend-next/src/app/(public)/movies/[movieId]/page.tsx
+  - frontend-next/src/app/(public)/tv/[tvId]/page.tsx
+  - frontend-next/src/app/(public)/people/[personId]/page.tsx
+  - frontend-next/src/app/(public)/search/page.tsx
+  - AGENTS.md
+  - PROJECT_GUIDE.md
+- Commands Run: git branch --show-current; git status --short; git log --oneline -5; Get-Content -LiteralPath AGENTS.md, PROJECT_GUIDE.md -Raw -Encoding UTF8; git show --name-only/--stat d1e8668 3acd648; Get-Date -Format "yyyy-MM-dd HH:mm:ss zzz"; git add/commit/push
+- Tests Run + Result: Not run (코드 테스트 미수행, 커밋/푸시 및 문서 동기화만 수행)
+- Open Risks: `.ref-v0-movie-community-service/`, `src/test/` untracked 항목 정책은 미확정 상태
+- Blockers: None
+- Next 3 Actions:
+  1) 홈 히어로/캐러셀 모바일 브레이크포인트 미세 튜닝
+  2) 통합검색 결과 랭킹 가중치(정확도/인기도/타입) 정책 확정
+  3) Favorites 목록 전용 페이지(`/favorites`)와 필터 UX 확장
+- Resume Command: git status --short && git branch --show-current
+
 ## Handoff Snapshot
 - Timestamp (KST): 2026-02-24 17:47:57 +09:00
 - Agent Name: Codex
@@ -335,4 +362,3 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
