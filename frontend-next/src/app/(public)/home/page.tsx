@@ -3,16 +3,15 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Search, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Play, Search, Star } from 'lucide-react';
 import { useUser } from '@/providers/user-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
 
-const BG = '#070912';
-const PANEL = '#0d1020';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#B45309';
+const BG = '#04060C';
+const AMBER = '#55A8FF';
+const AMBER_DARK = '#2A6FD2';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 const DRAG_MULTIPLIER = 1.35;
 const MOMENTUM_MULTIPLIER = 18;
@@ -21,6 +20,7 @@ const MOMENTUM_STOP_THRESHOLD = 0.4;
 const DRAG_START_THRESHOLD = 6;
 const EDGE_AUTO_SCROLL_ZONE = 88;
 const EDGE_AUTO_SCROLL_MAX_STEP = 14;
+const MASK_START_THRESHOLD = 48;
 
 type Movie = {
   id: number;
@@ -29,7 +29,9 @@ type Movie = {
   poster_path: string | null;
   backdrop_path: string | null;
   vote_average: number;
+  vote_count?: number;
   release_date: string;
+  genre_ids?: number[];
   href?: string;
   display_meta?: string;
 };
@@ -72,7 +74,17 @@ type GenrePayload = {
   genres: Genre[];
 };
 
-function movieImage(path: string | null, size: 'w500' | 'w780' = 'w500') {
+type MovieTrailerPayload = {
+  videos?: {
+    results?: Array<{
+      key: string;
+      site: string;
+      type: string;
+    }>;
+  };
+};
+
+function movieImage(path: string | null, size: 'w500' | 'w780' | 'w1280' | 'original' = 'w500') {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
 }
@@ -101,8 +113,20 @@ export default function HomePage() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [isMovieLoading, setIsMovieLoading] = useState(true);
   const [movieError, setMovieError] = useState<string | null>(null);
+  const [heroTrailerUrl, setHeroTrailerUrl] = useState<string | null>(null);
+  const handleBrandReload = () => {
+    window.location.reload();
+  };
 
   const heroMovie = useMemo(() => trending[0] ?? null, [trending]);
+  const heroGenreNames = useMemo(() => {
+    if (!heroMovie?.genre_ids?.length || !genres.length) return [] as string[];
+    const genreMap = new Map(genres.map((genre) => [genre.id, genre.name]));
+    return heroMovie.genre_ids
+      .map((genreId) => genreMap.get(genreId))
+      .filter((name): name is string => Boolean(name))
+      .slice(0, 3);
+  }, [heroMovie, genres]);
   const trendingWithoutHero = useMemo(() => (trending.length > 1 ? trending.slice(1) : trending), [trending]);
   const trendingTvAsMovies = useMemo(
     () =>
@@ -195,6 +219,41 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadHeroTrailer() {
+      if (!heroMovie?.id) {
+        if (isMounted) setHeroTrailerUrl(null);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/movies/${heroMovie.id}`);
+        if (!res.ok) throw new Error('failed');
+        const data = (await res.json()) as MovieTrailerPayload;
+        const trailer = data.videos?.results?.find(
+          (video) => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')
+        );
+        if (!isMounted) return;
+        if (trailer?.key) {
+          setHeroTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
+        } else {
+          setHeroTrailerUrl(`https://www.youtube.com/results?search_query=${encodeURIComponent(`${heroMovie.title} trailer`)}`);
+        }
+      } catch {
+        if (!isMounted) return;
+        setHeroTrailerUrl(`https://www.youtube.com/results?search_query=${encodeURIComponent(`${heroMovie.title} trailer`)}`);
+      }
+    }
+
+    loadHeroTrailer();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [heroMovie?.id, heroMovie?.title]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
@@ -205,20 +264,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-[26rem] h-[26rem] rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.30), transparent 70%)' }} />
-        <div className="absolute bottom-0 right-0 w-[30rem] h-[30rem] rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.14), transparent 70%)' }} />
-      </div>
-
-      <header className="sticky top-0 z-40 border-b" style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(7,9,18,0.88)', backdropFilter: 'blur(12px)' }}>
+      <header className="sticky top-0 z-40" style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
+          <button type="button" onClick={handleBrandReload} className="flex items-center gap-3">
             <span className="text-xl">🎬</span>
-            <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
-          </div>
-          <nav className="hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.72)' }}>
+            <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
+          </button>
+          <nav className="hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.64)' }}>
             <a href="#trending" className="hover:text-white transition-colors">Trending</a>
             <a href="#now-playing" className="hover:text-white transition-colors">Now Playing</a>
             <a href="#upcoming" className="hover:text-white transition-colors">Upcoming</a>
@@ -227,7 +279,7 @@ export default function HomePage() {
           <div className="flex items-center gap-4">
             <Button asChild variant="outline"
               className="font-medium"
-              style={{ borderColor: 'rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)', color: 'rgba(245,158,11,0.95)' }}>
+              style={{ borderColor: 'rgba(255,255,255,0.20)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.90)' }}>
               <Link href="/search" className="inline-flex items-center gap-1.5">
                 <Search className="w-4 h-4" />
                 통합 검색
@@ -236,7 +288,7 @@ export default function HomePage() {
             {user ? (
               <>
                 <Button asChild className="text-white font-medium"
-                  style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
                 <UserMenu />
@@ -245,7 +297,7 @@ export default function HomePage() {
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
                   className="font-medium"
-                  style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
@@ -259,71 +311,113 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="relative z-10 max-w-7xl mx-auto px-4 pt-8 md:pt-10">
-        <div
-          className="relative overflow-hidden rounded-2xl border min-h-[460px] p-8 md:p-10 flex items-end"
-          style={{ borderColor: 'rgba(245,158,11,0.2)', background: PANEL }}
-        >
-          {heroMovie?.backdrop_path && (
+      <section
+        className="relative z-10 w-full -mt-20 pt-32 md:pt-36 pb-20 md:pb-24 min-h-[calc(100vh-64px)] md:min-h-[90vh] flex items-center overflow-hidden"
+        style={{ background: 'linear-gradient(180deg, rgba(4,6,12,0.30) 0%, rgba(4,6,12,0.76) 100%)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none">
+          {heroMovie?.backdrop_path ? (
             <div
               className="absolute inset-0"
               style={{
-                backgroundImage: `linear-gradient(180deg, rgba(7,9,18,0.22) 0%, rgba(7,9,18,0.92) 70%), linear-gradient(90deg, rgba(7,9,18,0.88) 5%, rgba(7,9,18,0.35) 55%, rgba(7,9,18,0.9) 100%), url(${movieImage(heroMovie.backdrop_path, 'w780')})`,
+                backgroundImage: `url(${movieImage(heroMovie.backdrop_path, 'original')})`,
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundPosition: 'center center',
+                filter: 'saturate(1.04) contrast(1.06)',
               }}
             />
-          )}
-          <div className="relative max-w-3xl">
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4 uppercase tracking-wide"
-              style={{ background: 'rgba(245,158,11,0.12)', color: AMBER, border: '1px solid rgba(245,158,11,0.3)' }}
-            >
-              오늘의 스포트라이트
-            </div>
+          ) : null}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(126% 108% at 26% 46%, rgba(6,8,16,0.06) 0%, rgba(6,8,16,0.42) 52%, rgba(6,8,16,0.80) 100%), linear-gradient(90deg, rgba(6,8,16,0.90) 0%, rgba(6,8,16,0.18) 48%, rgba(6,8,16,0.62) 100%), linear-gradient(180deg, rgba(6,8,16,0.02) 0%, rgba(6,8,16,0.20) 68%, rgba(6,8,16,0.84) 100%)',
+            }}
+          />
+        </div>
+
+        <div className="relative w-full max-w-7xl mx-auto px-6 md:px-10 lg:px-16">
+          <div className="max-w-[700px]">
             {heroMovie ? (
               <>
-                <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">{heroMovie.title}</h2>
-                <p className="mt-4 text-sm md:text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
-                  {heroMovie.overview || '줄거리 정보가 아직 등록되지 않았습니다.'}
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <Star className="w-3.5 h-3.5" style={{ fill: AMBER, color: AMBER }} />
+                <div className="flex flex-wrap items-center gap-2 mb-5">
+                  <span
+                    className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+                    style={{ background: 'rgba(85,168,255,0.28)', color: '#CFE7FF' }}
+                  >
+                    Trending
+                  </span>
+                  {(heroGenreNames.length ? heroGenreNames : ['Movie']).map((genre) => (
+                    <span
+                      key={genre}
+                      className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                      style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.82)' }}
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+                <h2 className="text-4xl md:text-6xl font-black text-white leading-[1.06] tracking-tight">
+                  {heroMovie.title}
+                </h2>
+                <div className="mt-6 flex flex-wrap items-center gap-4 text-xl md:text-2xl font-semibold" style={{ color: 'rgba(255,255,255,0.88)' }}>
+                  <span
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Star className="w-5 h-5" style={{ fill: '#F7B267', color: '#F7B267' }} />
                     {heroMovie.vote_average.toFixed(1)}
                   </span>
-                  <span className="px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    개봉 {yearFromDate(heroMovie.release_date)}
-                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.72)' }}>{yearFromDate(heroMovie.release_date)}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>•</span>
+                  {typeof heroMovie.vote_count === 'number' ? (
+                    <span style={{ color: 'rgba(255,255,255,0.66)' }}>{heroMovie.vote_count.toLocaleString()} votes</span>
+                  ) : null}
+                </div>
+                <p className="mt-7 text-lg md:text-xl leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                  {heroMovie.overview || '줄거리 정보가 아직 등록되지 않았습니다.'}
+                </p>
+                <div className="mt-9 flex flex-wrap gap-3">
+                <Button
+                  asChild
+                  className="text-white font-semibold px-7 py-6 text-base rounded-2xl"
+                  style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}
+                >
+                  <a
+                    href={
+                      heroTrailerUrl ??
+                      `https://www.youtube.com/results?search_query=${encodeURIComponent(`${heroMovie.title} trailer`)}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    Watch Trailer
+                  </a>
+                </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="font-semibold px-7 py-6 text-base rounded-2xl"
+                    style={{ borderColor: 'rgba(255,255,255,0.24)', background: 'rgba(255,255,255,0.08)', color: 'white' }}
+                  >
+                    <Link href={`/movies/${heroMovie.id}`} className="inline-flex items-center gap-2">
+                      <Info className="w-4 h-4" />
+                      More Info
+                    </Link>
+                  </Button>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">SceneHive Movie Feed</h2>
-                <p className="mt-4 text-sm md:text-base" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                <h2 className="text-5xl md:text-7xl font-black text-white leading-[1.06] tracking-tight">
+                  SceneHive Movie Feed
+                </h2>
+                <p className="mt-7 text-xl leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}>
                   지금 상영작과 트렌딩 영화를 홈에서 바로 확인하세요.
                 </p>
               </>
             )}
-            <div className="mt-7">
-              {user ? (
-                <Button
-                  asChild
-                  className="text-white font-bold"
-                  style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}
-                >
-                  <Link href="/workspaces">영화 클럽 입장하기</Link>
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => router.push('/register')}
-                  className="text-white font-bold"
-                  style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}
-                >
-                  회원가입하고 토론 시작
-                </Button>
-              )}
-            </div>
           </div>
         </div>
       </section>
@@ -335,7 +429,7 @@ export default function HomePage() {
           </div>
         )}
         {movieError && (
-          <Card className="border-0 mb-8" style={{ background: 'rgba(127,29,29,0.25)', border: '1px solid rgba(248,113,113,0.35)' }}>
+          <Card className="border-0 mb-8" style={{ background: 'rgba(127,29,29,0.25)' }}>
             <CardContent className="py-4 text-sm" style={{ color: '#FCA5A5' }}>
               {movieError}
             </CardContent>
@@ -389,11 +483,11 @@ export default function HomePage() {
               <Link
                 key={genre.id}
                 href={`/genres/${genre.id}?name=${encodeURIComponent(genre.name)}`}
-                className="px-3 py-1.5 rounded-full text-sm"
+                className="px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110"
                 style={{
-                  background: 'rgba(245,158,11,0.12)',
-                  border: '1px solid rgba(245,158,11,0.28)',
-                  color: 'rgba(245,158,11,0.92)',
+                  background: 'rgba(255,255,255,0.10)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  color: 'rgba(255,255,255,0.88)',
                 }}
               >
                 {genre.name}
@@ -406,7 +500,7 @@ export default function HomePage() {
       {!user && (
         <section className="relative z-10 max-w-3xl mx-auto px-4 py-16">
           <Card className="border-0"
-            style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(20px)' }}>
+            style={{ background: 'rgba(85,168,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', backdropFilter: 'blur(20px)' }}>
             <CardContent className="py-12 text-center">
               <h3 className="text-2xl font-bold text-white mb-3">영화 클럽을 만들어 보세요</h3>
               <p className="mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -423,7 +517,7 @@ export default function HomePage() {
       )}
 
       {/* Footer */}
-      <footer className="relative z-10 border-t py-8 mt-8" style={{ borderColor: 'rgba(245,158,11,0.1)' }}>
+      <footer className="relative z-10 py-8 mt-8">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
           <p>SceneHive — 영화 팬을 위한 실시간 토론 공간</p>
           <p className="mt-1">Powered by TMDB API. TMDB의 인증 또는 보증을 받지 않았습니다.</p>
@@ -471,7 +565,7 @@ function MovieCarouselSection({
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
-    setIsAtStart(scrollRef.current.scrollLeft <= 2);
+    setIsAtStart(scrollRef.current.scrollLeft <= MASK_START_THRESHOLD);
   };
 
   const stopMomentum = () => {
@@ -617,8 +711,8 @@ function MovieCarouselSection({
             type="button"
             aria-label={`${title} left`}
             onClick={() => scroll('left')}
-            className="h-9 w-9 rounded-full border flex items-center justify-center"
-            style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+            className="h-9 w-9 rounded-full border-0 flex items-center justify-center"
+            style={{ color: 'rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(6px)' }}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -626,8 +720,8 @@ function MovieCarouselSection({
             type="button"
             aria-label={`${title} right`}
             onClick={() => scroll('right')}
-            className="h-9 w-9 rounded-full border flex items-center justify-center"
-            style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+            className="h-9 w-9 rounded-full border-0 flex items-center justify-center"
+            style={{ color: 'rgba(255,255,255,0.88)', background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(6px)' }}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -672,7 +766,7 @@ function MoviePosterCard({
       href={movie.href ?? `/movies/${movie.id}`}
       draggable={false}
       onDragStart={(event) => event.preventDefault()}
-      className="relative w-40 md:w-48 shrink-0 group block"
+      className="relative w-40 md:w-48 shrink-0 group block transition-transform duration-300 hover:-translate-y-1"
     >
       {numbered && (
         <span
@@ -683,8 +777,8 @@ function MoviePosterCard({
         </span>
       )}
       <div
-        className="rounded-xl overflow-hidden border"
-        style={{ borderColor: 'rgba(245,158,11,0.18)', background: 'rgba(255,255,255,0.03)' }}
+        className="rounded-xl overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.02)', boxShadow: '0 12px 34px rgba(0,0,0,0.42)' }}
       >
         {movie.poster_path ? (
           <img
