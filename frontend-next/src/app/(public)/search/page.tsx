@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 
-const BG = '#070912';
-const PANEL = '#0d1020';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#B45309';
+const BG = '#04060C';
+const PANEL = 'rgba(9,13,24,0.58)';
+const AMBER = '#55A8FF';
+const AMBER_DARK = '#2A6FD2';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 
 type MediaType = 'movie' | 'person' | 'tv';
@@ -209,12 +209,12 @@ function MovieSearchPageContent() {
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
-      <header className="sticky top-0 z-40 border-b" style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(7,9,18,0.88)', backdropFilter: 'blur(12px)' }}>
+      <header className="sticky top-0 z-40" style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-2">
               <span className="text-xl">🎬</span>
-              <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
+              <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
             </Link>
             <span className="text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>
               통합 검색
@@ -224,7 +224,7 @@ function MovieSearchPageContent() {
             {user ? (
               <>
                 <Button asChild className="text-white font-medium"
-                  style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
                 <UserMenu />
@@ -233,7 +233,7 @@ function MovieSearchPageContent() {
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
                   className="font-medium"
-                  style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
@@ -250,7 +250,7 @@ function MovieSearchPageContent() {
       <main className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         <section
           className="rounded-2xl border p-5 md:p-6"
-          style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}
+          style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}
         >
           <h2 className="text-2xl md:text-3xl font-black text-white">통합 검색</h2>
           <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -265,7 +265,7 @@ function MovieSearchPageContent() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="예: 인터스텔라, Leonardo DiCaprio, Breaking Bad"
                 className="w-full h-11 rounded-lg pl-10 pr-3 text-sm bg-transparent border text-white"
-                style={{ borderColor: 'rgba(245,158,11,0.24)' }}
+                style={{ borderColor: 'rgba(255,255,255,0.24)' }}
               />
             </div>
             <Button
@@ -314,9 +314,9 @@ function MovieSearchPageContent() {
                       onClick={() => setActiveFilter('all')}
                       className="px-3 py-1.5 rounded-full text-xs border"
                       style={{
-                        borderColor: activeFilter === 'all' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
-                        color: activeFilter === 'all' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
-                        background: activeFilter === 'all' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                        borderColor: activeFilter === 'all' ? 'rgba(85,168,255,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'all' ? 'rgba(191,224,255,0.96)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'all' ? 'rgba(85,168,255,0.14)' : 'rgba(255,255,255,0.04)',
                       }}
                     >
                       All ({results.length})
@@ -326,9 +326,9 @@ function MovieSearchPageContent() {
                       onClick={() => setActiveFilter('person')}
                       className="px-3 py-1.5 rounded-full text-xs border"
                       style={{
-                        borderColor: activeFilter === 'person' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
-                        color: activeFilter === 'person' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
-                        background: activeFilter === 'person' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                        borderColor: activeFilter === 'person' ? 'rgba(85,168,255,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'person' ? 'rgba(191,224,255,0.96)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'person' ? 'rgba(85,168,255,0.14)' : 'rgba(255,255,255,0.04)',
                       }}
                     >
                       Person ({personResults.length})
@@ -338,9 +338,9 @@ function MovieSearchPageContent() {
                       onClick={() => setActiveFilter('movie')}
                       className="px-3 py-1.5 rounded-full text-xs border"
                       style={{
-                        borderColor: activeFilter === 'movie' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
-                        color: activeFilter === 'movie' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
-                        background: activeFilter === 'movie' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                        borderColor: activeFilter === 'movie' ? 'rgba(85,168,255,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'movie' ? 'rgba(191,224,255,0.96)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'movie' ? 'rgba(85,168,255,0.14)' : 'rgba(255,255,255,0.04)',
                       }}
                     >
                       Movie ({movieResults.length})
@@ -350,9 +350,9 @@ function MovieSearchPageContent() {
                       onClick={() => setActiveFilter('tv')}
                       className="px-3 py-1.5 rounded-full text-xs border"
                       style={{
-                        borderColor: activeFilter === 'tv' ? 'rgba(245,158,11,0.45)' : 'rgba(255,255,255,0.2)',
-                        color: activeFilter === 'tv' ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
-                        background: activeFilter === 'tv' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                        borderColor: activeFilter === 'tv' ? 'rgba(85,168,255,0.45)' : 'rgba(255,255,255,0.2)',
+                        color: activeFilter === 'tv' ? 'rgba(191,224,255,0.96)' : 'rgba(255,255,255,0.78)',
+                        background: activeFilter === 'tv' ? 'rgba(85,168,255,0.14)' : 'rgba(255,255,255,0.04)',
                       }}
                     >
                       TV ({tvResults.length})
@@ -383,7 +383,7 @@ function MovieSearchPageContent() {
                         variant="outline"
                         disabled={isLoading}
                         onClick={onLoadMore}
-                        style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                        style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}
                       >
                         {isLoading ? '불러오는 중...' : `더보기 (24개)`}
                       </Button>
@@ -419,7 +419,7 @@ function SearchResultCard({ item }: { item: MultiSearchItem }) {
     <Link href={getItemHref(item)} className="group block">
       <div
         className="rounded-xl overflow-hidden border"
-        style={{ borderColor: 'rgba(245,158,11,0.18)', background: 'rgba(255,255,255,0.03)' }}
+        style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.03)' }}
       >
         {(item.poster_path || item.profile_path) ? (
           <img
@@ -437,7 +437,7 @@ function SearchResultCard({ item }: { item: MultiSearchItem }) {
       <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
         <span
           className="inline-flex items-center px-2 py-0.5 rounded-full mr-2"
-          style={{ background: 'rgba(245,158,11,0.12)', color: 'rgba(245,158,11,0.92)' }}
+          style={{ background: 'rgba(85,168,255,0.14)', color: 'rgba(191,224,255,0.96)' }}
         >
           {getItemTypeLabel(item.media_type)}
         </span>
@@ -445,7 +445,7 @@ function SearchResultCard({ item }: { item: MultiSearchItem }) {
           <span>{item.known_for_department || '분야 정보 없음'}</span>
         ) : (
           <span className="inline-flex items-center gap-1">
-            <Star className="w-3.5 h-3.5" style={{ fill: AMBER, color: AMBER }} />
+            <Star className="w-3.5 h-3.5" style={{ fill: '#F7B267', color: '#F7B267' }} />
             {(item.vote_average ?? 0).toFixed(1)} · {toYear(item.release_date || item.first_air_date)}
           </span>
         )}

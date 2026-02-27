@@ -9,10 +9,10 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
 
-const BG = '#070912';
-const PANEL = '#0d1020';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#B45309';
+const BG = '#04060C';
+const PANEL = 'rgba(9,13,24,0.58)';
+const AMBER = '#55A8FF';
+const AMBER_DARK = '#2A6FD2';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 const DRAG_MULTIPLIER = 1.35;
 const MOMENTUM_MULTIPLIER = 18;
@@ -407,17 +407,17 @@ export default function MovieDetailPage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
-      <header className="sticky top-0 z-40 border-b" style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(7,9,18,0.88)', backdropFilter: 'blur(12px)' }}>
+      <header className="sticky top-0 z-40" style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <Link href="/home" className="flex items-center gap-2">
             <span className="text-xl">🎬</span>
-            <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
+            <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
           </Link>
           <div className="flex items-center gap-3">
             {user ? (
               <>
                 <Button asChild className="text-white font-medium"
-                  style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
                 <UserMenu />
@@ -426,7 +426,7 @@ export default function MovieDetailPage() {
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
                   className="font-medium"
-                  style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
@@ -456,14 +456,14 @@ export default function MovieDetailPage() {
         {!isLoading && !error && movie && (
           <>
             <section
-              className="relative overflow-hidden rounded-2xl border min-h-[360px] p-6 md:p-8"
-              style={{ borderColor: 'rgba(245,158,11,0.22)', background: PANEL }}
+              className="relative overflow-hidden rounded-[2rem] min-h-[460px] p-6 md:p-10 border-0 shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
+              style={{ background: PANEL }}
             >
               {movie.backdrop_path && (
                 <div
                   className="absolute inset-0"
                   style={{
-                    backgroundImage: `linear-gradient(180deg, rgba(7,9,18,0.20) 0%, rgba(7,9,18,0.90) 70%), linear-gradient(90deg, rgba(7,9,18,0.88) 10%, rgba(7,9,18,0.45) 55%, rgba(7,9,18,0.92) 100%), url(${imageUrl(movie.backdrop_path, 'w780')})`,
+                    backgroundImage: `linear-gradient(180deg, rgba(6,9,16,0.12) 0%, rgba(6,9,16,0.90) 74%), linear-gradient(90deg, rgba(6,9,16,0.92) 0%, rgba(6,9,16,0.34) 56%, rgba(6,9,16,0.88) 100%), url(${imageUrl(movie.backdrop_path, 'w780')})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
@@ -471,7 +471,7 @@ export default function MovieDetailPage() {
               )}
               <div className="relative flex flex-col md:flex-row gap-6">
                 <div className="w-48 shrink-0 rounded-xl overflow-hidden border hidden md:block"
-                  style={{ borderColor: 'rgba(245,158,11,0.2)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
                   {movie.poster_path ? (
                     <img src={imageUrl(movie.poster_path, 'w500')} alt={movie.title} className="w-full h-full object-cover" />
                   ) : (
@@ -482,7 +482,7 @@ export default function MovieDetailPage() {
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(245,158,11,0.9)' }}>
+                  <p className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(85,168,255,0.95)' }}>
                     Movie Detail
                   </p>
                   <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
@@ -495,7 +495,7 @@ export default function MovieDetailPage() {
                   )}
                   <div className="mt-4 flex flex-wrap items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                      <Star className="w-3.5 h-3.5" style={{ fill: AMBER, color: AMBER }} />
+                      <Star className="w-3.5 h-3.5" style={{ fill: '#F7B267', color: '#F7B267' }} />
                       {movie.vote_average.toFixed(1)} ({movie.vote_count.toLocaleString()} votes)
                     </span>
                     <span className="px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
@@ -522,7 +522,7 @@ export default function MovieDetailPage() {
                         href={`/genres/${genre.id}`}
                         className="px-2.5 py-1 rounded-full text-xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
                         title={`${genre.name} 장르 보기`}
-                        style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)', color: 'rgba(245,158,11,0.92)' }}
+                        style={{ background: 'rgba(85,168,255,0.14)', border: '1px solid rgba(85,168,255,0.30)', color: 'rgba(191,224,255,0.96)' }}
                       >
                         {genre.name}
                       </Link>
@@ -541,7 +541,7 @@ export default function MovieDetailPage() {
                       imagePath={movie.poster_path}
                     />
                     <Button asChild variant="outline"
-                      style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}>
+                      style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}>
                       <Link href="/home">홈으로</Link>
                     </Button>
                     <Button asChild
@@ -582,14 +582,14 @@ export default function MovieDetailPage() {
             </section>
 
             {trailerEmbedUrl ? (
-              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white">트레일러</h3>
                 <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
                   {trailer?.name || 'YouTube Trailer'}
                 </p>
                 <div
                   className="mt-3 rounded-xl overflow-hidden border"
-                  style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(0,0,0,0.35)' }}
+                  style={{ borderColor: 'rgba(255,255,255,0.16)', background: 'rgba(0,0,0,0.35)' }}
                 >
                   <div className="aspect-video w-full">
                     <iframe
@@ -607,7 +607,7 @@ export default function MovieDetailPage() {
             ) : null}
 
             <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-4">핵심 정보</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   <InfoRow label="원제" value={movie.original_title || '정보 없음'} />
@@ -619,7 +619,7 @@ export default function MovieDetailPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-4">제작 정보</h3>
                 <div className="space-y-3 text-sm">
                   <InfoRow
@@ -651,7 +651,7 @@ export default function MovieDetailPage() {
             </section>
 
             {castList.length > 0 ? (
-              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-4">주요 출연진</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
                   {visibleCast.map((cast) => (
@@ -659,7 +659,7 @@ export default function MovieDetailPage() {
                       key={cast.id}
                       href={`/people/${cast.id}`}
                       className="rounded-lg border p-2 block"
-                      style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="w-full aspect-square rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {cast.profile_path ? (
@@ -681,7 +681,7 @@ export default function MovieDetailPage() {
                       type="button"
                       variant="outline"
                       onClick={() => setShowAllCast((prev) => !prev)}
-                      style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}
                     >
                       {showAllCast ? '출연진 접기' : `출연진 더보기 (${castList.length - 8}명)`}
                     </Button>
@@ -691,7 +691,7 @@ export default function MovieDetailPage() {
             ) : null}
 
             {crewList.length > 0 ? (
-              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-4">주요 스태프</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
                   {visibleCrew.map((crew) => (
@@ -699,7 +699,7 @@ export default function MovieDetailPage() {
                       key={`${crew.id}-${crew.job}-${crew.department}`}
                       href={`/people/${crew.id}`}
                       className="rounded-lg border p-2 block"
-                      style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="w-full aspect-square rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {crew.profile_path ? (
@@ -726,7 +726,7 @@ export default function MovieDetailPage() {
                       type="button"
                       variant="outline"
                       onClick={() => setShowAllCrew((prev) => !prev)}
-                      style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}
                     >
                       {showAllCrew ? '스태프 접기' : `스태프 더보기 (${crewList.length - 8}명)`}
                     </Button>
@@ -736,7 +736,7 @@ export default function MovieDetailPage() {
             ) : null}
 
             {recommendations.length > 0 ? (
-              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-white">비슷한 영화 추천</h3>
                   <div className="hidden md:flex items-center gap-2">
@@ -745,7 +745,7 @@ export default function MovieDetailPage() {
                       aria-label="recommendations left"
                       onClick={() => scrollRecommendations('left')}
                       className="h-9 w-9 rounded-full border flex items-center justify-center"
-                      style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.08)' }}
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
@@ -754,7 +754,7 @@ export default function MovieDetailPage() {
                       aria-label="recommendations right"
                       onClick={() => scrollRecommendations('right')}
                       className="h-9 w-9 rounded-full border flex items-center justify-center"
-                      style={{ borderColor: 'rgba(245,158,11,0.24)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.04)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.08)' }}
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -776,7 +776,7 @@ export default function MovieDetailPage() {
                       draggable={false}
                       onDragStart={(event) => event.preventDefault()}
                       className="group rounded-lg border p-2 block w-40 md:w-48 shrink-0"
-                      style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="w-full h-56 md:h-72 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {item.poster_path ? (

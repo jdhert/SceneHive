@@ -9,10 +9,10 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
 
-const BG = '#070912';
-const PANEL = '#0d1020';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#B45309';
+const BG = '#04060C';
+const PANEL = 'rgba(9,13,24,0.58)';
+const AMBER = '#55A8FF';
+const AMBER_DARK = '#2A6FD2';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 
 type MovieCredit = {
@@ -310,17 +310,17 @@ export default function PersonDetailPage() {
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
       <header
-        className="sticky top-0 z-40 border-b"
-        style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(7,9,18,0.88)', backdropFilter: 'blur(12px)' }}
+        className="sticky top-0 z-40"
+        style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <Link href="/home" className="flex items-center gap-2">
             <span className="text-xl">🎬</span>
-            <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
+            <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild variant="outline" className="font-medium"
-              style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}>
+              style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}>
               <Link href="/search" className="inline-flex items-center gap-1.5">
                 <Search className="w-4 h-4" />
                 통합 검색
@@ -329,7 +329,7 @@ export default function PersonDetailPage() {
             {user ? (
               <>
                 <Button asChild className="text-white font-medium"
-                  style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
                 <UserMenu />
@@ -338,7 +338,7 @@ export default function PersonDetailPage() {
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
                   className="font-medium"
-                  style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
@@ -367,10 +367,10 @@ export default function PersonDetailPage() {
 
         {!isLoading && !error && person && (
           <>
-            <section className="rounded-2xl border p-6 md:p-8" style={{ borderColor: 'rgba(245,158,11,0.22)', background: PANEL }}>
+            <section className="rounded-[2rem] border p-6 md:p-8 shadow-[0_24px_70px_rgba(0,0,0,0.45)]" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
               <div className="flex flex-col md:flex-row md:items-start gap-6">
                 <div className="w-48 h-[320px] shrink-0 rounded-xl overflow-hidden border hidden md:block"
-                  style={{ borderColor: 'rgba(245,158,11,0.2)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
                   {person.profile_path ? (
                     <img src={imageUrl(person.profile_path, 'w500')} alt={person.name} className="w-full h-full object-cover" />
                   ) : (
@@ -381,7 +381,7 @@ export default function PersonDetailPage() {
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(245,158,11,0.9)' }}>
+                  <p className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(85,168,255,0.95)' }}>
                     Person Detail
                   </p>
                   <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
@@ -409,7 +409,7 @@ export default function PersonDetailPage() {
                       imagePath={person.profile_path}
                     />
                     <Button asChild variant="outline"
-                      style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}>
+                      style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}>
                       <Link href="/people">인물 검색으로</Link>
                     </Button>
                     <Button asChild variant="outline"
@@ -448,7 +448,7 @@ export default function PersonDetailPage() {
               </div>
             </section>
 
-            <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+            <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
               <h3 className="text-lg font-bold text-white mb-4">기본 정보</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                 <InfoRow label="주요 분야" value={person.known_for_department || '정보 없음'} />
@@ -460,7 +460,7 @@ export default function PersonDetailPage() {
             </section>
 
             {featuredWorks.length > 0 ? (
-              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-2">대표작</h3>
                 <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.58)' }}>
                   인기 기준 상위 4개 작품
@@ -471,7 +471,7 @@ export default function PersonDetailPage() {
                       key={`featured-${work.movie.id}`}
                       href={`/movies/${work.movie.id}`}
                       className="group rounded-lg border p-2 block"
-                      style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                      style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
                       <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {work.movie.poster_path ? (
@@ -486,7 +486,7 @@ export default function PersonDetailPage() {
                       <p className="text-xs mt-1 line-clamp-2" style={{ color: 'rgba(255,255,255,0.58)' }}>
                         {work.role}
                       </p>
-                      <p className="text-xs mt-1" style={{ color: 'rgba(245,158,11,0.9)' }}>
+                      <p className="text-xs mt-1" style={{ color: 'rgba(85,168,255,0.9)' }}>
                         Popularity {work.movie.popularity.toFixed(1)}
                       </p>
                     </Link>
@@ -496,7 +496,7 @@ export default function PersonDetailPage() {
             ) : null}
 
             {careerSections.length > 0 ? (
-              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}>
+              <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
                 <h3 className="text-lg font-bold text-white mb-2">Career</h3>
                 <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.58)' }}>
                   최근작 기준 정렬 · 역할별 분류
@@ -521,7 +521,7 @@ export default function PersonDetailPage() {
                                   [section.key]: !prev[section.key],
                                 }))
                               }
-                              style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                              style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}
                             >
                               {isExpanded ? '접기' : `더보기 (${section.items.length - 12}개)`}
                             </Button>
@@ -533,7 +533,7 @@ export default function PersonDetailPage() {
                               key={`${section.key}-${work.movie.id}-${work.creditType}`}
                               href={`/movies/${work.movie.id}`}
                               className="group rounded-lg border p-2 block"
-                              style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
+                              style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                             >
                               <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                                 {work.movie.poster_path ? (
@@ -548,7 +548,7 @@ export default function PersonDetailPage() {
                               <p className="text-xs mt-1 line-clamp-2" style={{ color: 'rgba(255,255,255,0.58)' }}>
                                 {work.role}
                               </p>
-                              <p className="text-xs mt-1" style={{ color: 'rgba(245,158,11,0.9)' }}>
+                              <p className="text-xs mt-1" style={{ color: 'rgba(85,168,255,0.9)' }}>
                                 {toYear(work.movie.release_date)} · {work.movie.vote_average.toFixed(1)}
                               </p>
                             </Link>
@@ -572,7 +572,7 @@ export default function PersonDetailPage() {
 
 function Badge({ text }: { text: string }) {
   return (
-    <span className="px-2.5 py-1 rounded-full text-xs" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)', color: 'rgba(245,158,11,0.92)' }}>
+    <span className="px-2.5 py-1 rounded-full text-xs" style={{ background: 'rgba(85,168,255,0.14)', border: '1px solid rgba(85,168,255,0.30)', color: 'rgba(191,224,255,0.96)' }}>
       {text}
     </span>
   );
