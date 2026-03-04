@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   DEPLOY_SCRIPT: deploy.sh
 
 jobs:
@@ -20,6 +19,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Normalize image name
+        id: image_name
+        run: echo "value=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -35,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}
           tags: |
             type=ref,event=branch
             type=sha,prefix=
@@ -48,8 +51,8 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:staging
+            ${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}-backend:staging
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -61,8 +64,8 @@ jobs:
           file: ./frontend-next/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:staging
+            ${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}-frontend:staging
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -104,7 +107,7 @@ jobs:
           USER: ${{ secrets.STAGING_USER }}
           PORT: ${{ secrets.STAGING_PORT || '22' }}
           REGISTRY: ${{ env.REGISTRY }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          IMAGE_NAME: ${{ steps.image_name.outputs.value }}
           SHA: ${{ github.sha }}
         run: |
           chmod +x deploy.sh

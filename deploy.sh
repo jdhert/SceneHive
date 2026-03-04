@@ -11,7 +11,8 @@ NC='\033[0m' # No Color
 # Default values
 DEPLOYMENT_TYPE="${1:-staging}"
 REGISTRY="${REGISTRY:-ghcr.io}"
-IMAGE_NAME="${IMAGE_NAME:-$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')}"
+RAW_IMAGE_NAME="${IMAGE_NAME:-$GITHUB_REPOSITORY}"
+IMAGE_NAME="$(echo "${RAW_IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
 PROJECT_DIR="/opt/scenehive"
 COMPOSE_FILE="docker-compose.prod.yml"
 BACKUP_DIR="/opt/scenehive_backups"

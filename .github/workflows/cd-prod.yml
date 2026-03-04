@@ -15,7 +15,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   deploy-production:
@@ -34,6 +33,10 @@ jobs:
             .env.production.example
           sparse-checkout-cone-mode: false
 
+      - name: Normalize image name
+        id: image_name
+        run: echo "value=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Setup SSH key
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -50,7 +53,7 @@ jobs:
           USER: ${{ secrets.PRODUCTION_USER }}
           PORT: ${{ secrets.PRODUCTION_PORT || '22' }}
           REGISTRY: ${{ env.REGISTRY }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          IMAGE_NAME: ${{ steps.image_name.outputs.value }}
           TAG: ${{ github.event.inputs.tag }}
         run: |
           chmod +x deploy.sh
