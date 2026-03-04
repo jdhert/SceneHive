@@ -162,6 +162,54 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-03-04 13:54:36 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Kakao OAuth 로그인 후 로그인 상태 동기화 이슈 수정 및 핸드오프 준비
+- Scope (In/Out): In: src/main/java/com/example/auth/security/{JwtAuthenticationFilter,OAuth2AuthenticationSuccessHandler}.java, frontend-next/src/providers/user-provider.tsx, AGENTS.md / Out: 네이버 OAuth 연동, 관리자 provider 필터 API 신규 구현
+- Current Status: in progress
+- Percent Complete: 90%
+- Files Changed:  M AGENTS.md,  M docker-compose.yml,  M frontend-next/src/app/(protected)/settings/page.tsx,  M frontend-next/src/app/(public)/forgot-password/page.tsx,  M frontend-next/src/app/(public)/login/page.tsx,  M frontend-next/src/app/(public)/register/page.tsx,  M frontend-next/src/app/(public)/reset-password/page.tsx,  M frontend-next/src/app/(public)/unlock-account/page.tsx,  M frontend-next/src/app/(public)/verify-email/page.tsx,  M frontend-next/src/providers/user-provider.tsx,  M frontend-next/src/types/index.ts,  M src/main/java/com/example/auth/config/SecurityConfig.java,  M src/main/java/com/example/auth/dto/UserResponse.java,  M src/main/java/com/example/auth/dto/profile/ProfileResponse.java,  M src/main/java/com/example/auth/entity/User.java,  M src/main/java/com/example/auth/security/CustomOAuth2UserService.java,  M src/main/java/com/example/auth/security/JwtAuthenticationFilter.java,  M src/main/java/com/example/auth/security/OAuth2AuthenticationSuccessHandler.java,  M src/main/java/com/example/auth/security/OAuthAttributes.java,  M src/main/java/com/example/auth/service/AuthService.java,  M src/main/java/com/example/auth/service/UserService.java,  M src/main/resources/application.yml, ?? .ref-v0-movie-community-service/, ?? src/main/java/com/example/auth/entity/AuthProvider.java, ?? src/main/java/com/example/auth/security/OAuth2AuthenticationFailureHandler.java, ?? src/test/
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: docker compose build backend 성공; frontend-next npm run build 성공; docker compose up -d --build backend frontend 성공
+- Open Risks: 브라우저 쿠키/세션 잔여 상태에 따라 재현 편차 가능, 실제 브라우저 재로그인 E2E 최종 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 카카오 로그인 재시도 후 /api/users/me 200 및 UI 로그인 상태 일치 확인, 2) 실패 시 Network에서 /oauth2/redirect, /api/users/me 응답 코드/헤더 확인, 3) 필요 시 UserController @AuthenticationPrincipal null-safe 처리 추가
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-03-04 13:37:48 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Provider 기반 로그인/비밀번호 정책 분기 및 설정 UI 반영
+- Scope (In/Out): In: src/main/java/com/example/auth/{service,dto/profile,entity}/**, frontend-next/src/app/(protected)/settings/page.tsx, frontend-next/src/types/index.ts / Out: 네이버 OAuth 신규 연동, 관리자 전용 사용자 필터 API 추가
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M AGENTS.md,  M docker-compose.yml,  M frontend-next/src/app/(protected)/settings/page.tsx,  M frontend-next/src/app/(public)/forgot-password/page.tsx,  M frontend-next/src/app/(public)/login/page.tsx,  M frontend-next/src/app/(public)/register/page.tsx,  M frontend-next/src/app/(public)/reset-password/page.tsx,  M frontend-next/src/app/(public)/unlock-account/page.tsx,  M frontend-next/src/app/(public)/verify-email/page.tsx,  M frontend-next/src/types/index.ts,  M src/main/java/com/example/auth/config/SecurityConfig.java,  M src/main/java/com/example/auth/dto/UserResponse.java,  M src/main/java/com/example/auth/dto/profile/ProfileResponse.java,  M src/main/java/com/example/auth/entity/User.java,  M src/main/java/com/example/auth/security/CustomOAuth2UserService.java,  M src/main/java/com/example/auth/security/OAuthAttributes.java,  M src/main/java/com/example/auth/service/AuthService.java,  M src/main/java/com/example/auth/service/UserService.java,  M src/main/resources/application.yml, ?? .ref-v0-movie-community-service/, ?? src/main/java/com/example/auth/entity/AuthProvider.java, ?? src/main/java/com/example/auth/security/OAuth2AuthenticationFailureHandler.java, ?? src/test/
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: docker compose build backend 성공; frontend-next npm run build 성공(기존 lint warning만 존재)
+- Open Risks: 기존 소셜 계정이 LOCAL로 남아있으면 정책 분기 체감이 제한될 수 있어 로그인 후 provider 재동기화 필요
+- Blockers: None
+- Next 3 Actions: 1) 카카오 로그인 재시도 후 users.provider/provider_user_id 값 반영 확인, 2) 설정 페이지에서 소셜 계정 비밀번호 카드 안내 문구 UX 미세 조정, 3) 필요 시 관리자용 users provider 필터 API 설계
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-03-04 11:31:39 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 카카오 OAuth 로그인 연동 및 이메일 필수 동의 처리
+- Scope (In/Out): In: src/main/resources/application.yml, src/main/java/com/example/auth/security/**, src/main/java/com/example/auth/config/SecurityConfig.java, frontend-next/src/app/(public)/login/page.tsx, docker-compose.yml / Out: 네이버 OAuth 구현, 백엔드 도메인 로직 대규모 개편
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M docker-compose.yml,  M frontend-next/src/app/(public)/forgot-password/page.tsx,  M frontend-next/src/app/(public)/login/page.tsx,  M frontend-next/src/app/(public)/register/page.tsx,  M frontend-next/src/app/(public)/reset-password/page.tsx,  M frontend-next/src/app/(public)/unlock-account/page.tsx,  M frontend-next/src/app/(public)/verify-email/page.tsx,  M src/main/java/com/example/auth/config/SecurityConfig.java,  M src/main/java/com/example/auth/security/CustomOAuth2UserService.java,  M src/main/java/com/example/auth/security/OAuthAttributes.java,  M src/main/resources/application.yml, ?? .ref-v0-movie-community-service/, ?? src/main/java/com/example/auth/security/OAuth2AuthenticationFailureHandler.java, ?? src/test/
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: docker compose build backend 성공; frontend-next npm run build 성공(기존 lint warning만 존재)
+- Open Risks: KAKAO_CLIENT_AUTH_METHOD 설정이 콘솔의 Client Secret 사용 여부와 불일치하면 OAuth 교환 실패 가능
+- Blockers: None
+- Next 3 Actions: 1) 카카오 실제 브라우저 로그인 E2E 검증 및 동의 거부 시나리오 확인, 2) 네이버 OAuth registration/provider 및 attribute 매핑 추가, 3) OAuth provider 확장 내용을 PROJECT_GUIDE.md와 동기화
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-02-27 17:58:17 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -362,3 +410,6 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
+
+
