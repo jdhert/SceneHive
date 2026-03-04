@@ -41,7 +41,7 @@ function ToggleItem({ label, description, checked, onChange }: {
 export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const { logout } = useUser();
+  const { user, logout } = useUser();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,6 +49,9 @@ export default function SettingsPage() {
   const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState('');
+
+  const provider = user?.provider?.toUpperCase();
+  const isSocialLogin = provider != null && provider !== 'LOCAL';
 
   const inputStyle = { borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' };
 
@@ -187,36 +190,45 @@ export default function SettingsPage() {
             <CardTitle className="text-white text-base">비밀번호 변경</CardTitle>
           </CardHeader>
           <CardContent>
-            {pwError && (
-              <div className="p-3 rounded-md text-sm mb-4"
-                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
-                {pwError}
+            {isSocialLogin ? (
+              <div className="rounded-md p-4 text-sm"
+                style={{ border: '1px solid rgba(245,158,11,0.25)', background: 'rgba(245,158,11,0.08)', color: 'rgba(255,255,255,0.82)' }}>
+                현재 계정은 <span className="font-semibold">{provider}</span> 소셜 로그인 계정입니다. 비밀번호 변경은 해당 플랫폼에서 진행해주세요.
               </div>
+            ) : (
+              <>
+                {pwError && (
+                  <div className="p-3 rounded-md text-sm mb-4"
+                    style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}>
+                    {pwError}
+                  </div>
+                )}
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>현재 비밀번호</Label>
+                    <Input type="password" value={pwForm.current}
+                      onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })}
+                      style={inputStyle} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호</Label>
+                    <Input type="password" placeholder="최소 8자 이상" value={pwForm.newPw}
+                      onChange={(e) => setPwForm({ ...pwForm, newPw: e.target.value })}
+                      style={inputStyle} required minLength={8} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호 확인</Label>
+                    <Input type="password" placeholder="새 비밀번호를 다시 입력하세요" value={pwForm.confirm}
+                      onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })}
+                      style={inputStyle} required minLength={8} />
+                  </div>
+                  <Button type="submit" disabled={pwLoading} className="font-bold text-white"
+                    style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: pwLoading ? 'none' : '0 4px 15px rgba(245,158,11,0.3)' }}>
+                    {pwLoading ? '변경 중...' : '비밀번호 변경'}
+                  </Button>
+                </form>
+              </>
             )}
-<form onSubmit={handlePasswordChange} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>현재 비밀번호</Label>
-                <Input type="password" value={pwForm.current}
-                  onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })}
-                  style={inputStyle} required />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호</Label>
-                <Input type="password" placeholder="최소 8자 이상" value={pwForm.newPw}
-                  onChange={(e) => setPwForm({ ...pwForm, newPw: e.target.value })}
-                  style={inputStyle} required minLength={8} />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>새 비밀번호 확인</Label>
-                <Input type="password" placeholder="새 비밀번호를 다시 입력하세요" value={pwForm.confirm}
-                  onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })}
-                  style={inputStyle} required minLength={8} />
-              </div>
-              <Button type="submit" disabled={pwLoading} className="font-bold text-white"
-                style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: pwLoading ? 'none' : '0 4px 15px rgba(245,158,11,0.3)' }}>
-                {pwLoading ? '변경 중...' : '비밀번호 변경'}
-              </Button>
-            </form>
           </CardContent>
         </Card>
       </main>

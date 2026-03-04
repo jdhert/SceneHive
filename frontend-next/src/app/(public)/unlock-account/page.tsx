@@ -7,9 +7,9 @@ import api from '@/lib/api-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-const BG = '#0B0B14';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#D97706';
+const BG = '#04060C';
+const AMBER = '#55A8FF';
+const AMBER_DARK = '#2A6FD2';
 
 function UnlockAccountContent() {
   const searchParams = useSearchParams();
@@ -39,11 +39,11 @@ function UnlockAccountContent() {
     <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: BG }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/3 left-1/3 w-80 h-80 rounded-full blur-3xl opacity-10"
-          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+          style={{ background: 'radial-gradient(circle, #55A8FF, transparent)' }} />
       </div>
 
       <Card className="w-full max-w-md relative z-10 border-0"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(85,168,255,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         <CardContent className="py-12 text-center">
           {status === 'loading' && (
             <>
@@ -75,7 +75,7 @@ function UnlockAccountContent() {
               </div>
               <Link href="/login">
                 <Button className="font-medium text-white"
-                  style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  style={{ background: 'rgba(85,168,255,0.15)', border: '1px solid rgba(85,168,255,0.3)' }}>
                   로그인으로 이동
                 </Button>
               </Link>
@@ -98,3 +98,4 @@ export default function UnlockAccountPage() {
     </Suspense>
   );
 }
+

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authService, userService } from '@/services/api';
-import { getAccessToken, setAccessToken, clearAccessToken } from '@/lib/access-token';
+import { getAccessToken, setAccessToken, clearAccessToken, subscribeAccessToken } from '@/lib/access-token';
 import type { User } from '@/types';
 
 function setSessionCookie() {
@@ -73,6 +73,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
+  }, [fetchUser]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeAccessToken((token) => {
+      if (!token) {
+        return;
+      }
+      fetchUser({ suppressLoading: true });
+    });
+
+    return unsubscribe;
   }, [fetchUser]);
 
   useEffect(() => {

@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-const BG = '#0B0B14';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#D97706';
+const BG = '#04060C';
+const AMBER = '#55A8FF';
+const AMBER_DARK = '#2A6FD2';
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -36,17 +36,17 @@ function VerifyEmailContent() {
     }
   };
 
-  const inputStyle = { borderColor: 'rgba(245,158,11,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' };
+  const inputStyle = { borderColor: 'rgba(85,168,255,0.25)', background: 'rgba(255,255,255,0.06)', color: 'white' };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: BG }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/3 left-1/3 w-80 h-80 rounded-full blur-3xl opacity-10"
-          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+          style={{ background: 'radial-gradient(circle, #55A8FF, transparent)' }} />
       </div>
 
       <Card className="w-full max-w-md relative z-10 border-0"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(85,168,255,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="flex justify-center mb-2"><span className="text-3xl">📧</span></div>
           <CardTitle className="text-3xl font-bold text-white">이메일 인증</CardTitle>
@@ -77,7 +77,7 @@ function VerifyEmailContent() {
                 style={inputStyle} required />
             </div>
             <Button type="submit" className="w-full font-bold py-5 text-white" disabled={isLoading}
-              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: isLoading ? 'none' : '0 4px 15px rgba(245,158,11,0.3)' }}>
+              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: isLoading ? 'none' : '0 4px 15px rgba(85,168,255,0.3)' }}>
               {isLoading ? '인증 중...' : '이메일 인증하기'}
             </Button>
           </form>
@@ -98,3 +98,4 @@ export default function VerifyEmailPage() {
     </Suspense>
   );
 }
+

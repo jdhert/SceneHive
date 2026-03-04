@@ -1,5 +1,6 @@
 // === Enums ===
 export type Role = 'USER' | 'ADMIN';
+export type AuthProvider = 'LOCAL' | 'GOOGLE' | 'KAKAO' | 'NAVER';
 export type MessageType = 'TEXT' | 'CODE';
 export type WorkspaceRole = 'OWNER' | 'ADMIN' | 'MEMBER';
 export type UserStatus = 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
@@ -26,7 +27,7 @@ export interface User {
   company?: string;
   status: UserStatus;
   isVerified: boolean;
-  provider?: string;
+  provider?: AuthProvider;
   createdAt: string;
   updatedAt: string;
   lastSeenAt?: string;
