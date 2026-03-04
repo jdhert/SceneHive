@@ -5,6 +5,7 @@ import com.example.auth.dto.profile.ProfileResponse;
 import com.example.auth.dto.profile.PublicProfileResponse;
 import com.example.auth.dto.profile.UpdateProfileRequest;
 import com.example.auth.dto.profile.UpdateStatusRequest;
+import com.example.auth.entity.AuthProvider;
 import com.example.auth.entity.User;
 import com.example.auth.entity.UserStatus;
 import com.example.auth.exception.CustomException;
@@ -107,6 +108,10 @@ public class UserService {
     public void changePassword(String email, ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
+
+        if (user.getProvider() != AuthProvider.LOCAL) {
+            throw new CustomException("소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.", HttpStatus.BAD_REQUEST);
+        }
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new CustomException("현재 비밀번호가 올바르지 않습니다", HttpStatus.BAD_REQUEST);

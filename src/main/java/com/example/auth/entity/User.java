@@ -31,6 +31,13 @@ public class User {
     @Builder.Default
     private Role role = Role.USER;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'LOCAL'")
+    @Builder.Default
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    private String providerUserId;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -64,6 +71,9 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+        if (provider == null) {
+            provider = AuthProvider.LOCAL;
+        }
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }

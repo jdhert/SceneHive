@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -56,6 +57,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             var cookie = refreshTokenCookieProvider.create(refreshToken, request.isSecure());
             response.addHeader("Set-Cookie", cookie.toString());
+
+            if (request.getSession(false) != null) {
+                request.getSession(false).invalidate();
+            }
+            SecurityContextHolder.clearContext();
 
             String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/redirect")
                     .queryParam("accessToken", accessToken)

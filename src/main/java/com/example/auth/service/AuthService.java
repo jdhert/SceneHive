@@ -7,6 +7,7 @@ import com.example.auth.dto.RefreshTokenRequest;
 import com.example.auth.dto.RegisterRequest;
 import com.example.auth.dto.ResetPasswordRequest;
 import com.example.auth.dto.UserResponse;
+import com.example.auth.entity.AuthProvider;
 import com.example.auth.entity.User;
 import com.example.auth.exception.CustomException;
 import com.example.auth.repository.UserRepository;
@@ -59,6 +60,7 @@ public class AuthService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .name(request.name())
+                .provider(AuthProvider.LOCAL)
                 .isVerified(false)
                 .build();
 
@@ -76,6 +78,10 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        if (user.getProvider() != AuthProvider.LOCAL) {
+            throw new CustomException("소셜 로그인 계정입니다. " + user.getProvider().name() + " 로그인을 사용해주세요.", HttpStatus.BAD_REQUEST);
+        }
 
         if (user.getAccountLockedUntil() != null) {
             throw new CustomException("계정이 잠겼습니다. 이메일로 전송된 잠금 해제 링크를 확인해주세요.", HttpStatus.LOCKED);

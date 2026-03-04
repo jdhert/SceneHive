@@ -1,6 +1,7 @@
 package com.example.auth.dto.profile;
 
 import com.example.auth.entity.User;
+import com.example.auth.entity.AuthProvider;
 import com.example.auth.entity.UserStatus;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ public record ProfileResponse(
     Long id,
     String email,
     String name,
+    AuthProvider provider,
     String profilePictureUrl,
     String bio,
     String jobTitle,
@@ -22,6 +24,7 @@ public record ProfileResponse(
             user.getId(),
             user.getEmail(),
             user.getName(),
+            user.getProvider(),
             user.getProfilePictureUrl(),
             user.getBio(),
             user.getJobTitle(),

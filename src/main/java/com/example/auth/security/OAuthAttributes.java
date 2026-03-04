@@ -46,6 +46,12 @@ class OAuthAttributes {
         if ("google".equals(registrationId)) {
             return ofGoogle(attributes);
         }
+        if ("kakao".equals(registrationId)) {
+            return ofKakao(attributes);
+        }
+        if ("naver".equals(registrationId)) {
+            return ofNaver(attributes);
+        }
         throw new IllegalArgumentException("Unknown OAuth2 Provider: " + registrationId);
     }
 
@@ -55,6 +61,53 @@ class OAuthAttributes {
                 .email((String) attributes.get("email"))
                 .name((String) attributes.get("name"))
                 .imageUrl((String) attributes.get("picture"))
+                .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static UserProfile ofKakao(Map<String, Object> attributes) {
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        Map<String, Object> profile = kakaoAccount == null
+                ? null
+                : (Map<String, Object>) kakaoAccount.get("profile");
+
+        String email = kakaoAccount == null ? null : (String) kakaoAccount.get("email");
+        String nickname = profile == null ? null : (String) profile.get("nickname");
+        String imageUrl = profile == null ? null : (String) profile.get("profile_image_url");
+
+        return UserProfile.builder()
+                .oauthId(String.valueOf(attributes.get("id")))
+                .email(email)
+                .name(nickname)
+                .imageUrl(imageUrl)
+                .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static UserProfile ofNaver(Map<String, Object> attributes) {
+        // NAVER returns user info wrapped in "response" object
+        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+
+        if (response == null) {
+            return UserProfile.builder()
+                    .oauthId(null)
+                    .email(null)
+                    .name(null)
+                    .imageUrl(null)
+                    .build();
+        }
+
+        String id = (String) response.get("id");
+        String email = (String) response.get("email");
+        String name = (String) response.get("name");
+        String nickname = (String) response.get("nickname");
+        String profileImage = (String) response.get("profile_image");
+
+        return UserProfile.builder()
+                .oauthId(id)
+                .email(email)
+                .name(name != null ? name : nickname)
+                .imageUrl(profileImage)
                 .build();
     }
 }
