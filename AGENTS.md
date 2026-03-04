@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-03-04 17:44:34 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): GitHub Actions CD-Staging 실패 원인(이미지 태그 대문자) 수정 및 체크포인트 기록
+- Scope (In/Out): In: .github/workflows/{cd-staging,cd-prod}.yml, deploy.sh, AGENTS.md / Out: CI 테스트 로직 변경, STAGING 서버 시크릿 등록
+- Current Status: in progress
+- Percent Complete: 95%
+- Files Changed:  M .github/workflows/cd-prod.yml,  M .github/workflows/cd-staging.yml,  M deploy.sh,  M AGENTS.md, ?? .ref-v0-movie-community-service/, ?? .sisyphus/, ?? nul
+- Commands Run: git status --short, git branch --show-current, grep(워크플로 IMAGE_NAME 사용처), read(.github/workflows/*.yml, deploy.sh), bash -n deploy.sh, git diff -- .github/workflows/cd-staging.yml .github/workflows/cd-prod.yml deploy.sh
+- Tests Run + Result: bash -n deploy.sh 성공; YAML/Bash LSP 미설치로 lsp_diagnostics 미실행
+- Open Risks: GitHub Secrets(STAGING_HOST/STAGING_USER/STAGING_SSH_KEY) 미설정 시 CD-Staging deploy job 실패 지속 가능
+- Blockers: None
+- Next 3 Actions: 1) workflow/deploy.sh 수정사항 커밋 및 push, 2) main push 후 Actions에서 CD-Staging build-and-push 재검증, 3) 필요 시 CD-Staging을 workflow_dispatch 전용으로 분리 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-03-04 13:54:36 +09:00
 - Agent Name: Codex
 - Branch: main
