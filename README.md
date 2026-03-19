@@ -160,6 +160,134 @@ flowchart TD
 프론트엔드는 `next.config.mjs`의 rewrite 설정을 통해 백엔드 API, WebSocket, OAuth 경로를 프록시합니다.  
 TMDB 기반 영화 데이터는 `frontend-next/src/app/api/**` 및 `frontend-next/src/lib/tmdb.ts`를 통해 처리합니다.
 
+## 데이터 모델링
+
+README에는 빠른 이해를 위한 상위 수준 데이터 모델만 싣고, 상세 컬럼/DDL은 실제 엔티티와 스키마 설정을 기준으로 관리하는 것이 일반적입니다.  
+현재 SceneHive는 아래와 같은 도메인 모델을 중심으로 동작합니다.
+
+```mermaid
+erDiagram
+    USER {
+        bigint id PK
+        string email UK
+        string password
+        string name
+        enum role
+        enum provider
+        string providerUserId
+        boolean isVerified
+        enum status
+    }
+
+    USER_SETTINGS {
+        bigint id PK
+        bigint user_id UK,FK
+        enum theme
+        string language
+        boolean emailNotifications
+        boolean pushNotifications
+        boolean mentionNotifications
+    }
+
+    WORKSPACE {
+        bigint id PK
+        string name
+        string description
+        string inviteCode UK
+        bigint owner_id FK
+    }
+
+    WORKSPACE_MEMBER {
+        bigint id PK
+        bigint workspace_id FK
+        bigint user_id FK
+        enum role
+        datetime joinedAt
+    }
+
+    CHAT_MESSAGE {
+        bigint id PK
+        bigint workspace_id FK
+        bigint sender_id FK
+        text content
+        enum type
+        datetime createdAt
+    }
+
+    CODE_SNIPPET {
+        bigint id PK
+        bigint workspace_id FK
+        bigint author_id FK
+        string title
+        text code
+        string language
+    }
+
+    MEMO {
+        bigint id PK
+        bigint workspace_id FK
+        bigint author_id FK
+        string title
+        text content
+    }
+
+    NOTIFICATION {
+        bigint id PK
+        bigint recipient_id FK
+        bigint sender_id FK
+        bigint workspace_id FK
+        enum type
+        boolean isRead
+        string relatedUrl
+    }
+
+    FAVORITE {
+        bigint id PK
+        bigint user_id FK
+        enum targetType
+        bigint targetId
+        string displayName
+        string imagePath
+    }
+
+    USER ||--|| USER_SETTINGS : has
+    USER ||--o{ WORKSPACE : owns
+    USER ||--o{ WORKSPACE_MEMBER : joins
+    WORKSPACE ||--o{ WORKSPACE_MEMBER : contains
+    WORKSPACE ||--o{ CHAT_MESSAGE : contains
+    USER ||--o{ CHAT_MESSAGE : sends
+    WORKSPACE ||--o{ CODE_SNIPPET : stores
+    USER ||--o{ CODE_SNIPPET : authors
+    WORKSPACE ||--o{ MEMO : stores
+    USER ||--o{ MEMO : writes
+    USER ||--o{ NOTIFICATION : receives
+    USER ||--o{ NOTIFICATION : triggers
+    WORKSPACE ||--o{ NOTIFICATION : scopes
+    USER ||--o{ FAVORITE : saves
+```
+
+### 핵심 모델 설명
+
+| 엔티티 | 역할 | 핵심 포인트 |
+|------|------|------|
+| `users` | 계정, 인증, 프로필의 중심 | 로컬/소셜 로그인 provider 정보를 함께 보관 |
+| `user_settings` | 사용자 환경설정 | `users`와 1:1 관계 |
+| `workspaces` | 영화 클럽 단위 공간 | 소유자(`owner_id`)와 초대코드 기반 참여 구조 |
+| `workspace_members` | 클럽 멤버십 | `workspace_id + user_id` 유니크 제약으로 중복 가입 방지 |
+| `chat_messages` | 실시간 토론 기록 | 워크스페이스와 발신자 기준으로 누적 |
+| `code_snippets` | 명대사/스니펫 아카이브 | 워크스페이스별 기록, 작성자 추적 |
+| `memos` | 리뷰/감상문 | 마크다운 기반 장문 콘텐츠 저장 |
+| `notifications` | 멘션/활동 알림 | recipient 중심 읽음 상태 관리, 인덱스 존재 |
+| `favorites` | 영화/TV/인물 즐겨찾기 | 로컬 작품 테이블 없이 `targetType + targetId`로 TMDB 대상을 참조 |
+
+### 설계 포인트
+
+- 영화/TV/인물 원천 데이터는 TMDB에서 조회하고, 로컬 DB에는 전체 카탈로그를 저장하지 않습니다.
+- 즐겨찾기는 내부 FK 대신 `targetType`, `targetId` 조합으로 외부 콘텐츠를 식별합니다.
+- 커뮤니티 데이터는 `workspace`를 중심으로 채팅, 메모, 스니펫, 알림이 연결되는 구조입니다.
+- 멤버십은 `workspace_members` 조인 엔티티로 분리해 권한(`OWNER`, `ADMIN`, `MEMBER`)을 표현합니다.
+- 알림은 `recipient_id`, `is_read`, `created_at` 복합 인덱스로 읽지 않은 항목 조회를 최적화합니다.
+
 ## 디렉터리 구조
 
 ```text

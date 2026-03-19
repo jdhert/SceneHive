@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-03-19 10:23:07 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README에 데이터 모델링 산출물 추가
+- Scope (In/Out): In: README.md, AGENTS.md / 엔티티 관계 기반 데이터 모델링 문서화 / Out: 애플리케이션 로직 및 스키마 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M .gitignore,  M AGENTS.md,  M README.md, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README에 데이터 모델링 산출물 추가" -ScopeIn "README.md, AGENTS.md / 엔티티 관계 기반 데이터 모델링 문서화" -ScopeOut "애플리케이션 로직 및 스키마 변경 없음" -Status "done" -PercentComplete "100%" -TestsResult "Not run (문서 작업; 엔티티 관계와 README 렌더링용 Mermaid 다이어그램 검토 완료)" -OpenRisks "README의 데이터 모델은 개념/요약 수준이며 상세 DDL 변경 시 함께 갱신 필요" -Blockers "None" -NextAction1 "원하면 상세 스키마는 docs/ERD 문서로 분리" -NextAction2 "엔티티 추가 시 README 데이터 모델 섹션 동기화" -NextAction3 "필요 시 DB 인덱스/제약조건 표를 별도 추가"
+- Tests Run + Result: Not run (문서 작업; 엔티티 관계와 README 렌더링용 Mermaid 다이어그램 검토 완료)
+- Open Risks: README의 데이터 모델은 개념/요약 수준이며 상세 DDL 변경 시 함께 갱신 필요
+- Blockers: None
+- Next 3 Actions: 1) 원하면 상세 스키마는 docs/ERD 문서로 분리, 2) 엔티티 추가 시 README 데이터 모델 섹션 동기화, 3) 필요 시 DB 인덱스/제약조건 표를 별도 추가
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-03-19 10:21:03 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README에 데이터 모델링 산출물 추가
+- Scope (In/Out): In: README.md, AGENTS.md / 엔티티 관계 기반 데이터 모델링 문서화 / Out: 애플리케이션 로직 및 스키마 변경 없음
+- Current Status: in progress
+- Percent Complete: 10%
+- Files Changed:  M .gitignore, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README에 데이터 모델링 산출물 추가" -ScopeIn "README.md, AGENTS.md / 엔티티 관계 기반 데이터 모델링 문서화" -ScopeOut "애플리케이션 로직 및 스키마 변경 없음" -Status "in progress" -PercentComplete "10%" -TestsResult "Not run (문서 작업 시작)" -OpenRisks "README용 모델링은 현재 엔티티 기준 요약이므로 컬럼 전체 목록 대신 핵심 관계 위주로 표현할 가능성이 높음" -Blockers "None" -NextAction1 "엔티티 관계와 핵심 속성 확인" -NextAction2 "README에 ER 다이어그램과 도메인 설명 추가" -NextAction3 "문서 변경분 커밋 및 원격 푸시"
+- Tests Run + Result: Not run (문서 작업 시작)
+- Open Risks: README용 모델링은 현재 엔티티 기준 요약이므로 컬럼 전체 목록 대신 핵심 관계 위주로 표현할 가능성이 높음
+- Blockers: None
+- Next 3 Actions: 1) 엔티티 관계와 핵심 속성 확인, 2) README에 ER 다이어그램과 도메인 설명 추가, 3) 문서 변경분 커밋 및 원격 푸시
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-03-19 10:02:57 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -490,6 +522,8 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
+
 
 
 
