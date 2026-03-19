@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-03-19 10:02:57 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 시각화 보강
+- Scope (In/Out): In: README.md, AGENTS.md / Mermaid 기반 도식 및 시각 구조 개선 / Out: 애플리케이션 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M .gitignore,  M AGENTS.md,  M README.md, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 시각화 보강" -ScopeIn "README.md, AGENTS.md / Mermaid 기반 도식 및 시각 구조 개선" -ScopeOut "애플리케이션 로직 변경 없음" -Status "done" -PercentComplete "100%" -TestsResult "Not run (문서 작업; Mermaid 문법과 문서 흐름 검토 완료)" -OpenRisks "Mermaid 미지원 뷰어에서는 다이어그램이 코드 블록으로만 보일 수 있음" -Blockers "None" -NextAction1 "원하면 시각화 변경분만 별도 커밋" -NextAction2 "원하면 README 스크린샷 섹션 추가" -NextAction3 "추가 기능 반영 시 다이어그램도 함께 갱신"
+- Tests Run + Result: Not run (문서 작업; Mermaid 문법과 문서 흐름 검토 완료)
+- Open Risks: Mermaid 미지원 뷰어에서는 다이어그램이 코드 블록으로만 보일 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 원하면 시각화 변경분만 별도 커밋, 2) 원하면 README 스크린샷 섹션 추가, 3) 추가 기능 반영 시 다이어그램도 함께 갱신
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-03-19 10:01:59 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 시각화 보강
+- Scope (In/Out): In: README.md, AGENTS.md / Mermaid 기반 도식 및 시각 구조 개선 / Out: 애플리케이션 로직 변경 없음
+- Current Status: in progress
+- Percent Complete: 15%
+- Files Changed:  M .gitignore, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 시각화 보강" -ScopeIn "README.md, AGENTS.md / Mermaid 기반 도식 및 시각 구조 개선" -ScopeOut "애플리케이션 로직 변경 없음" -Status "in progress" -PercentComplete "15%" -TestsResult "Not run (문서 작업 시작)" -OpenRisks "Mermaid 렌더링은 GitHub에서는 지원되지만 일부 뷰어에서는 텍스트로만 보일 수 있음" -Blockers "None" -NextAction1 "README 내 시각화 포인트 선정" -NextAction2 "Mermaid 다이어그램 및 요약 섹션 추가" -NextAction3 "검토 후 커밋/푸시 여부 정리"
+- Tests Run + Result: Not run (문서 작업 시작)
+- Open Risks: Mermaid 렌더링은 GitHub에서는 지원되지만 일부 뷰어에서는 텍스트로만 보일 수 있음
+- Blockers: None
+- Next 3 Actions: 1) README 내 시각화 포인트 선정, 2) Mermaid 다이어그램 및 요약 섹션 추가, 3) 검토 후 커밋/푸시 여부 정리
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-03-19 09:53:01 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -458,6 +490,8 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
+
 
 
 
