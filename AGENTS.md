@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-03-19 09:53:01 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): SceneHive README를 실제 프로젝트 구조 기준으로 전면 개편
+- Scope (In/Out): In: README.md, AGENTS.md / 프로젝트 개요·구조·실행 가이드 문서화 / Out: 애플리케이션 로직 및 인프라 동작 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M .gitignore,  M AGENTS.md,  M README.md, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "SceneHive README를 실제 프로젝트 구조 기준으로 전면 개편" -ScopeIn "README.md, AGENTS.md / 프로젝트 개요·구조·실행 가이드 문서화" -ScopeOut "애플리케이션 로직 및 인프라 동작 변경 없음" -Status "done" -PercentComplete "100%" -TestsResult "Not run (문서 작업; README 내용과 저장소 구조/설정 파일 교차 검토 완료)" -OpenRisks "README는 현재 코드 기준으로 정리했으며 향후 라우트/배포 변경 시 문서 동기화가 필요" -Blockers "None" -NextAction1 "필요 시 README에 스크린샷 또는 아키텍처 다이어그램 추가" -NextAction2 "PROJECT_GUIDE와 README 변경 시 함께 동기화" -NextAction3 "향후 Favorites 전용 페이지 등 신규 기능 반영 시 README 갱신"
+- Tests Run + Result: Not run (문서 작업; README 내용과 저장소 구조/설정 파일 교차 검토 완료)
+- Open Risks: README는 현재 코드 기준으로 정리했으며 향후 라우트/배포 변경 시 문서 동기화가 필요
+- Blockers: None
+- Next 3 Actions: 1) 필요 시 README에 스크린샷 또는 아키텍처 다이어그램 추가, 2) PROJECT_GUIDE와 README 변경 시 함께 동기화, 3) 향후 Favorites 전용 페이지 등 신규 기능 반영 시 README 갱신
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-03-19 09:50:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): SceneHive README를 실제 프로젝트 구조 기준으로 전면 개편
+- Scope (In/Out): In: README.md, AGENTS.md / 프로젝트 개요·구조·실행 가이드 문서화 / Out: 애플리케이션 로직 및 인프라 동작 변경 없음
+- Current Status: in progress
+- Percent Complete: 20%
+- Files Changed:  M .gitignore, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "SceneHive README를 실제 프로젝트 구조 기준으로 전면 개편" -ScopeIn "README.md, AGENTS.md / 프로젝트 개요·구조·실행 가이드 문서화" -ScopeOut "애플리케이션 로직 및 인프라 동작 변경 없음" -Status "in progress" -PercentComplete "20%" -TestsResult "Not run (문서 작업 시작 전)" -OpenRisks "README 내용은 PROJECT_GUIDE 및 현재 코드 구조 기준으로 정리되며 미완료 기능은 상태 표기가 필요" -Blockers "None" -NextAction1 "실제 구조 기준 README 섹션 초안 작성" -NextAction2 "README.md 반영 후 문구/명령 정합성 검토" -NextAction3 "작업 완료 스냅샷으로 AGENTS.md 갱신"
+- Tests Run + Result: Not run (문서 작업 시작 전)
+- Open Risks: README 내용은 PROJECT_GUIDE 및 현재 코드 구조 기준으로 정리되며 미완료 기능은 상태 표기가 필요
+- Blockers: None
+- Next 3 Actions: 1) 실제 구조 기준 README 섹션 초안 작성, 2) README.md 반영 후 문구/명령 정합성 검토, 3) 작업 완료 스냅샷으로 AGENTS.md 갱신
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-03-04 17:44:34 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -426,6 +458,8 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
+
 
 
 
