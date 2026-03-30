@@ -31,7 +31,7 @@ export default function MessageList({ messages, memberMap }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-1">
       {messages.map((message, index) => {
         const prevMessage = index > 0 ? messages[index - 1] : null;
         const showAvatar =

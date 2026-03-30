@@ -48,7 +48,7 @@ export default function MessageItem({ message, showAvatar, member }: MessageItem
   const senderUser = member?.user || message.sender;
 
   return (
-    <div className={cn('flex gap-3', showAvatar ? 'mt-3 pt-1' : 'pl-[52px]')}>
+    <div className={cn('flex gap-3', showAvatar ? 'mt-5 pt-1' : 'pl-[52px]')}>
       {showAvatar && (
         <div className="shrink-0 w-10">
           <Avatar

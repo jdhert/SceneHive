@@ -38,3 +38,6 @@ Thumbs.db
 
 # Agent handoff archive
 AGENTS_ARCHIVE.md
+
+# Agent workspace
+.sisyphus/
