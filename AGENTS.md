@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-15 17:43:18 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): CI smoke test 실패 원인 수정
+- Scope (In/Out): In: .github/workflows/ci.yml, docker-compose.yml, AGENTS.md / Out: 애플리케이션 비즈니스 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .github/workflows/ci.yml,  M docker-compose.yml, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "CI smoke test 실패 원인 수정" -ScopeIn ".github/workflows/ci.yml, docker-compose.yml, AGENTS.md" -ScopeOut "애플리케이션 비즈니스 로직 변경 없음" -Status "done" -PercentComplete "100" -TestsResult "빈 env-file 기준 docker compose up -d db redis backend 후 /actuator/health 200 확인; compose 기본값 치환 검증 완료" -OpenRisks "GitHub Actions 런타임에서 frontend health까지 포함한 전체 smoke는 원격 실행으로 최종 재검증 필요" -Blockers "None" -NextAction1 "수정분 커밋 및 push" -NextAction2 "GitHub Actions 재실행 후 backend health/log 출력 확인" -NextAction3 "필요 시 frontend health도 retry 방식으로 확장"
+- Tests Run + Result: 빈 env-file 기준 docker compose up -d db redis backend 후 /actuator/health 200 확인; compose 기본값 치환 검증 완료
+- Open Risks: GitHub Actions 런타임에서 frontend health까지 포함한 전체 smoke는 원격 실행으로 최종 재검증 필요
+- Blockers: None
+- Next 3 Actions: 1) 수정분 커밋 및 push, 2) GitHub Actions 재실행 후 backend health/log 출력 확인, 3) 필요 시 frontend health도 retry 방식으로 확장
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-15 17:29:00 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -602,5 +618,6 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 

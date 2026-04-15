@@ -108,10 +108,16 @@ jobs:
       - name: Wait for backend health with retry
         uses: nick-fields/retry@v3
         with:
-          timeout_seconds: 60
-          wait_seconds: 5
-          max_attempts: 12
+          timeout_seconds: 10
+          retry_wait_seconds: 5
+          max_attempts: 24
           command: curl -sf http://localhost:8081/actuator/health
+
+      - name: Dump smoke test logs on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --tail=200 db redis backend frontend
 
       - name: Check frontend health
         run: |
