@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -16,6 +16,7 @@ IMAGE_NAME="$(echo "${RAW_IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
 PROJECT_DIR="/opt/scenehive"
 COMPOSE_FILE="docker-compose.prod.yml"
 BACKUP_DIR="/opt/scenehive_backups"
+DEPLOY_ENV_FILE=".deploy.env"
 
 # Full image paths
 BACKEND_IMAGE="${REGISTRY}/${IMAGE_NAME}-backend"
@@ -52,21 +53,74 @@ scp_copy() {
     scp -o StrictHostKeyChecking=no -P "${PORT:-22}" "$@"
 }
 
+ensure_project_dir() {
+    ssh_cmd "sudo mkdir -p ${PROJECT_DIR} ${BACKUP_DIR} && sudo chown ${USER}:${USER} ${PROJECT_DIR} ${BACKUP_DIR}"
+}
+
+write_remote_file() {
+    local content="$1"
+    local destination="$2"
+    local tmp_file
+    tmp_file=$(mktemp)
+    printf '%s' "$content" > "$tmp_file"
+    scp_copy "$tmp_file" "${USER}@${HOST}:${destination}"
+    rm -f "$tmp_file"
+}
+
+write_runtime_env() {
+    local backend_tag="$1"
+    local frontend_tag="$2"
+
+    cat <<EOF | ssh_cmd "cat > ${PROJECT_DIR}/${DEPLOY_ENV_FILE}"
+IMAGE_NAME=${IMAGE_NAME}
+BACKEND_IMAGE_TAG=${backend_tag}
+FRONTEND_IMAGE_TAG=${frontend_tag}
+EOF
+}
+
+write_app_env() {
+    if [ -n "${ENV_FILE_CONTENT:-}" ]; then
+        log_info "Uploading runtime .env from GitHub secret..."
+        write_remote_file "${ENV_FILE_CONTENT}" "${PROJECT_DIR}/.env"
+        return
+    fi
+
+    if ssh_cmd "[ -f ${PROJECT_DIR}/.env ]"; then
+        log_warn "No ENV_FILE_CONTENT provided. Reusing existing ${PROJECT_DIR}/.env"
+        return
+    fi
+
+    log_error "No ENV_FILE_CONTENT provided and remote .env does not exist"
+    exit 1
+}
+
 # Backup current deployment
 backup_deployment() {
     log_info "Creating backup..."
     TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-    ssh_cmd "mkdir -p ${BACKUP_DIR}"
-    ssh_cmd "cp -r ${PROJECT_DIR}/docker-compose.yml ${BACKUP_DIR}/docker-compose.yml.\${TIMESTAMP}"
-    ssh_cmd "cp -r ${PROJECT_DIR}/.env ${BACKUP_DIR}/.env.\${TIMESTAMP}" || true
-    log_info "Backup created: ${BACKUP_DIR}/docker-compose.yml.${TIMESTAMP}"
+    ssh_cmd "mkdir -p ${BACKUP_DIR}/${TIMESTAMP}"
+    ssh_cmd "[ -f ${PROJECT_DIR}/docker-compose.yml ] && cp ${PROJECT_DIR}/docker-compose.yml ${BACKUP_DIR}/${TIMESTAMP}/docker-compose.yml || true"
+    ssh_cmd "[ -f ${PROJECT_DIR}/.env ] && cp ${PROJECT_DIR}/.env ${BACKUP_DIR}/${TIMESTAMP}/.env || true"
+    ssh_cmd "[ -f ${PROJECT_DIR}/${DEPLOY_ENV_FILE} ] && cp ${PROJECT_DIR}/${DEPLOY_ENV_FILE} ${BACKUP_DIR}/${TIMESTAMP}/${DEPLOY_ENV_FILE} || true"
+    log_info "Backup created: ${BACKUP_DIR}/${TIMESTAMP}"
 }
 
 # Login to GHCR
 ghcr_login() {
+    if [ -z "${REGISTRY_USERNAME:-}" ] || [ -z "${REGISTRY_PASSWORD:-}" ]; then
+        log_warn "Skipping registry login. Assuming public images in ${REGISTRY}"
+        return
+    fi
+
     log_info "Logging into GHCR..."
-    # Use GITHUB_TOKEN for GHCR login
-    echo "$GITHUB_TOKEN" | ssh_cmd "echo \$GITHUB_TOKEN | docker login ${REGISTRY} -u github --password-stdin"
+    local password_file="/tmp/scenehive_registry_password"
+    write_remote_file "${REGISTRY_PASSWORD}" "${password_file}"
+    ssh_cmd "cat ${password_file} | docker login ${REGISTRY} -u '${REGISTRY_USERNAME}' --password-stdin && rm -f ${password_file}"
+}
+
+compose_cmd() {
+    local command="$1"
+    ssh_cmd "cd ${PROJECT_DIR} && docker compose --env-file .env --env-file ${DEPLOY_ENV_FILE} ${command}"
 }
 
 # Deploy staging
@@ -75,37 +129,29 @@ deploy_staging() {
     
     log_info "Deploying STAGING (${SHA})..."
     
-    # Create project directory if not exists
-    ssh_cmd "mkdir -p ${PROJECT_DIR}"
+    ensure_project_dir
     
     # Copy docker-compose.prod.yml
     scp_copy docker-compose.prod.yml "${USER}@${HOST}:${PROJECT_DIR}/docker-compose.yml"
     
-    # Create or update .env file
-    scp_copy .env.staging.example "${USER}@${HOST}:${PROJECT_DIR}/.env"
+    # Create or update env files
+    write_app_env
+    write_runtime_env "${SHA}" "${SHA}"
     
     # Login to GHCR
     ghcr_login
     
-    # Pull and retag images
-    log_info "Pulling and retagging images..."
-    ssh_cmd "docker pull ${BACKEND_IMAGE}:${SHA}"
-    ssh_cmd "docker tag ${BACKEND_IMAGE}:${SHA} ${BACKEND_IMAGE}:latest"
-    ssh_cmd "docker pull ${FRONTEND_IMAGE}:${SHA}"
-    ssh_cmd "docker tag ${FRONTEND_IMAGE}:${SHA} ${FRONTEND_IMAGE}:latest"
-    
-    # Update compose file with correct image tags
-    ssh_cmd "cd ${PROJECT_DIR} && \
-        sed -i 's|image: ghcr.io/.*scenehive-backend:|image: ${BACKEND_IMAGE}:latest|' docker-compose.yml && \
-        sed -i 's|image: ghcr.io/.*scenehive-frontend:|image: ${FRONTEND_IMAGE}:latest|' docker-compose.yml"
+    # Pull images
+    log_info "Pulling images..."
+    compose_cmd "pull backend frontend"
     
     # Stop old containers
     log_info "Stopping old containers..."
-    ssh_cmd "cd ${PROJECT_DIR} && docker compose down" || true
+    compose_cmd "down" || true
     
     # Start services
     log_info "Starting services..."
-    ssh_cmd "cd ${PROJECT_DIR} && docker compose up -d"
+    compose_cmd "up -d"
     
     # Wait for health check
     log_info "Waiting for services to be healthy..."
@@ -129,35 +175,29 @@ deploy_production() {
     # Create backup first
     backup_deployment
     
-    # Create project directory if not exists
-    ssh_cmd "mkdir -p ${PROJECT_DIR}"
+    ensure_project_dir
     
     # Copy docker-compose.prod.yml
     scp_copy docker-compose.prod.yml "${USER}@${HOST}:${PROJECT_DIR}/docker-compose.yml"
     
-    # Create or update .env file
-    scp_copy .env.production.example "${USER}@${HOST}:${PROJECT_DIR}/.env"
+    # Create or update env files
+    write_app_env
+    write_runtime_env "${TAG}" "${TAG}"
     
     # Login to GHCR
     ghcr_login
     
     # Pull images with specific tag
     log_info "Pulling images..."
-    ssh_cmd "docker pull ${BACKEND_IMAGE}:${TAG}"
-    ssh_cmd "docker pull ${FRONTEND_IMAGE}:${TAG}"
-    
-    # Update compose file with correct image tags
-    ssh_cmd "cd ${PROJECT_DIR} && \
-        sed -i 's|image: ghcr.io/.*scenehive-backend:|image: ${BACKEND_IMAGE}:${TAG}|' docker-compose.yml && \
-        sed -i 's|image: ghcr.io/.*scenehive-frontend:|image: ${FRONTEND_IMAGE}:${TAG}|' docker-compose.yml"
+    compose_cmd "pull backend frontend"
     
     # Stop old containers
     log_info "Stopping old containers..."
-    ssh_cmd "cd ${PROJECT_DIR} && docker compose down"
+    compose_cmd "down"
     
     # Start services
     log_info "Starting services..."
-    ssh_cmd "cd ${PROJECT_DIR} && docker compose up -d"
+    compose_cmd "up -d"
     
     # Wait for health check
     log_info "Waiting for services to be healthy..."
@@ -178,7 +218,8 @@ rollback() {
     log_warn "Rolling back to previous backup..."
     
     # Find latest backup
-    local LATEST_BACKUP=$(ssh_cmd "ls -t ${BACKUP_DIR}/docker-compose.yml.* 2>/dev/null | head -1")
+    local LATEST_BACKUP
+    LATEST_BACKUP=$(ssh_cmd "ls -1dt ${BACKUP_DIR}/* 2>/dev/null | head -1")
     
     if [ -z "$LATEST_BACKUP" ]; then
         log_error "No backup found!"
@@ -186,11 +227,13 @@ rollback() {
     fi
     
     # Restore backup
-    ssh_cmd "cp ${LATEST_BACKUP} ${PROJECT_DIR}/docker-compose.yml"
-    ssh_cmd "cp ${BACKUP_DIR}/.env.* \$(echo ${LATEST_BACKUP} | rev | cut -d'.' -f1 | rev) ${PROJECT_DIR}/.env" || true
+    ssh_cmd "[ -f ${LATEST_BACKUP}/docker-compose.yml ] && cp ${LATEST_BACKUP}/docker-compose.yml ${PROJECT_DIR}/docker-compose.yml || true"
+    ssh_cmd "[ -f ${LATEST_BACKUP}/.env ] && cp ${LATEST_BACKUP}/.env ${PROJECT_DIR}/.env || true"
+    ssh_cmd "[ -f ${LATEST_BACKUP}/${DEPLOY_ENV_FILE} ] && cp ${LATEST_BACKUP}/${DEPLOY_ENV_FILE} ${PROJECT_DIR}/${DEPLOY_ENV_FILE} || true"
     
     # Restart services
-    ssh_cmd "cd ${PROJECT_DIR} && docker compose down && docker compose up -d"
+    compose_cmd "down"
+    compose_cmd "up -d"
     
     log_info "✅ Rollback completed!"
 }

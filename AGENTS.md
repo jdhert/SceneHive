@@ -162,6 +162,54 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-15 16:37:57 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Public GHCR 기준 OCI 자동배포 파이프라인 단순화
+- Scope (In/Out): In: .github/workflows/*.yml, deploy.sh, AGENTS.md / Out: 애플리케이션 비즈니스 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M .env.production.example,  M .env.staging.example,  M .github/workflows/cd-prod.yml,  M .github/workflows/cd-staging.yml,  M AGENTS.md,  M deploy.sh,  M docker-compose.prod.yml,  M frontend-next/Dockerfile, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Public GHCR 기준 OCI 자동배포 파이프라인 단순화" -ScopeIn ".github/workflows/*.yml, deploy.sh, AGENTS.md" -ScopeOut "애플리케이션 비즈니스 로직 변경 없음" -Status "done" -PercentComplete "100%" -TestsResult "git diff 및 compose config 검토 완료; bash 구문검사는 로컬 bash 부재로 미실행" -OpenRisks "GHCR package visibility가 실제로 public이 아니면 서버 pull 단계에서 여전히 인증이 필요함" -Blockers "None" -NextAction1 "GitHub Variables와 OCI 서버 .env 확인" -NextAction2 "커밋/푸시 후 CD-Staging 실제 실행 확인" -NextAction3 "필요 시 package visibility를 public으로 재확인"
+- Tests Run + Result: git diff 및 compose config 검토 완료; bash 구문검사는 로컬 bash 부재로 미실행
+- Open Risks: GHCR package visibility가 실제로 public이 아니면 서버 pull 단계에서 여전히 인증이 필요함
+- Blockers: None
+- Next 3 Actions: 1) GitHub Variables와 OCI 서버 .env 확인, 2) 커밋/푸시 후 CD-Staging 실제 실행 확인, 3) 필요 시 package visibility를 public으로 재확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-15 16:03:25 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): OCI VM 대상 GHCR 기반 자동배포 파이프라인 정비
+- Scope (In/Out): In: .github/workflows/*.yml, deploy.sh, docker-compose.prod.yml, frontend-next/Dockerfile, env examples, AGENTS.md / Out: 애플리케이션 비즈니스 로직 변경 없음
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M .env.production.example,  M .env.staging.example,  M .github/workflows/cd-prod.yml,  M .github/workflows/cd-staging.yml,  M AGENTS.md,  M deploy.sh,  M docker-compose.prod.yml,  M frontend-next/Dockerfile, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "OCI VM 대상 GHCR 기반 자동배포 파이프라인 정비" -ScopeIn ".github/workflows/*.yml, deploy.sh, docker-compose.prod.yml, frontend-next/Dockerfile, env examples, AGENTS.md" -ScopeOut "애플리케이션 비즈니스 로직 변경 없음" -Status "done" -PercentComplete "100%" -TestsResult "docker compose -f docker-compose.prod.yml config 검증 완료; bash -n deploy.sh 는 로컬 환경에 bash 미설치로 미실행" -OpenRisks "GitHub Secrets(GHCR_USERNAME, GHCR_TOKEN, STAGING/PRODUCTION_*_ENV_FILE, SSH 관련)와 Actions Variables 미설정 시 배포 실패 가능" -Blockers "None" -NextAction1 "GitHub Secrets/Variables를 OCI 기준 값으로 등록" -NextAction2 "OCI VM에 Docker/Compose 설치 후 SSH 접속 테스트" -NextAction3 "main push 또는 workflow_dispatch로 실제 배포 검증"
+- Tests Run + Result: docker compose -f docker-compose.prod.yml config 검증 완료; bash -n deploy.sh 는 로컬 환경에 bash 미설치로 미실행
+- Open Risks: GitHub Secrets(GHCR_USERNAME, GHCR_TOKEN, STAGING/PRODUCTION_*_ENV_FILE, SSH 관련)와 Actions Variables 미설정 시 배포 실패 가능
+- Blockers: None
+- Next 3 Actions: 1) GitHub Secrets/Variables를 OCI 기준 값으로 등록, 2) OCI VM에 Docker/Compose 설치 후 SSH 접속 테스트, 3) main push 또는 workflow_dispatch로 실제 배포 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-15 16:00:12 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): OCI VM 대상 GHCR 기반 자동배포 파이프라인 정비
+- Scope (In/Out): In: .github/workflows/*.yml, deploy.sh, docker-compose.prod.yml, frontend-next/Dockerfile, env examples, AGENTS.md / Out: 애플리케이션 비즈니스 로직 변경 없음
+- Current Status: in progress
+- Percent Complete: 20%
+- Files Changed: ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "OCI VM 대상 GHCR 기반 자동배포 파이프라인 정비" -ScopeIn ".github/workflows/*.yml, deploy.sh, docker-compose.prod.yml, frontend-next/Dockerfile, env examples, AGENTS.md" -ScopeOut "애플리케이션 비즈니스 로직 변경 없음" -Status "in progress" -PercentComplete "20%" -TestsResult "Not run (구조 분석 완료, 수정 시작 전)" -OpenRisks "OCI 서버 시크릿/환경변수 미설정 시 워크플로우는 여전히 실패 가능" -Blockers "None" -NextAction1 "GHCR 빌드 후 SSH 배포 구조에 맞게 workflow와 deploy 스크립트 수정" -NextAction2 "prod compose의 외부 노출 포트와 env 주입 방식 정리" -NextAction3 "검증 후 사용자에게 필요한 GitHub Secrets/Variables 체크리스트 제공"
+- Tests Run + Result: Not run (구조 분석 완료, 수정 시작 전)
+- Open Risks: OCI 서버 시크릿/환경변수 미설정 시 워크플로우는 여전히 실패 가능
+- Blockers: None
+- Next 3 Actions: 1) GHCR 빌드 후 SSH 배포 구조에 맞게 workflow와 deploy 스크립트 수정, 2) prod compose의 외부 노출 포트와 env 주입 방식 정리, 3) 검증 후 사용자에게 필요한 GitHub Secrets/Variables 체크리스트 제공
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-03-19 10:23:07 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -522,6 +570,9 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
+
+
 
 
 
