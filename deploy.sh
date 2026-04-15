@@ -17,6 +17,9 @@ PROJECT_DIR="/opt/scenehive"
 COMPOSE_FILE="docker-compose.prod.yml"
 BACKUP_DIR="/opt/scenehive_backups"
 DEPLOY_ENV_FILE=".deploy.env"
+HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://localhost:8081/actuator/health}"
+HEALTHCHECK_ATTEMPTS="${HEALTHCHECK_ATTEMPTS:-24}"
+HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-5}"
 
 # Full image paths
 BACKEND_IMAGE="${REGISTRY}/${IMAGE_NAME}-backend"
@@ -123,6 +126,27 @@ compose_cmd() {
     ssh_cmd "cd ${PROJECT_DIR} && docker compose --env-file .env --env-file ${DEPLOY_ENV_FILE} ${command}"
 }
 
+wait_for_health() {
+    local attempt=1
+
+    log_info "Waiting for services to become healthy..."
+    while [ "$attempt" -le "$HEALTHCHECK_ATTEMPTS" ]; do
+        if ssh_cmd "curl -sf ${HEALTHCHECK_URL}" >/dev/null 2>&1; then
+            log_info "Health check passed on attempt ${attempt}/${HEALTHCHECK_ATTEMPTS}"
+            return 0
+        fi
+
+        log_info "Health check attempt ${attempt}/${HEALTHCHECK_ATTEMPTS} failed. Retrying in ${HEALTHCHECK_SLEEP_SECONDS}s..."
+        sleep "${HEALTHCHECK_SLEEP_SECONDS}"
+        attempt=$((attempt + 1))
+    done
+
+    log_error "Health check failed after ${HEALTHCHECK_ATTEMPTS} attempts"
+    log_info "Recent backend logs:"
+    ssh_cmd "cd ${PROJECT_DIR} && docker compose --env-file .env --env-file ${DEPLOY_ENV_FILE} logs --tail=200 backend" || true
+    return 1
+}
+
 # Deploy staging
 deploy_staging() {
     local SHA="${SHA:-staging}"
@@ -153,12 +177,8 @@ deploy_staging() {
     log_info "Starting services..."
     compose_cmd "up -d"
     
-    # Wait for health check
-    log_info "Waiting for services to be healthy..."
-    sleep 30
-    
     # Health check
-    if ssh_cmd "curl -sf http://localhost:8081/actuator/health"; then
+    if wait_for_health; then
         log_info "✅ Staging deployment completed successfully!"
     else
         log_error "Health check failed!"
@@ -199,12 +219,8 @@ deploy_production() {
     log_info "Starting services..."
     compose_cmd "up -d"
     
-    # Wait for health check
-    log_info "Waiting for services to be healthy..."
-    sleep 30
-    
     # Health check
-    if ssh_cmd "curl -sf http://localhost:8081/actuator/health"; then
+    if wait_for_health; then
         log_info "✅ Production deployment completed successfully!"
     else
         log_error "Health check failed! Rolling back..."
