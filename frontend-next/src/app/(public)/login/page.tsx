@@ -19,7 +19,21 @@ function setSessionCookie() {
 }
 
 function resolveOAuthBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_OAUTH_BASE_URL || process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:8081';
+  const explicitBaseUrl = process.env.NEXT_PUBLIC_OAUTH_BASE_URL;
+  if (explicitBaseUrl) {
+    return explicitBaseUrl;
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (apiUrl && /^https?:\/\//.test(apiUrl)) {
+    return apiUrl.replace(/\/api\/?$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  return 'http://localhost:8081';
 }
 
 export default function LoginPage() {

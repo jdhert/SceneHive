@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-15 17:29:00 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): CI를 이미지 build/push 전담으로 통합하고 staging/prod를 deploy-only로 분리
+- Scope (In/Out): In: .github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, frontend-next/src/app/(public)/login/page.tsx, AGENTS.md / Out: 애플리케이션 비즈니스 로직 및 deploy.sh 헬스체크/로그 출력 동작 변경 없음
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .github/workflows/cd-prod.yml,  M .github/workflows/cd-staging.yml,  M .github/workflows/ci.yml,  M AGENTS.md,  M frontend-next/src/app/(public)/login/page.tsx, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "CI를 이미지 build/push 전담으로 통합하고 staging/prod를 deploy-only로 분리" -ScopeIn ".github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, frontend-next/src/app/(public)/login/page.tsx, AGENTS.md" -ScopeOut "애플리케이션 비즈니스 로직 및 deploy.sh 헬스체크/로그 출력 동작 변경 없음" -Status "done" -PercentComplete "100" -TestsResult "frontend-next npm run build 성공; git diff --check는 AGENTS.md EOF blank line만 경고" -OpenRisks "GitHub Actions YAML 자체는 원격 실행 전까지 런타임 검증이 불가하며, GHCR package visibility 또는 Actions permissions 설정이 예상과 다르면 manifest inspect 단계에서 실패할 수 있음" -Blockers "None" -NextAction1 "main push 후 CI에서 sha 이미지 publish 확인" -NextAction2 "CI 완료 후 CD-Staging workflow_run 자동 배포 확인" -NextAction3 "prod 배포 시 검증된 sha 또는 v* release tag로 workflow_dispatch 실행"
+- Tests Run + Result: frontend-next npm run build 성공; git diff --check는 AGENTS.md EOF blank line만 경고
+- Open Risks: GitHub Actions YAML 자체는 원격 실행 전까지 런타임 검증이 불가하며, GHCR package visibility 또는 Actions permissions 설정이 예상과 다르면 manifest inspect 단계에서 실패할 수 있음
+- Blockers: None
+- Next 3 Actions: 1) main push 후 CI에서 sha 이미지 publish 확인, 2) CI 완료 후 CD-Staging workflow_run 자동 배포 확인, 3) prod 배포 시 검증된 sha 또는 v* release tag로 workflow_dispatch 실행
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-15 17:22:03 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): CI에 이미지 build/push를 통합하고 staging/prod를 deploy-only로 분리
+- Scope (In/Out): In: .github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, AGENTS.md / Out: 애플리케이션 비즈니스 로직 및 deploy.sh 헬스체크 동작 변경 없음
+- Current Status: in progress
+- Percent Complete: 35
+- Files Changed:  M .github/workflows/cd-prod.yml,  M .github/workflows/cd-staging.yml,  M .github/workflows/ci.yml, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "CI에 이미지 build/push를 통합하고 staging/prod를 deploy-only로 분리" -ScopeIn ".github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, AGENTS.md" -ScopeOut "애플리케이션 비즈니스 로직 및 deploy.sh 헬스체크 동작 변경 없음" -Status "in progress" -PercentComplete "35" -TestsResult "Not run (workflow 역할 분리 구조 검토 완료, 보정 패치 예정)" -OpenRisks "prod에서 release tag 배포를 허용하려면 CI가 tag 이미지도 publish해야 하며, 수동 입력 검증이 느슨하면 잘못된 태그 배포 가능" -Blockers "None" -NextAction1 "CI에서 sha 및 release tag 이미지 publish 로직 보강" -NextAction2 "cd-prod에 image 존재 검증 및 입력 제한 추가" -NextAction3 "검토 후 커밋/푸시"
+- Tests Run + Result: Not run (workflow 역할 분리 구조 검토 완료, 보정 패치 예정)
+- Open Risks: prod에서 release tag 배포를 허용하려면 CI가 tag 이미지도 publish해야 하며, 수동 입력 검증이 느슨하면 잘못된 태그 배포 가능
+- Blockers: None
+- Next 3 Actions: 1) CI에서 sha 및 release tag 이미지 publish 로직 보강, 2) cd-prod에 image 존재 검증 및 입력 제한 추가, 3) 검토 후 커밋/푸시
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-15 16:37:57 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -570,15 +602,5 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
-
-
-
-
-
-
-
-
-
 
 
