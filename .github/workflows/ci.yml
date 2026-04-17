@@ -54,7 +54,7 @@ jobs:
         run: ./gradlew test
 
       - name: Publish backend test results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Backend Tests
@@ -94,7 +94,7 @@ jobs:
         working-directory: frontend-next
 
       - name: Publish frontend test results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Frontend Tests
