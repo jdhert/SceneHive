@@ -147,7 +147,7 @@ jobs:
             NEXT_PUBLIC_OAUTH_BASE_URL=
 
       - name: Scan backend image (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: scenehive-backend:local
           format: sarif
@@ -156,7 +156,7 @@ jobs:
           severity: CRITICAL
 
       - name: Scan frontend image (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: scenehive-frontend:local
           format: sarif
