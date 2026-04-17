@@ -150,38 +150,42 @@ wait_for_health() {
 # Deploy staging
 deploy_staging() {
     local SHA="${SHA:-staging}"
-    
+
     log_info "Deploying STAGING (${SHA})..."
-    
+
     ensure_project_dir
-    
+
+    # Backup before deploy (enables rollback on failure)
+    backup_deployment
+
     # Copy docker-compose.prod.yml
     scp_copy docker-compose.prod.yml "${USER}@${HOST}:${PROJECT_DIR}/docker-compose.yml"
-    
+
     # Create or update env files
     write_app_env
     write_runtime_env "${SHA}" "${SHA}"
-    
+
     # Login to GHCR
     ghcr_login
-    
+
     # Pull images
     log_info "Pulling images..."
     compose_cmd "pull backend frontend"
-    
+
     # Stop old containers
     log_info "Stopping old containers..."
     compose_cmd "down" || true
-    
+
     # Start services
     log_info "Starting services..."
     compose_cmd "up -d"
-    
+
     # Health check
     if wait_for_health; then
         log_info "✅ Staging deployment completed successfully!"
     else
-        log_error "Health check failed!"
+        log_error "Health check failed! Rolling back..."
+        rollback
         exit 1
     fi
 }

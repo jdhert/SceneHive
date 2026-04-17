@@ -24,9 +24,15 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Spring Boot Backend
   backend:
+    image: scenehive-backend:local
     build:
       context: .
       dockerfile: Dockerfile
@@ -58,12 +64,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     volumes:
       - uploads_data:/app/uploads
 
   # Next.js Frontend (Standalone)
   frontend:
+    image: scenehive-frontend:local
     build:
       context: ./frontend-next
       dockerfile: Dockerfile

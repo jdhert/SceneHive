@@ -1,0 +1,60 @@
+version: 2
+
+updates:
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "ci"
+
+  # npm (Next.js frontend)
+  - package-ecosystem: npm
+    directory: /frontend-next
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    labels:
+      - dependencies
+      - frontend
+    commit-message:
+      prefix: "chore(frontend)"
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+      next-ecosystem:
+        patterns:
+          - "next"
+          - "@next/*"
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+
+  # Gradle (Spring Boot backend)
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Seoul
+    labels:
+      - dependencies
+      - backend
+    commit-message:
+      prefix: "chore(backend)"

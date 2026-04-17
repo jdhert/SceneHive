@@ -11,12 +11,18 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # Backend CI
+  # Backend CI — code only, no Docker build
   backend-ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
+      checks: write
 
     steps:
       - name: Checkout repository
@@ -47,15 +53,22 @@ jobs:
       - name: Test backend
         run: ./gradlew test
 
-      - name: Build backend Docker image
-        run: |
-          docker compose build backend
+      - name: Publish backend test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Backend Tests
+          path: build/test-results/test/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
 
-  # Frontend CI
+  # Frontend CI — code only, no Docker build
   frontend-ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
+      checks: write
 
     steps:
       - name: Checkout repository
@@ -80,32 +93,88 @@ jobs:
         run: npm test -- --passWithNoTests
         working-directory: frontend-next
 
+      - name: Publish frontend test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Frontend Tests
+          path: frontend-next/test-results/junit.xml
+          reporter: java-junit
+          fail-on-error: false
+
       - name: Build frontend
         run: npm run build
         working-directory: frontend-next
 
-      - name: Build frontend Docker image
-        run: |
-          docker compose build frontend
-
-  # Smoke test (optional - runs docker compose)
+  # Smoke test — builds images with GHA cache, Trivy scan, runs docker compose
   smoke-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     needs: [backend-ci, frontend-ci]
     permissions:
       contents: read
+      security-events: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build all services
-        run: docker compose build --parallel
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          tags: scenehive-backend:local
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend-next
+          file: ./frontend-next/Dockerfile
+          load: true
+          tags: scenehive-frontend:local
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+          build-args: |
+            NEXT_PUBLIC_API_URL=/api
+            NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
+            NEXT_PUBLIC_OAUTH_BASE_URL=
+
+      - name: Scan backend image (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: scenehive-backend:local
+          format: sarif
+          output: trivy-backend.sarif
+          exit-code: 1
+          severity: CRITICAL
+
+      - name: Scan frontend image (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: scenehive-frontend:local
+          format: sarif
+          output: trivy-frontend.sarif
+          exit-code: 1
+          severity: CRITICAL
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: .
+          category: trivy
 
       - name: Start services
-        run: docker compose up -d
+        run: docker compose up -d --no-build
 
-      - name: Wait for backend health with retry
+      - name: Wait for backend health
         uses: nick-fields/retry@v3
         with:
           timeout_seconds: 10
@@ -113,15 +182,19 @@ jobs:
           max_attempts: 24
           command: curl -sf http://localhost:8081/actuator/health
 
+      - name: Wait for frontend health
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 10
+          retry_wait_seconds: 5
+          max_attempts: 12
+          command: curl -sf http://localhost:3000
+
       - name: Dump smoke test logs on failure
         if: failure()
         run: |
           docker compose ps
           docker compose logs --tail=200 db redis backend frontend
-
-      - name: Check frontend health
-        run: |
-          curl -f http://localhost:3000 || exit 1
 
       - name: Stop services
         if: always()
@@ -129,6 +202,7 @@ jobs:
 
   build-and-push-images:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [backend-ci, frontend-ci, smoke-test]
     if: github.event_name == 'push'
     permissions:
@@ -178,24 +252,24 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push backend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           push: true
           tags: ${{ steps.image_tags.outputs.backend }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
 
       - name: Build and push frontend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend-next
           file: ./frontend-next/Dockerfile
           push: true
           tags: ${{ steps.image_tags.outputs.frontend }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
           build-args: |
             NEXT_PUBLIC_API_URL=/api
             NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p

@@ -19,6 +19,7 @@ env:
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: production
     permissions:
       contents: read
@@ -119,6 +120,7 @@ jobs:
 
   notify-deployment:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: deploy-production
     if: always()
 
