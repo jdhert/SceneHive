@@ -28,6 +28,14 @@ updates:
       - frontend
     commit-message:
       prefix: "chore(frontend)"
+    ignore:
+      # Major version bumps require manual migration
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
     groups:
       react-ecosystem:
         patterns:

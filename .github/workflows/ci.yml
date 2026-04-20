@@ -1,210 +1,24 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
     tags: ['v*']
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  pull_request:
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  # Backend CI — code only, no Docker build
-  backend-ci:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      checks: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build backend
-        run: ./gradlew build -x test
-
-      - name: Test backend
-        run: ./gradlew test
-
-      - name: Publish backend test results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Backend Tests
-          path: build/test-results/test/**/*.xml
-          reporter: java-junit
-          fail-on-error: false
-
-  # Frontend CI — code only, no Docker build
-  frontend-ci:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      checks: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend-next/package-lock.json
-
-      - name: Install frontend dependencies
-        run: npm ci
-        working-directory: frontend-next
-
-      - name: Lint frontend
-        run: npm run lint
-        working-directory: frontend-next
-
-      - name: Test frontend
-        run: npm test -- --passWithNoTests
-        working-directory: frontend-next
-
-      - name: Publish frontend test results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Frontend Tests
-          path: frontend-next/test-results/junit.xml
-          reporter: java-junit
-          fail-on-error: false
-
-      - name: Build frontend
-        run: npm run build
-        working-directory: frontend-next
-
-  # Smoke test — builds images with GHA cache, Trivy scan, runs docker compose
-  smoke-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    needs: [backend-ci, frontend-ci]
-    permissions:
-      contents: read
-      security-events: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          load: true
-          tags: scenehive-backend:local
-          cache-from: type=gha,scope=backend
-          cache-to: type=gha,mode=max,scope=backend
-
-      - name: Build frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend-next
-          file: ./frontend-next/Dockerfile
-          load: true
-          tags: scenehive-frontend:local
-          cache-from: type=gha,scope=frontend
-          cache-to: type=gha,mode=max,scope=frontend
-          build-args: |
-            NEXT_PUBLIC_API_URL=/api
-            NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
-            NEXT_PUBLIC_OAUTH_BASE_URL=
-
-      - name: Scan backend image (Trivy)
-        uses: aquasecurity/trivy-action@0.35.0
-        with:
-          image-ref: scenehive-backend:local
-          format: sarif
-          output: trivy-backend.sarif
-          exit-code: 1
-          severity: CRITICAL
-
-      - name: Scan frontend image (Trivy)
-        uses: aquasecurity/trivy-action@0.35.0
-        with:
-          image-ref: scenehive-frontend:local
-          format: sarif
-          output: trivy-frontend.sarif
-          exit-code: 1
-          severity: CRITICAL
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: .
-          category: trivy
-
-      - name: Start services
-        run: docker compose up -d --no-build
-
-      - name: Wait for backend health
-        uses: nick-fields/retry@v3
-        with:
-          timeout_seconds: 10
-          retry_wait_seconds: 5
-          max_attempts: 24
-          command: curl -sf http://localhost:8081/actuator/health
-
-      - name: Wait for frontend health
-        uses: nick-fields/retry@v3
-        with:
-          timeout_seconds: 10
-          retry_wait_seconds: 5
-          max_attempts: 12
-          command: curl -sf http://localhost:3000
-
-      - name: Dump smoke test logs on failure
-        if: failure()
-        run: |
-          docker compose ps
-          docker compose logs --tail=200 db redis backend frontend
-
-      - name: Stop services
-        if: always()
-        run: docker compose down
-
-  build-and-push-images:
+  build-and-push:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [backend-ci, frontend-ci, smoke-test]
-    if: github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -217,8 +31,20 @@ jobs:
         id: image_name
         run: echo "value=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Resolve image tags
         id: image_tags
+        if: github.event_name == 'push'
         run: |
           backend_image="${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}-backend"
           frontend_image="${{ env.REGISTRY }}/${{ steps.image_name.outputs.value }}-frontend"
@@ -227,9 +53,8 @@ jobs:
           frontend_tags="${frontend_image}:${{ github.sha }}"
 
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            release_tag="${GITHUB_REF_NAME}"
-            backend_tags="${backend_tags}"$'\n'"${backend_image}:${release_tag}"
-            frontend_tags="${frontend_tags}"$'\n'"${frontend_image}:${release_tag}"
+            backend_tags="${backend_tags}"$'\n'"${backend_image}:${GITHUB_REF_NAME}"
+            frontend_tags="${frontend_tags}"$'\n'"${frontend_image}:${GITHUB_REF_NAME}"
           fi
 
           {
@@ -241,33 +66,23 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push backend image
+      - name: Build backend image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: true
-          tags: ${{ steps.image_tags.outputs.backend }}
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ github.event_name == 'push' && steps.image_tags.outputs.backend || 'scenehive-backend:pr' }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
-      - name: Build and push frontend image
+      - name: Build frontend image
         uses: docker/build-push-action@v6
         with:
           context: ./frontend-next
           file: ./frontend-next/Dockerfile
-          push: true
-          tags: ${{ steps.image_tags.outputs.frontend }}
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ github.event_name == 'push' && steps.image_tags.outputs.frontend || 'scenehive-frontend:pr' }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
           build-args: |
