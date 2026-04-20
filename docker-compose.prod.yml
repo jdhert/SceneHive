@@ -75,6 +75,8 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
       NEXT_PUBLIC_TMDB_IMAGE_BASE_URL: ${NEXT_PUBLIC_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
       NEXT_PUBLIC_OAUTH_BASE_URL: ${NEXT_PUBLIC_OAUTH_BASE_URL:-}
+      TMDB_API_KEY: ${TMDB_API_KEY}
+      TMDB_BASE_URL: ${TMDB_BASE_URL:-https://api.themoviedb.org/3}
     depends_on:
       - backend
     restart: unless-stopped
