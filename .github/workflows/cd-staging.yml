@@ -34,7 +34,7 @@ jobs:
           fi
 
       - name: Checkout deploy script
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           sparse-checkout: |
             deploy.sh
