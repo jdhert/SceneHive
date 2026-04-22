@@ -207,12 +207,12 @@ export default function GenreMoviesPage() {
               style={{ borderColor: 'rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)', color: 'rgba(245,158,11,0.95)' }}>
               <Link href="/search" className="inline-flex items-center gap-1.5">
                 <Search className="w-4 h-4" />
-                통합 검색
+                <span className="hidden sm:inline">통합 검색</span>
               </Link>
             </Button>
             {user ? (
               <>
-                <Button asChild className="text-white font-medium"
+                <Button asChild className="hidden sm:inline-flex text-white font-medium"
                   style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
@@ -221,7 +221,7 @@ export default function GenreMoviesPage() {
             ) : (
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
-                  className="font-medium"
+                  className="hidden sm:inline-flex font-medium"
                   style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
                   로그인
                 </Button>

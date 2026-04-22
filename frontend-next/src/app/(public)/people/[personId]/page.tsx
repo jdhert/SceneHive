@@ -323,12 +323,12 @@ export default function PersonDetailPage() {
               style={{ borderColor: 'rgba(255,255,255,0.24)', color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.08)' }}>
               <Link href="/search" className="inline-flex items-center gap-1.5">
                 <Search className="w-4 h-4" />
-                통합 검색
+                <span className="hidden sm:inline">통합 검색</span>
               </Link>
             </Button>
             {user ? (
               <>
-                <Button asChild className="text-white font-medium"
+                <Button asChild className="hidden sm:inline-flex text-white font-medium"
                   style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
@@ -337,7 +337,7 @@ export default function PersonDetailPage() {
             ) : (
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
-                  className="font-medium"
+                  className="hidden sm:inline-flex font-medium"
                   style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
