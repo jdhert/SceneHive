@@ -210,7 +210,9 @@ export default function TvDetailPage() {
   };
 
   const handleRecommendationsPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'mouse' || event.button !== 0 || !recommendationsRef.current) return;
+    if (!recommendationsRef.current) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (event.pointerType !== 'mouse' && event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     stopMomentum();
     stopEdgeAutoScroll();
     isPointerDownRef.current = true;
@@ -594,7 +596,7 @@ export default function TvDetailPage() {
                   onPointerUp={handleRecommendationsPointerEnd}
                   onPointerCancel={handleRecommendationsPointerEnd}
                   onDragStart={(event) => event.preventDefault()}
-                  className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-pan-y"
+                  className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-auto"
                 >
                   {recommendations.map((item) => (
                     <Link
