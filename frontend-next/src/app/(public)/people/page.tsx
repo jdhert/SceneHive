@@ -127,7 +127,7 @@ function PeopleSearchContent() {
         style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(7,9,18,0.88)', backdropFilter: 'blur(12px)' }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
-          <Link href="/home" className="flex items-center gap-2">
+          <Link href="/home" className="flex items-center gap-3">
             <span className="text-xl">🎬</span>
             <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
           </Link>

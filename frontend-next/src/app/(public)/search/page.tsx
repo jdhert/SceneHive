@@ -212,7 +212,7 @@ function MovieSearchPageContent() {
       <header className="sticky top-0 z-40" style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
-            <Link href="/home" className="flex items-center gap-2">
+            <Link href="/home" className="flex items-center gap-3">
               <span className="text-xl">🎬</span>
               <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
             </Link>
