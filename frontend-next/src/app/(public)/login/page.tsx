@@ -173,13 +173,10 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" style={{ borderColor: 'rgba(85,168,255,0.15)' }} />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 text-xs font-medium tracking-widest uppercase" style={{ background: 'rgba(15,13,25,0.9)', color: 'rgba(255,255,255,0.6)' }}>소셜 로그인</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px" style={{ background: 'rgba(85,168,255,0.15)' }} />
+            <span className="text-xs font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>소셜 로그인</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(85,168,255,0.15)' }} />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
