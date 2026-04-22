@@ -7,6 +7,7 @@ import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
 const BG = '#070912';
 const PANEL = '#0d1020';
@@ -128,7 +129,7 @@ function PeopleSearchContent() {
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <Link href="/home" className="flex items-center gap-3">
-            <span className="text-xl">🎬</span>
+            <SceneHiveIcon className="w-6 h-6 shrink-0" />
             <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
           </Link>
           <div className="flex items-center gap-3">

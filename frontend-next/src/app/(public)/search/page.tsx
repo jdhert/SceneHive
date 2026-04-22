@@ -7,6 +7,7 @@ import { Search, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.58)';
@@ -213,7 +214,7 @@ function MovieSearchPageContent() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-3">
-              <span className="text-xl">🎬</span>
+              <SceneHiveIcon className="w-6 h-6 shrink-0" />
               <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
             </Link>
             <span className="text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>

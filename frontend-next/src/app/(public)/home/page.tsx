@@ -8,6 +8,7 @@ import { useUser } from '@/providers/user-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
 const BG = '#04060C';
 const AMBER = '#55A8FF';
@@ -267,7 +268,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-40" style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <button type="button" onClick={handleBrandReload} className="flex items-center gap-3">
-            <span className="text-xl">🎬</span>
+            <SceneHiveIcon className="w-6 h-6 shrink-0" />
             <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
           </button>
           <nav className="hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.64)' }}>
