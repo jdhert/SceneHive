@@ -427,12 +427,12 @@ export default function MovieDetailPage() {
             ) : (
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
-                  className="hidden sm:inline-flex font-medium"
+                  className="font-medium"
                   style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
-                  className="font-bold text-white"
+                  className="hidden sm:inline-flex font-bold text-white"
                   style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
                   회원가입
                 </Button>

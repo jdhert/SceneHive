@@ -221,12 +221,12 @@ export default function GenreMoviesPage() {
             ) : (
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
-                  className="hidden sm:inline-flex font-medium"
+                  className="font-medium"
                   style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
-                  className="font-bold text-white"
+                  className="hidden sm:inline-flex font-bold text-white"
                   style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
                   회원가입
                 </Button>
