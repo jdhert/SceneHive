@@ -8,6 +8,7 @@ import { useAccessToken } from '@/hooks/use-access-token';
 import { WS_URL } from '@/lib/ws';
 import { Button } from '@/components/ui/button';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import NotificationBell from '@/components/notification/notification-bell';
 import Avatar from '@/components/user/avatar';
 import ChatContainer from '@/components/chat/chat-container';
@@ -185,7 +186,7 @@ export default function WorkspacePage() {
         <div className="px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button onClick={() => router.push('/workspaces')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <span className="text-xl">🎬</span>
+              <SceneHiveIcon className="w-6 h-6 shrink-0" />
               <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
             </button>
             <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>

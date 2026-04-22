@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Avatar from '@/components/user/avatar';
 import StatusBadge from '@/components/user/status-badge';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import NotificationBell from '@/components/notification/notification-bell';
 
 const BG = '#0B0B14';
@@ -36,7 +37,7 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/workspaces" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <span className="text-xl">🎬</span>
+              <SceneHiveIcon className="w-6 h-6 shrink-0" />
               <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
             </Link>
             <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>

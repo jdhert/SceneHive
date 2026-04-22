@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
 const BG = '#04060C';
 const AMBER = '#55A8FF';
@@ -82,7 +83,7 @@ function ResetPasswordContent() {
       <Card className="w-full max-w-md relative z-10 border-0"
         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(85,168,255,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         <CardHeader className="text-center space-y-3 pb-2">
-          <div className="flex justify-center mb-2"><span className="text-3xl">🎬</span></div>
+          <div className="flex justify-center mb-2"><SceneHiveIcon className="w-10 h-10" /></div>
           <CardTitle className="text-3xl font-bold text-white">
             {success ? '비밀번호 변경 완료' : '새 비밀번호 설정'}
           </CardTitle>

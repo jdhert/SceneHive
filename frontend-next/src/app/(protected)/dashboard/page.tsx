@@ -8,6 +8,7 @@ import { useFavorites } from '@/queries/favorites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import NotificationBell from '@/components/notification/notification-bell';
 import type { ChatMessage, CodeSnippet, FavoriteItem, Memo } from '@/types';
 
@@ -70,7 +71,7 @@ export default function DashboardPage() {
       >
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <Link href="/workspaces" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="text-xl">🎬</span>
+            <SceneHiveIcon className="w-6 h-6 shrink-0" />
             <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>
               SceneHive
             </span>

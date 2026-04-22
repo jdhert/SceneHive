@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
 const BG = '#04060C';
 const AMBER = '#55A8FF';
@@ -55,7 +56,7 @@ export default function RegisterPage() {
         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(85,168,255,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="flex justify-center mb-2">
-            <span className="text-3xl">🎬</span>
+            <SceneHiveIcon className="w-10 h-10" />
           </div>
           <CardTitle className="text-3xl font-bold text-white">SceneHive 가입</CardTitle>
           <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>영화 팬들과 함께하세요</CardDescription>

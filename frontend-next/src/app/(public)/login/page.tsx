@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
 const BG = '#04060C';
 const AMBER = '#55A8FF';
@@ -119,7 +120,7 @@ export default function LoginPage() {
         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(85,168,255,0.15)', backdropFilter: 'blur(40px)', boxShadow: '0 32px 80px rgba(0,0,0,0.5)' }}>
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="flex justify-center mb-2">
-            <span className="text-3xl">🎬</span>
+            <SceneHiveIcon className="w-10 h-10" />
           </div>
           <CardTitle className="text-3xl font-bold text-white">다시 만나요</CardTitle>
           <CardDescription style={{ color: 'rgba(255,255,255,0.5)' }}>SceneHive에 로그인하세요</CardDescription>
@@ -177,7 +178,7 @@ export default function LoginPage() {
               <span className="w-full border-t" style={{ borderColor: 'rgba(85,168,255,0.15)' }} />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2" style={{ background: 'rgba(15,13,25,0.9)', color: 'rgba(255,255,255,0.35)' }}>소셜 로그인</span>
+              <span className="px-3 text-xs font-medium tracking-widest uppercase" style={{ background: 'rgba(15,13,25,0.9)', color: 'rgba(255,255,255,0.6)' }}>소셜 로그인</span>
             </div>
           </div>
 

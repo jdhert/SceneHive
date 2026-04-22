@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
+import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import NotificationBell from '@/components/notification/notification-bell';
 import type { Workspace } from '@/types';
 
@@ -97,7 +98,7 @@ export default function WorkspacesPage() {
       <header className="relative z-10 border-b" style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.85)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <span className="text-xl">🎬</span>
+            <SceneHiveIcon className="w-6 h-6 shrink-0" />
             <span className="text-lg font-bold" style={{ color: AMBER }}>SceneHive</span>
           </Link>
           <div className="flex items-center gap-4">
@@ -144,7 +145,7 @@ export default function WorkspacesPage() {
           <Card className="border-0 text-center py-12"
             style={{ background: CARD_BG, border: CARD_BORDER }}>
             <CardContent>
-              <div className="text-4xl mb-4">🎬</div>
+              <div className="mb-4"><SceneHiveIcon className="w-12 h-12 mx-auto" /></div>
               <p className="text-lg text-white">아직 참여 중인 영화 클럽이 없습니다.</p>
               <p className="mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>새 클럽을 만들거나 초대 코드로 참여하세요</p>
             </CardContent>
@@ -158,7 +159,7 @@ export default function WorkspacesPage() {
                 onClick={() => router.push(`/workspaces/${workspace.id}`)}>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">🎬</span>
+                    <SceneHiveIcon className="w-5 h-5 shrink-0" />
                     <CardTitle className="text-white">{workspace.name}</CardTitle>
                   </div>
                   <CardDescription style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -183,7 +184,7 @@ export default function WorkspacesPage() {
           <Card className="w-full max-w-md border-0"
             style={{ background: 'rgba(18,16,26,0.97)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(40px)' }}>
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2"><span>🎬</span> 새 영화 클럽 만들기</CardTitle>
+              <CardTitle className="text-white flex items-center gap-2"><SceneHiveIcon className="w-5 h-5 shrink-0" /> 새 영화 클럽 만들기</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleCreateWorkspace} className="space-y-4">
