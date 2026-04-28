@@ -18,8 +18,9 @@ COMPOSE_FILE="docker-compose.prod.yml"
 BACKUP_DIR="/opt/scenehive_backups"
 DEPLOY_ENV_FILE=".deploy.env"
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://localhost:8081/actuator/health}"
-HEALTHCHECK_ATTEMPTS="${HEALTHCHECK_ATTEMPTS:-24}"
-HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-5}"
+HEALTHCHECK_INITIAL_DELAY_SECONDS="${HEALTHCHECK_INITIAL_DELAY_SECONDS:-45}"
+HEALTHCHECK_ATTEMPTS="${HEALTHCHECK_ATTEMPTS:-12}"
+HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-10}"
 
 # Full image paths
 BACKEND_IMAGE="${REGISTRY}/${IMAGE_NAME}-backend"
@@ -130,13 +131,18 @@ wait_for_health() {
     local attempt=1
 
     log_info "Waiting for services to become healthy..."
+    if [ "$HEALTHCHECK_INITIAL_DELAY_SECONDS" -gt 0 ]; then
+        log_info "Giving services ${HEALTHCHECK_INITIAL_DELAY_SECONDS}s warm-up time before health checks..."
+        sleep "${HEALTHCHECK_INITIAL_DELAY_SECONDS}"
+    fi
+
     while [ "$attempt" -le "$HEALTHCHECK_ATTEMPTS" ]; do
         if ssh_cmd "curl -sf ${HEALTHCHECK_URL}" >/dev/null 2>&1; then
             log_info "Health check passed on attempt ${attempt}/${HEALTHCHECK_ATTEMPTS}"
             return 0
         fi
 
-        log_info "Health check attempt ${attempt}/${HEALTHCHECK_ATTEMPTS} failed. Retrying in ${HEALTHCHECK_SLEEP_SECONDS}s..."
+        log_info "Health check not ready (${attempt}/${HEALTHCHECK_ATTEMPTS}). Retrying in ${HEALTHCHECK_SLEEP_SECONDS}s..."
         sleep "${HEALTHCHECK_SLEEP_SECONDS}"
         attempt=$((attempt + 1))
     done

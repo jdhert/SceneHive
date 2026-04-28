@@ -218,7 +218,7 @@ Alerts:
 
 ## Implementation Checklist
 
-1. Add Kafka broker to local/OCI Docker Compose. Done as an optional `kafka` profile.
+1. Add Kafka broker to local/OCI Docker Compose. Done as an optional `kafka` profile using the official `apache/kafka:3.7.2` image.
 2. Add Spring Kafka dependency and JSON serializer/deserializer configuration.
 3. Add `eventId` column and unique index to `Notification`.
 4. Replace `SpringNotificationCommandPublisher` with `KafkaNotificationCommandPublisher`.
@@ -231,6 +231,7 @@ Alerts:
 
 Kafka is optional until the producer/consumer implementation is merged.
 This keeps the current OCI single-VM deployment from paying the memory cost before it is needed.
+The compose files use the official Apache Kafka Docker image because the previous `bitnami/kafka:3.7` tag is not reliably pullable from Docker Hub.
 
 Local run:
 

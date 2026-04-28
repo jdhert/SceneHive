@@ -616,6 +616,11 @@ FRONTEND_URL=http://localhost:3000
 - `kafka-init` 컨테이너가 알림 command/retry/DLQ topic을 생성하도록 구성했다.
 - OCI 단일 VM 메모리 부담을 줄이기 위해 기본 `docker compose up -d`에는 Kafka가 포함되지 않는다.
 
+**배포 헬스체크 조정 사항:**
+- OCI 단일 VM에서 Spring Boot 부팅 시간이 길어 GitHub Actions 로그에 health check retry가 과도하게 찍히던 문제를 줄이기 위해 초기 대기 시간을 둔다.
+- 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=45`, `HEALTHCHECK_ATTEMPTS=12`, `HEALTHCHECK_SLEEP_SECONDS=10`이다.
+- 최대 대기 시간은 기존 120초에서 약 165초로 늘어나지만, 정상 배포 시 실패 retry 로그는 크게 줄어든다.
+
 **서비스 분리 계획:**
 ```
 현재 (Monolith)                    →    MSA 구조

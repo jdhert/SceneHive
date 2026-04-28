@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 17:47:49 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Kafka 이미지 pull 실패 수정 및 health check 로그 완화
+- Scope (In/Out): In: docker-compose.yml, docker-compose.prod.yml, deploy.sh, env examples, Kafka policy docs, PROJECT_GUIDE.md, AGENTS.md / Out: Spring Kafka producer/consumer 구현, Kafka 실제 OCI 기동 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .env.production.example,  M .env.staging.example,  M AGENTS.md,  M PROJECT_GUIDE.md,  M deploy.sh,  M docker-compose.prod.yml,  M docker-compose.yml,  M docs/architecture/notification-kafka-policy.md, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Kafka 이미지 pull 실패 수정 및 health check 로그 완화" -ScopeIn "docker-compose.yml, docker-compose.prod.yml, deploy.sh, env examples, Kafka policy docs, PROJECT_GUIDE.md, AGENTS.md" -ScopeOut "Spring Kafka producer/consumer 구현, Kafka 실제 OCI 기동 검증" -Status "done" -PercentComplete "100" -TestsResult "docker compose config --quiet 성공; docker compose --profile kafka config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; docker compose -f docker-compose.prod.yml --profile kafka config --quiet 성공; git diff --check 성공" -OpenRisks "apache/kafka:3.7.2 실제 OCI pull 및 기동은 push/CD 후 서버에서 재검증 필요; OCI 1GB 메모리에서 Kafka 상시 운영은 성능 확인 필요" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "OCI에서 docker compose --profile kafka up -d kafka kafka-init 재시도" -NextAction3 "topic 생성 및 free/docker stats 확인"
+- Tests Run + Result: docker compose config --quiet 성공; docker compose --profile kafka config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; docker compose -f docker-compose.prod.yml --profile kafka config --quiet 성공; git diff --check 성공
+- Open Risks: apache/kafka:3.7.2 실제 OCI pull 및 기동은 push/CD 후 서버에서 재검증 필요; OCI 1GB 메모리에서 Kafka 상시 운영은 성능 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) OCI에서 docker compose --profile kafka up -d kafka kafka-init 재시도, 3) topic 생성 및 free/docker stats 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 17:41:18 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 배포 health check retry 로그 완화
+- Scope (In/Out): In: deploy.sh, env examples, PROJECT_GUIDE.md, AGENTS.md / Out: 애플리케이션 런타임 로직, GitHub Actions workflow 구조, 서버 직접 배포 실행
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .env.production.example,  M .env.staging.example,  M PROJECT_GUIDE.md,  M deploy.sh, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "배포 health check retry 로그 완화" -ScopeIn "deploy.sh, env examples, PROJECT_GUIDE.md, AGENTS.md" -ScopeOut "애플리케이션 런타임 로직, GitHub Actions workflow 구조, 서버 직접 배포 실행" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; bash -n은 로컬 WSL bash 경로 부재 및 Docker daemon 미실행으로 미수행" -OpenRisks "실제 GitHub Actions 배포 로그에서 retry 감소 여부는 다음 push/CD 실행 후 확인 필요" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "다음 CD 로그에서 warm-up 이후 health check 횟수 확인" -NextAction3 "필요 시 HEALTHCHECK_INITIAL_DELAY_SECONDS를 서버 env로 조정"
+- Tests Run + Result: git diff --check 성공; bash -n은 로컬 WSL bash 경로 부재 및 Docker daemon 미실행으로 미수행
+- Open Risks: 실제 GitHub Actions 배포 로그에서 retry 감소 여부는 다음 push/CD 실행 후 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 다음 CD 로그에서 warm-up 이후 health check 횟수 확인, 3) 필요 시 HEALTHCHECK_INITIAL_DELAY_SECONDS를 서버 env로 조정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 17:23:46 +09:00
 - Agent Name: Codex
 - Branch: main
