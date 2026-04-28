@@ -4,16 +4,13 @@ import com.example.auth.dto.chat.ChatMessageRequest;
 import com.example.auth.dto.chat.ChatMessageResponse;
 import com.example.auth.entity.*;
 import com.example.auth.event.ChatMessageCreatedEvent;
-import com.example.auth.exception.CustomException;
+import com.example.auth.identity.IdentityReader;
 import com.example.auth.repository.ChatMessageRepository;
-import com.example.auth.repository.UserRepository;
-import com.example.auth.repository.WorkspaceMemberRepository;
-import com.example.auth.repository.WorkspaceRepository;
+import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,35 +21,25 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
-    private final WorkspaceRepository workspaceRepository;
-    private final WorkspaceMemberRepository memberRepository;
-    private final UserRepository userRepository;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
+    private final IdentityReader identityReader;
     private final ApplicationEventPublisher eventPublisher;
 
     public ChatService(ChatMessageRepository chatMessageRepository,
-                      WorkspaceRepository workspaceRepository,
-                      WorkspaceMemberRepository memberRepository,
-                      UserRepository userRepository,
+                      WorkspaceAccessChecker workspaceAccessChecker,
+                      IdentityReader identityReader,
                       ApplicationEventPublisher eventPublisher) {
         this.chatMessageRepository = chatMessageRepository;
-        this.workspaceRepository = workspaceRepository;
-        this.memberRepository = memberRepository;
-        this.userRepository = userRepository;
+        this.workspaceAccessChecker = workspaceAccessChecker;
+        this.identityReader = identityReader;
         this.eventPublisher = eventPublisher;
     }
 
     @Transactional
     public ChatMessageResponse saveMessage(Long workspaceId, ChatMessageRequest request, String senderEmail) {
-        User sender = userRepository.findByEmail(senderEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new CustomException("워크스페이스를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        // 멤버십 확인
-        if (!memberRepository.existsByWorkspaceIdAndUserId(workspaceId, sender.getId())) {
-            throw new CustomException("워크스페이스에 접근 권한이 없습니다", HttpStatus.FORBIDDEN);
-        }
+        User sender = identityReader.requireUserByEmail(senderEmail);
+        Workspace workspace = workspaceAccessChecker.requireWorkspace(workspaceId);
+        workspaceAccessChecker.requireMember(workspaceId, sender.getId());
 
         ChatMessage message = ChatMessage.builder()
                 .workspace(workspace)
@@ -72,13 +59,8 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public List<ChatMessageResponse> getMessages(Long workspaceId, String userEmail, int page, int size) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        // 멤버십 확인
-        if (!memberRepository.existsByWorkspaceIdAndUserId(workspaceId, user.getId())) {
-            throw new CustomException("워크스페이스에 접근 권한이 없습니다", HttpStatus.FORBIDDEN);
-        }
+        User user = identityReader.requireUserByEmail(userEmail);
+        workspaceAccessChecker.requireMember(workspaceId, user.getId());
 
         Pageable pageable = PageRequest.of(page, size);
         Page<ChatMessage> messagePage = chatMessageRepository.findByWorkspaceIdOrderByCreatedAtDesc(workspaceId, pageable);

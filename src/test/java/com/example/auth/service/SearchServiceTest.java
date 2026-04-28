@@ -3,11 +3,11 @@ package com.example.auth.service;
 import com.example.auth.dto.search.SearchResponse;
 import com.example.auth.entity.User;
 import com.example.auth.exception.CustomException;
+import com.example.auth.identity.IdentityReader;
 import com.example.auth.repository.ChatMessageRepository;
 import com.example.auth.repository.CodeSnippetRepository;
 import com.example.auth.repository.MemoRepository;
-import com.example.auth.repository.UserRepository;
-import com.example.auth.repository.WorkspaceMemberRepository;
+import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,10 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,17 +37,18 @@ class SearchServiceTest {
     private MemoRepository memoRepository;
 
     @Mock
-    private WorkspaceMemberRepository memberRepository;
+    private WorkspaceAccessChecker workspaceAccessChecker;
 
     @Mock
-    private UserRepository userRepository;
+    private IdentityReader identityReader;
 
     @InjectMocks
     private SearchService searchService;
 
     @Test
     void searchThrowsWhenUserMissing() {
-        when(userRepository.findByEmail("missing@test.com")).thenReturn(Optional.empty());
+        when(identityReader.requireUserByEmail("missing@test.com"))
+                .thenThrow(new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
 
         CustomException exception = assertThrows(
                 CustomException.class,
@@ -60,8 +61,9 @@ class SearchServiceTest {
     @Test
     void searchThrowsWhenUserIsNotMember() {
         User user = testUser(1L, "user@test.com");
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
-        when(memberRepository.existsByWorkspaceIdAndUserId(100L, 1L)).thenReturn(false);
+        when(identityReader.requireUserByEmail("user@test.com")).thenReturn(user);
+        doThrow(new CustomException("워크스페이스에 접근 권한이 없습니다", HttpStatus.FORBIDDEN))
+                .when(workspaceAccessChecker).requireMember(100L, 1L);
 
         CustomException exception = assertThrows(
                 CustomException.class,
@@ -74,8 +76,7 @@ class SearchServiceTest {
     @Test
     void searchAllQueriesAllRepositories() {
         User user = testUser(1L, "user@test.com");
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
-        when(memberRepository.existsByWorkspaceIdAndUserId(100L, 1L)).thenReturn(true);
+        when(identityReader.requireUserByEmail("user@test.com")).thenReturn(user);
         when(chatMessageRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
         when(codeSnippetRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
         when(memoRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
@@ -91,8 +92,7 @@ class SearchServiceTest {
     @Test
     void searchChatTypeQueriesOnlyChatRepository() {
         User user = testUser(1L, "user@test.com");
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
-        when(memberRepository.existsByWorkspaceIdAndUserId(100L, 1L)).thenReturn(true);
+        when(identityReader.requireUserByEmail("user@test.com")).thenReturn(user);
         when(chatMessageRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
 
         SearchResponse response = searchService.search(100L, "hello", "CHAT", "user@test.com");

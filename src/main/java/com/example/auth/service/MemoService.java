@@ -6,12 +6,10 @@ import com.example.auth.dto.memo.UpdateMemoRequest;
 import com.example.auth.entity.Memo;
 import com.example.auth.entity.User;
 import com.example.auth.entity.Workspace;
-import com.example.auth.entity.WorkspaceRole;
 import com.example.auth.exception.CustomException;
+import com.example.auth.identity.IdentityReader;
 import com.example.auth.repository.MemoRepository;
-import com.example.auth.repository.UserRepository;
-import com.example.auth.repository.WorkspaceMemberRepository;
-import com.example.auth.repository.WorkspaceRepository;
+import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,29 +21,22 @@ import java.util.stream.Collectors;
 public class MemoService {
 
     private final MemoRepository memoRepository;
-    private final WorkspaceRepository workspaceRepository;
-    private final WorkspaceMemberRepository memberRepository;
-    private final UserRepository userRepository;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
+    private final IdentityReader identityReader;
 
     public MemoService(MemoRepository memoRepository,
-                       WorkspaceRepository workspaceRepository,
-                       WorkspaceMemberRepository memberRepository,
-                       UserRepository userRepository) {
+                       WorkspaceAccessChecker workspaceAccessChecker,
+                       IdentityReader identityReader) {
         this.memoRepository = memoRepository;
-        this.workspaceRepository = workspaceRepository;
-        this.memberRepository = memberRepository;
-        this.userRepository = userRepository;
+        this.workspaceAccessChecker = workspaceAccessChecker;
+        this.identityReader = identityReader;
     }
 
     @Transactional
     public MemoResponse createMemo(Long workspaceId, CreateMemoRequest request, String authorEmail) {
-        User author = userRepository.findByEmail(authorEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new CustomException("워크스페이스를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        validateMembership(workspaceId, author.getId());
+        User author = identityReader.requireUserByEmail(authorEmail);
+        Workspace workspace = workspaceAccessChecker.requireWorkspace(workspaceId);
+        workspaceAccessChecker.requireMember(workspaceId, author.getId());
 
         Memo memo = Memo.builder()
                 .workspace(workspace)
@@ -60,10 +51,8 @@ public class MemoService {
 
     @Transactional(readOnly = true)
     public List<MemoResponse> getMemos(Long workspaceId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        validateMembership(workspaceId, user.getId());
+        User user = identityReader.requireUserByEmail(userEmail);
+        workspaceAccessChecker.requireMember(workspaceId, user.getId());
 
         List<Memo> memos = memoRepository.findByWorkspaceIdOrderByUpdatedAtDesc(workspaceId);
         return memos.stream()
@@ -73,10 +62,8 @@ public class MemoService {
 
     @Transactional(readOnly = true)
     public MemoResponse getMemo(Long workspaceId, Long memoId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        validateMembership(workspaceId, user.getId());
+        User user = identityReader.requireUserByEmail(userEmail);
+        workspaceAccessChecker.requireMember(workspaceId, user.getId());
 
         Memo memo = memoRepository.findByIdWithAuthor(memoId)
                 .orElseThrow(() -> new CustomException("메모를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
@@ -90,8 +77,7 @@ public class MemoService {
 
     @Transactional
     public MemoResponse updateMemo(Long workspaceId, Long memoId, UpdateMemoRequest request, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
+        User user = identityReader.requireUserByEmail(userEmail);
 
         Memo memo = memoRepository.findByIdWithAuthor(memoId)
                 .orElseThrow(() -> new CustomException("메모를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
@@ -114,8 +100,7 @@ public class MemoService {
 
     @Transactional
     public void deleteMemo(Long workspaceId, Long memoId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
+        User user = identityReader.requireUserByEmail(userEmail);
 
         Memo memo = memoRepository.findByIdWithAuthor(memoId)
                 .orElseThrow(() -> new CustomException("메모를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
@@ -126,7 +111,7 @@ public class MemoService {
 
         // 작성자 또는 관리자만 삭제 가능
         boolean isAuthor = memo.getAuthor().getId().equals(user.getId());
-        boolean isAdmin = isAdminOrOwner(workspaceId, user.getId());
+        boolean isAdmin = workspaceAccessChecker.isAdminOrOwner(workspaceId, user.getId());
 
         if (!isAuthor && !isAdmin) {
             throw new CustomException("삭제 권한이 없습니다", HttpStatus.FORBIDDEN);
@@ -137,10 +122,8 @@ public class MemoService {
 
     @Transactional(readOnly = true)
     public List<MemoResponse> searchMemos(Long workspaceId, String keyword, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
-
-        validateMembership(workspaceId, user.getId());
+        User user = identityReader.requireUserByEmail(userEmail);
+        workspaceAccessChecker.requireMember(workspaceId, user.getId());
 
         List<Memo> memos = memoRepository.searchByKeyword(workspaceId, keyword);
         return memos.stream()
@@ -148,15 +131,4 @@ public class MemoService {
                 .collect(Collectors.toList());
     }
 
-    private void validateMembership(Long workspaceId, Long userId) {
-        if (!memberRepository.existsByWorkspaceIdAndUserId(workspaceId, userId)) {
-            throw new CustomException("워크스페이스에 접근 권한이 없습니다", HttpStatus.FORBIDDEN);
-        }
-    }
-
-    private boolean isAdminOrOwner(Long workspaceId, Long userId) {
-        WorkspaceRole role = memberRepository.findRoleByWorkspaceIdAndUserId(workspaceId, userId)
-                .orElse(null);
-        return role == WorkspaceRole.OWNER || role == WorkspaceRole.ADMIN;
-    }
 }

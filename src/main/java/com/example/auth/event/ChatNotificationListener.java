@@ -4,9 +4,9 @@ import com.example.auth.dto.notification.CreateNotificationRequest;
 import com.example.auth.entity.NotificationType;
 import com.example.auth.entity.WorkspaceMember;
 import com.example.auth.entity.User;
-import com.example.auth.repository.WorkspaceMemberRepository;
+import com.example.auth.notification.NotificationPublisher;
 import com.example.auth.service.ChatPresenceTracker;
-import com.example.auth.service.NotificationService;
+import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -26,15 +26,15 @@ public class ChatNotificationListener {
     private static final Logger log = LoggerFactory.getLogger(ChatNotificationListener.class);
     private static final Pattern MENTION_PATTERN = Pattern.compile("@(\\S+)");
 
-    private final WorkspaceMemberRepository memberRepository;
-    private final NotificationService notificationService;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
+    private final NotificationPublisher notificationPublisher;
     private final ChatPresenceTracker chatPresenceTracker;
 
-    public ChatNotificationListener(WorkspaceMemberRepository memberRepository,
-                                    NotificationService notificationService,
+    public ChatNotificationListener(WorkspaceAccessChecker workspaceAccessChecker,
+                                    NotificationPublisher notificationPublisher,
                                     ChatPresenceTracker chatPresenceTracker) {
-        this.memberRepository = memberRepository;
-        this.notificationService = notificationService;
+        this.workspaceAccessChecker = workspaceAccessChecker;
+        this.notificationPublisher = notificationPublisher;
         this.chatPresenceTracker = chatPresenceTracker;
     }
 
@@ -42,7 +42,7 @@ public class ChatNotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onChatMessageCreated(ChatMessageCreatedEvent event) {
         try {
-            List<WorkspaceMember> members = memberRepository.findAllByWorkspaceId(event.workspaceId());
+            List<WorkspaceMember> members = workspaceAccessChecker.findMembers(event.workspaceId());
             String preview = event.content().length() > 100
                     ? event.content().substring(0, 100) + "..."
                     : event.content();
@@ -54,14 +54,14 @@ public class ChatNotificationListener {
                 if (user.getId().equals(event.senderId())) continue;
 
                 if (mentionedNames.contains(user.getName())) {
-                    notificationService.createAndSend(new CreateNotificationRequest(
+                    notificationPublisher.publish(new CreateNotificationRequest(
                             user.getId(), event.senderId(), event.workspaceId(),
                             NotificationType.MENTION,
                             event.senderName() + "님이 회원님을 멘션했습니다",
                             preview, relatedUrl
                     ));
                 } else if (!chatPresenceTracker.isUserActive(event.workspaceId(), user.getEmail())) {
-                    notificationService.createAndSend(new CreateNotificationRequest(
+                    notificationPublisher.publish(new CreateNotificationRequest(
                             user.getId(), event.senderId(), event.workspaceId(),
                             NotificationType.NEW_CHAT_MESSAGE,
                             event.senderName() + "님이 메시지를 보냈습니다",

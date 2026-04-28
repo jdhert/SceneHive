@@ -571,8 +571,20 @@ FRONTEND_URL=http://localhost:3000
 - SSL/TLS 인증서 (Let's Encrypt)
 - 환경변수 시크릿 관리 (GitHub Secrets / AWS SSM)
 
-#### Phase 8: MSA (마이크로서비스 아키텍처) 전환
-**목표**: 현재 모놀리식 → 도메인별 마이크로서비스 분리
+#### Phase 8: Modular Monolith → MSA 전환
+**목표**: 현재 계층형 모놀리식 → 도메인 경계가 명확한 모듈러 모놀리스 → 도메인별 마이크로서비스 순차 분리
+
+**진행 원칙:**
+- 바로 여러 Spring Boot 애플리케이션으로 나누지 않고, 먼저 단일 배포 단위 안에서 모듈 소유권을 고정한다.
+- `UserRepository`, `WorkspaceRepository`, `WorkspaceMemberRepository`처럼 여러 도메인이 공유하는 저장소 접근을 내부 포트로 치환한다.
+- 모듈 간 쓰기 side effect는 내부 이벤트로 정리한 뒤 외부 브로커(Kafka/RabbitMQ 등)로 전환한다.
+- 대시보드/통합검색은 쓰기 도메인이 아니라 read model/BFF 성격의 조회 모듈로 분리한다.
+- 상세 계획은 `docs/architecture/modular-monolith.md`를 기준으로 관리한다.
+
+**1차 반영 사항:**
+- `IdentityReader`, `WorkspaceAccessChecker`, `NotificationPublisher` 내부 포트를 추가해 identity/workspace/notification 경계를 명시했다.
+- `ChatService`, `MemoService`, `SnippetService`, `SearchService`, `DashboardService`, `ChatNotificationListener`의 직접 저장소/서비스 의존 일부를 내부 포트로 교체했다.
+- `ModularMonolithBoundaryTest`로 모든 백엔드 클래스의 모듈 소유권과 1차 리팩터링 대상의 금지 의존성을 검증한다.
 
 **서비스 분리 계획:**
 ```
