@@ -234,12 +234,14 @@ flowchart LR
         IdentityReader["IdentityReader"]
         IdentityPresenceUpdater["IdentityPresenceUpdater"]
         WorkspaceAccessChecker["WorkspaceAccessChecker"]
+        NotificationCommandPublisher["NotificationCommandPublisher"]
         NotificationPublisher["NotificationPublisher"]
     end
 
     subgraph Owners["Owning Modules"]
         UserRepo["UserRepository\n(identity-owned)"]
         WorkspaceRepos["WorkspaceRepository\nWorkspaceMemberRepository\n(workspace-owned)"]
+        NotificationCommandHandler["NotificationCommandHandler\n(notification command consumer)"]
         NotificationSvc["NotificationService\n(notification-owned)"]
     end
 
@@ -263,13 +265,15 @@ flowchart LR
     NotificationService --> IdentityReader
     NotificationService --> WorkspaceAccessChecker
     ChatListener --> WorkspaceAccessChecker
-    ChatListener --> NotificationPublisher
+    ChatListener --> NotificationCommandPublisher
 
     IdentityReader --> UserRepo
     IdentityPresenceUpdater --> UserRepo
     ChatQueryReader --> ChatRepos["ChatMessageRepository\n(chat-owned)"]
     ContentQueryReader --> ContentRepos["CodeSnippetRepository\nMemoRepository\n(content-owned)"]
     WorkspaceAccessChecker --> WorkspaceRepos
+    NotificationCommandPublisher --> NotificationCommandHandler
+    NotificationCommandHandler --> NotificationPublisher
     NotificationPublisher --> NotificationSvc
 ```
 
@@ -280,9 +284,27 @@ flowchart LR
 | `IdentityReader` | `PersistenceIdentityReader` | 이메일/id 기반 사용자 조회 책임을 identity 모듈 뒤로 숨김 |
 | `IdentityPresenceUpdater` | `PersistenceIdentityPresenceUpdater` | WebSocket 접속 상태 변경을 identity 모듈의 사용자 상태 쓰기로 격리 |
 | `WorkspaceAccessChecker` | `PersistenceWorkspaceAccessChecker` | 워크스페이스 조회, 멤버십 확인, 관리자/소유자 권한 판단을 workspace 모듈로 집중 |
-| `NotificationPublisher` | `NotificationServicePublisher` | 이벤트 리스너가 `NotificationService`에 직접 묶이지 않고 알림 발행만 요청 |
+| `NotificationCommandPublisher` | `SpringNotificationCommandPublisher` | 채팅에서 발생한 알림 side effect를 Kafka 전환 가능한 command event로 발행 |
+| `NotificationPublisher` | `NotificationServicePublisher` | command handler가 `NotificationService`에 직접 묶이지 않고 알림 발행만 요청 |
 | `ChatQueryReader` | `PersistenceChatQueryReader` | 대시보드/검색이 채팅 저장소를 직접 읽지 않고 chat 모듈 read port를 사용 |
 | `ContentQueryReader` | `PersistenceContentQueryReader` | 대시보드/검색이 명대사/리뷰 저장소를 직접 읽지 않고 content 모듈 read port를 사용 |
+
+### Notification 분리 준비 흐름
+
+```mermaid
+sequenceDiagram
+    participant Chat as ChatService
+    participant Listener as ChatNotificationListener
+    participant CommandPub as NotificationCommandPublisher
+    participant Handler as NotificationCommandHandler
+    participant Notification as NotificationService
+
+    Chat->>Listener: ChatMessageCreatedEvent(after commit)
+    Listener->>CommandPub: NotificationCommand 발행
+    CommandPub->>Handler: Spring event 전달
+    Handler->>Notification: CreateNotificationRequest 변환 후 생성
+    Note over CommandPub,Handler: Kafka 도입 시 이 구간을 producer/consumer로 교체
+```
 
 ### MSA 전환 예상 흐름
 

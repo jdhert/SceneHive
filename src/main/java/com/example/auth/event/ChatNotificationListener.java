@@ -1,10 +1,10 @@
 package com.example.auth.event;
 
-import com.example.auth.dto.notification.CreateNotificationRequest;
 import com.example.auth.entity.NotificationType;
 import com.example.auth.entity.WorkspaceMember;
 import com.example.auth.entity.User;
-import com.example.auth.notification.NotificationPublisher;
+import com.example.auth.notification.NotificationCommand;
+import com.example.auth.notification.NotificationCommandPublisher;
 import com.example.auth.service.ChatPresenceTracker;
 import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.slf4j.Logger;
@@ -27,14 +27,14 @@ public class ChatNotificationListener {
     private static final Pattern MENTION_PATTERN = Pattern.compile("@(\\S+)");
 
     private final WorkspaceAccessChecker workspaceAccessChecker;
-    private final NotificationPublisher notificationPublisher;
+    private final NotificationCommandPublisher notificationCommandPublisher;
     private final ChatPresenceTracker chatPresenceTracker;
 
     public ChatNotificationListener(WorkspaceAccessChecker workspaceAccessChecker,
-                                    NotificationPublisher notificationPublisher,
+                                    NotificationCommandPublisher notificationCommandPublisher,
                                     ChatPresenceTracker chatPresenceTracker) {
         this.workspaceAccessChecker = workspaceAccessChecker;
-        this.notificationPublisher = notificationPublisher;
+        this.notificationCommandPublisher = notificationCommandPublisher;
         this.chatPresenceTracker = chatPresenceTracker;
     }
 
@@ -54,14 +54,14 @@ public class ChatNotificationListener {
                 if (user.getId().equals(event.senderId())) continue;
 
                 if (mentionedNames.contains(user.getName())) {
-                    notificationPublisher.publish(new CreateNotificationRequest(
+                    publishNotificationCommand(new NotificationCommand(
                             user.getId(), event.senderId(), event.workspaceId(),
                             NotificationType.MENTION,
                             event.senderName() + "님이 회원님을 멘션했습니다",
                             preview, relatedUrl
                     ));
                 } else if (!chatPresenceTracker.isUserActive(event.workspaceId(), user.getEmail())) {
-                    notificationPublisher.publish(new CreateNotificationRequest(
+                    publishNotificationCommand(new NotificationCommand(
                             user.getId(), event.senderId(), event.workspaceId(),
                             NotificationType.NEW_CHAT_MESSAGE,
                             event.senderName() + "님이 메시지를 보냈습니다",
@@ -72,6 +72,10 @@ public class ChatNotificationListener {
         } catch (Exception e) {
             log.warn("Failed to send chat notifications for workspace {}", event.workspaceId(), e);
         }
+    }
+
+    private void publishNotificationCommand(NotificationCommand command) {
+        notificationCommandPublisher.publish(command);
     }
 
     private Set<String> parseMentions(String content) {

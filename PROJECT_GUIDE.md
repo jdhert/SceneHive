@@ -596,6 +596,11 @@ FRONTEND_URL=http://localhost:3000
 - `SearchService`, `DashboardService`에서 `ChatMessageRepository`, `CodeSnippetRepository`, `MemoRepository` 직접 의존을 제거했다.
 - `ModularMonolithBoundaryTest`에 query 서비스가 chat/content write-model repository를 import하지 못하도록 검증을 추가했다.
 
+**4차 반영 사항:**
+- `NotificationCommand`, `NotificationCommandPublisher`, `NotificationCommandHandler`를 추가해 채팅 알림 생성을 명시적인 command event 계약으로 분리했다.
+- `ChatNotificationListener`는 더 이상 `NotificationPublisher`에 직접 알림 생성을 요청하지 않고, `NotificationCommandPublisher`로 알림 command만 발행한다.
+- 현재는 Spring event 기반 단일 프로세스 동작을 유지하며, 이후 Kafka 도입 시 `SpringNotificationCommandPublisher`와 `NotificationCommandHandler`를 producer/consumer로 교체하는 흐름을 만든다.
+
 **서비스 분리 계획:**
 ```
 현재 (Monolith)                    →    MSA 구조

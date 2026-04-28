@@ -124,7 +124,8 @@ class ModularMonolithBoundaryTest {
                 "import com.example.auth.repository.WorkspaceRepository;",
                 "import com.example.auth.repository.WorkspaceMemberRepository;",
                 "import com.example.auth.service.WorkspaceService;",
-                "import com.example.auth.service.NotificationService;"
+                "import com.example.auth.service.NotificationService;",
+                "import com.example.auth.notification.NotificationPublisher;"
         );
 
         StringBuilder violations = new StringBuilder();

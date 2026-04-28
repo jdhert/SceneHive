@@ -28,7 +28,8 @@ SceneHive starts as a single Spring Boot application, but the codebase should no
 2. Introduce internal ports for the heaviest shared dependencies:
    - `IdentityReader`: user lookup by email/id and display data.
    - `WorkspaceAccessChecker`: membership and role checks.
-   - `NotificationPublisher`: notification creation/delivery.
+   - `NotificationCommandPublisher`: chat-to-notification command event.
+   - `NotificationPublisher`: notification creation/delivery inside the notification module.
 3. Replace direct repository access across modules with those ports.
 4. Move classes physically into module packages after dependencies point inward:
    - `com.example.auth.identity`
@@ -51,7 +52,8 @@ Implemented the first dependency-inversion pass while keeping the single Spring 
 | `identity.IdentityReader` | `identity.PersistenceIdentityReader` | Allows chat, content, and query modules to resolve users without importing `UserRepository`. |
 | `identity.IdentityPresenceUpdater` | `identity.PersistenceIdentityPresenceUpdater` | Lets chat presence update user status without importing `UserRepository`. |
 | `workspace.WorkspaceAccessChecker` | `workspace.PersistenceWorkspaceAccessChecker` | Centralizes workspace lookup, membership checks, role checks, and member/workspace reads. |
-| `notification.NotificationPublisher` | `notification.NotificationServicePublisher` | Lets event listeners publish notifications without coupling directly to `NotificationService`. |
+| `notification.NotificationPublisher` | `notification.NotificationServicePublisher` | Lets the notification command handler create notifications without coupling directly to `NotificationService`. |
+| `notification.NotificationCommandPublisher` | `notification.SpringNotificationCommandPublisher` | Turns chat-driven notification side effects into a command event that can later become a Kafka producer. |
 | `chat.ChatQueryReader` | `chat.PersistenceChatQueryReader` | Lets query services read chat messages without importing `ChatMessageRepository`. |
 | `content.ContentQueryReader` | `content.PersistenceContentQueryReader` | Lets query services read snippets and memos without importing content repositories. |
 
@@ -59,7 +61,7 @@ Updated consumers:
 - `ChatService` now depends on `IdentityReader` and `WorkspaceAccessChecker`.
 - `MemoService` and `SnippetService` now use workspace and identity ports for membership/role checks.
 - `SearchService` and `DashboardService` now use identity/workspace ports instead of user/member/workspace repositories.
-- `ChatNotificationListener` now uses `WorkspaceAccessChecker` and `NotificationPublisher`.
+- `ChatNotificationListener` now uses `WorkspaceAccessChecker` and `NotificationCommandPublisher`.
 
 Architecture guardrails:
 - `ModularMonolithBoundaryTest` verifies every backend class is assigned to a planned module owner.
@@ -90,6 +92,20 @@ This keeps `query` as a read aggregation module while preventing it from reachin
 
 Architecture guardrails now also prevent query services from importing chat/content write-model repositories.
 
+### Checkpoint 4 - Notification Command Contract
+
+Prepared the first extraction candidate, `notification-service`, by adding an explicit command contract between chat notifications and notification creation:
+
+| Flow step | Current implementation | Later MSA replacement |
+| --- | --- | --- |
+| Chat message persisted | `ChatService` publishes `ChatMessageCreatedEvent` after saving a message. | `chat-service` publishes a chat domain event. |
+| Notification decision | `ChatNotificationListener` resolves workspace members, mentions, and active chat presence. | Can stay in chat or move to a notification policy consumer depending on ownership choice. |
+| Notification command publish | `NotificationCommandPublisher` publishes `NotificationCommand` through Spring events. | Kafka producer to `scenehive.notification.command`. |
+| Notification command consume | `NotificationCommandHandler` converts the command to `CreateNotificationRequest`. | Kafka consumer in `notification-service`. |
+| Notification delivery | `NotificationPublisher` delegates to `NotificationService`. | Local notification application service in the extracted service. |
+
+This keeps runtime behavior unchanged in the monolith, but the boundary is now shaped like an asynchronous message contract instead of a direct service call. The next Kafka step should replace `SpringNotificationCommandPublisher` and `NotificationCommandHandler`, not the chat or notification domain logic itself.
+
 ## Recommended Extraction Order
 
 | Order | Extraction | Why |
@@ -106,5 +122,6 @@ Architecture guardrails now also prevent query services from importing chat/cont
 - Some owner services still use their own repositories directly; this is expected until physical package moves and service extraction start.
 - Query aggregation is behind read ports, but the underlying adapters still use monolith JPA repositories until read models or indexes exist.
 - Entity relationships still point across future service boundaries.
+- `NotificationCommand` still uses the shared `NotificationType` enum; before physical service extraction, freeze this as an external event enum or duplicate it in a versioned contract package.
 
 The next code step is dependency inversion, not service extraction. Once cross-module calls go through ports, moving a module into its own Spring Boot application becomes mostly an infrastructure change rather than a domain rewrite.
