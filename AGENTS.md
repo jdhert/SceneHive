@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 14:16:22 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 보호 페이지 브랜드 링크 홈 이동 수정
+- Scope (In/Out): In: frontend-next/src/app/(protected)/* header links, AGENTS.md / Out: 백엔드 로직 변경, DB 스키마 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "보호 페이지 브랜드 링크 홈 이동 수정" -ScopeIn "frontend-next/src/app/(protected)/* header links, AGENTS.md" -ScopeOut "백엔드 로직 변경, DB 스키마 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; frontend-next npm run build 성공; 보호 페이지 브랜드 링크 /home 통일; 커밋 f4b1295 push 완료" -OpenRisks "GitHub public API rate limit 때문에 f4b1295 Actions 최종 상태는 미확인; 브라우저 캐시가 남으면 강력 새로고침 필요" -Blockers "None" -NextAction1 "브라우저에서 SceneHive 클릭 시 /home 이동 확인" -NextAction2 "JWT_SECRET 적용 후 backend 컨테이너 force recreate" -NextAction3 "CI/CD paths-ignore로 문서-only/AGENTS-only 배포 방지"
+- Tests Run + Result: git diff --check 성공; frontend-next npm run build 성공; 보호 페이지 브랜드 링크 /home 통일; 커밋 f4b1295 push 완료
+- Open Risks: GitHub public API rate limit 때문에 f4b1295 Actions 최종 상태는 미확인; 브라우저 캐시가 남으면 강력 새로고침 필요
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 SceneHive 클릭 시 /home 이동 확인, 2) JWT_SECRET 적용 후 backend 컨테이너 force recreate, 3) CI/CD paths-ignore로 문서-only/AGENTS-only 배포 방지
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 13:37:52 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -714,6 +730,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
