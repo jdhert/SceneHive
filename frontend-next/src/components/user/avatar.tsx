@@ -59,7 +59,7 @@ export default function Avatar({ user, size = 'md', showStatus = false }: Avatar
       ) : (
         <div
           className={cn(
-            'rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium',
+            'rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-amber-700 flex items-center justify-center text-white font-medium shadow-[0_0_18px_rgba(245,158,11,0.18)]',
             sizeClasses[size],
             textSizeClasses[size]
           )}

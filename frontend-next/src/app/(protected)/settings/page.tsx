@@ -129,11 +129,11 @@ export default function SettingsPage() {
     <div className="min-h-screen" style={{ background: BG }}>
       <header className="border-b flex-shrink-0"
         style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.9)', backdropFilter: 'blur(10px)' }}>
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
-              <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
+              <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: AMBER }}>SceneHive</span>
             </Link>
             <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>
             <Button variant="ghost" onClick={() => router.back()} className="text-sm"

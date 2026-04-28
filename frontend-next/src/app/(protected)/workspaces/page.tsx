@@ -16,8 +16,8 @@ import type { Workspace } from '@/types';
 const BG = '#0B0B14';
 const AMBER = '#F59E0B';
 const AMBER_DARK = '#D97706';
-const CARD_BG = 'rgba(255,255,255,0.05)';
-const CARD_BORDER = '1px solid rgba(245,158,11,0.15)';
+const CARD_BG = 'rgba(255,255,255,0.04)';
+const CARD_BORDER = '1px solid rgba(245,158,11,0.12)';
 
 export default function WorkspacesPage() {
   const router = useRouter();
@@ -89,17 +89,25 @@ export default function WorkspacesPage() {
 
   return (
     <div className="min-h-screen" style={{ background: BG }}>
-      {/* Ambient orb */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full blur-3xl opacity-8"
-          style={{ background: 'radial-gradient(circle, #F59E0B, transparent)' }} />
+        <div
+          className="absolute -top-24 right-[-10%] w-[28rem] h-[28rem] rounded-full blur-3xl opacity-[0.08]"
+          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.55), transparent 68%)' }}
+        />
       </div>
 
-      <header className="relative z-10 border-b" style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.85)', backdropFilter: 'blur(10px)' }}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+      <header
+        className="relative z-10 border-b flex-shrink-0"
+        style={{
+          borderColor: 'rgba(245,158,11,0.15)',
+          background: 'rgba(11,11,20,0.9)',
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+          <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
-            <span className="text-lg font-bold" style={{ color: AMBER }}>SceneHive</span>
+            <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: AMBER }}>SceneHive</span>
           </Link>
           <div className="flex items-center gap-4">
             <NotificationBell />
@@ -108,21 +116,21 @@ export default function WorkspacesPage() {
         </div>
       </header>
 
-      <div className="relative z-10 max-w-6xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">영화 클럽</h1>
             <p className="mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>클럽을 선택하거나 새로 만드세요</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
             <Button onClick={() => setShowJoinModal(true)} variant="outline"
               className="font-medium"
-              style={{ borderColor: 'rgba(245,158,11,0.35)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+              style={{ borderColor: 'rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.06)', color: 'rgba(245,158,11,0.9)' }}>
               초대 코드로 참여
             </Button>
             <Button onClick={() => setShowCreateModal(true)}
               className="font-bold text-white"
-              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
+              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: '0 14px 30px rgba(245,158,11,0.18)' }}>
               + 새 클럽 만들기
             </Button>
           </div>
