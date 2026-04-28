@@ -14,6 +14,8 @@ import type { ChatMessage, CodeSnippet, FavoriteItem, Memo } from '@/types';
 
 const BG = '#0B0B14';
 const AMBER = '#F59E0B';
+const BRAND_TEXT = 'rgba(255,255,255,0.92)';
+const ACTION_TEXT = 'rgba(255,255,255,0.62)';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 
 function timeAgo(dateStr: string) {
@@ -72,7 +74,7 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
-            <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: AMBER }}>
+            <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>
               SceneHive
             </span>
           </Link>
@@ -95,7 +97,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">참여 중인 영화 클럽</h2>
             <Link href="/workspaces">
-              <Button variant="ghost" className="text-sm" style={{ color: 'rgba(245,158,11,0.7)' }}>
+              <Button variant="ghost" className="text-sm" style={{ color: ACTION_TEXT }}>
                 전체 보기
               </Button>
             </Link>
@@ -152,7 +154,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">내 즐겨찾기</h2>
             <Link href="/search">
-              <Button variant="ghost" className="text-sm" style={{ color: 'rgba(245,158,11,0.7)' }}>
+              <Button variant="ghost" className="text-sm" style={{ color: ACTION_TEXT }}>
                 통합 검색으로 추가
               </Button>
             </Link>

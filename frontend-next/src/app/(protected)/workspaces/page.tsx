@@ -16,6 +16,7 @@ import type { Workspace } from '@/types';
 const BG = '#0B0B14';
 const AMBER = '#F59E0B';
 const AMBER_DARK = '#D97706';
+const BRAND_TEXT = 'rgba(255,255,255,0.92)';
 const CARD_BG = 'rgba(255,255,255,0.04)';
 const CARD_BORDER = '1px solid rgba(245,158,11,0.12)';
 
@@ -107,7 +108,7 @@ export default function WorkspacesPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
           <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
-            <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: AMBER }}>SceneHive</span>
+            <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>SceneHive</span>
           </Link>
           <div className="flex items-center gap-4">
             <NotificationBell />

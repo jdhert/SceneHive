@@ -17,6 +17,7 @@ import NotificationBell from '@/components/notification/notification-bell';
 const BG = '#0B0B14';
 const AMBER = '#F59E0B';
 const AMBER_DARK = '#D97706';
+const BRAND_TEXT = 'rgba(255,255,255,0.92)';
 
 export default function ProfileEditPage() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function ProfileEditPage() {
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
-              <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: AMBER }}>SceneHive</span>
+              <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>SceneHive</span>
             </Link>
             <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>
             <h1 className="text-lg font-semibold text-white">프로필 편집</h1>
