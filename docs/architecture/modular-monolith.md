@@ -53,7 +53,7 @@ Implemented the first dependency-inversion pass while keeping the single Spring 
 | `identity.IdentityPresenceUpdater` | `identity.PersistenceIdentityPresenceUpdater` | Lets chat presence update user status without importing `UserRepository`. |
 | `workspace.WorkspaceAccessChecker` | `workspace.PersistenceWorkspaceAccessChecker` | Centralizes workspace lookup, membership checks, role checks, and member/workspace reads. |
 | `notification.NotificationPublisher` | `notification.NotificationServicePublisher` | Lets the notification command handler create notifications without coupling directly to `NotificationService`. |
-| `notification.NotificationCommandPublisher` | `notification.SpringNotificationCommandPublisher` | Turns chat-driven notification side effects into a command event that can later become a Kafka producer. |
+| `notification.NotificationCommandPublisher` | `notification.SpringNotificationCommandPublisher` | Turns chat-driven notification side effects into a versioned command event that can later become a Kafka producer. |
 | `chat.ChatQueryReader` | `chat.PersistenceChatQueryReader` | Lets query services read chat messages without importing `ChatMessageRepository`. |
 | `content.ContentQueryReader` | `content.PersistenceContentQueryReader` | Lets query services read snippets and memos without importing content repositories. |
 
@@ -100,11 +100,22 @@ Prepared the first extraction candidate, `notification-service`, by adding an ex
 | --- | --- | --- |
 | Chat message persisted | `ChatService` publishes `ChatMessageCreatedEvent` after saving a message. | `chat-service` publishes a chat domain event. |
 | Notification decision | `ChatNotificationListener` resolves workspace members, mentions, and active chat presence. | Can stay in chat or move to a notification policy consumer depending on ownership choice. |
-| Notification command publish | `NotificationCommandPublisher` publishes `NotificationCommand` through Spring events. | Kafka producer to `scenehive.notification.command`. |
-| Notification command consume | `NotificationCommandHandler` converts the command to `CreateNotificationRequest`. | Kafka consumer in `notification-service`. |
+| Notification command publish | `NotificationCommandPublisher` publishes `notification.contract.NotificationCommand` through Spring events. | Kafka producer to `scenehive.notification.command.v1`. |
+| Notification command consume | `NotificationCommandHandler` maps the contract to `CreateNotificationRequest`. | Kafka consumer in `notification-service`. |
 | Notification delivery | `NotificationPublisher` delegates to `NotificationService`. | Local notification application service in the extracted service. |
 
 This keeps runtime behavior unchanged in the monolith, but the boundary is now shaped like an asynchronous message contract instead of a direct service call. The next Kafka step should replace `SpringNotificationCommandPublisher` and `NotificationCommandHandler`, not the chat or notification domain logic itself.
+
+Contract shape:
+- Package: `com.example.auth.notification.contract`
+- Current schema version: `1`
+- Required routing fields: `eventId`, `schemaVersion`, `occurredAt`, `recipientId`, `type`
+- Optional context fields: `senderId`, `workspaceId`, `relatedUrl`
+- Presentation fields: `title`, `message`
+
+Architecture guardrails now prevent the command contract package from importing application DTOs, entities, repositories, or services.
+
+Kafka topic, retry, DLQ, and idempotency policy is defined in [`notification-kafka-policy.md`](./notification-kafka-policy.md).
 
 ## Recommended Extraction Order
 
@@ -122,6 +133,6 @@ This keeps runtime behavior unchanged in the monolith, but the boundary is now s
 - Some owner services still use their own repositories directly; this is expected until physical package moves and service extraction start.
 - Query aggregation is behind read ports, but the underlying adapters still use monolith JPA repositories until read models or indexes exist.
 - Entity relationships still point across future service boundaries.
-- `NotificationCommand` still uses the shared `NotificationType` enum; before physical service extraction, freeze this as an external event enum or duplicate it in a versioned contract package.
+- `NotificationCommandHandler` still maps the contract type to the monolith `NotificationType`; when `notification-service` is physically extracted, that mapping should live inside the extracted service only.
 
 The next code step is dependency inversion, not service extraction. Once cross-module calls go through ports, moving a module into its own Spring Boot application becomes mostly an infrastructure change rather than a domain rewrite.

@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 17:16:02 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): notification Kafka 운영 정책 문서화
+- Scope (In/Out): In: docs/architecture/notification-kafka-policy.md, README.md, PROJECT_GUIDE.md, docs/architecture/modular-monolith.md, AGENTS.md / Out: Kafka broker/compose 추가, Spring Kafka 의존성 추가, producer/consumer 구현, DB eventId 컬럼 추가
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M PROJECT_GUIDE.md,  M README.md,  M docs/architecture/modular-monolith.md,  M src/main/java/com/example/auth/event/ChatNotificationListener.java,  D src/main/java/com/example/auth/notification/NotificationCommand.java,  M src/main/java/com/example/auth/notification/NotificationCommandHandler.java,  M src/main/java/com/example/auth/notification/NotificationCommandPublisher.java,  M src/main/java/com/example/auth/notification/SpringNotificationCommandPublisher.java,  M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, ?? .ref-v0-movie-community-service/, ?? docs/architecture/notification-kafka-policy.md, ?? nul, ?? src/main/java/com/example/auth/notification/contract/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "notification Kafka 운영 정책 문서화" -ScopeIn "docs/architecture/notification-kafka-policy.md, README.md, PROJECT_GUIDE.md, docs/architecture/modular-monolith.md, AGENTS.md" -ScopeOut "Kafka broker/compose 추가, Spring Kafka 의존성 추가, producer/consumer 구현, DB eventId 컬럼 추가" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; notification contract app-internal import 정적 검증 성공; ChatNotificationListener command boundary 정적 검증 성공; 문서 링크 rg 검증 성공" -OpenRisks "현재 Kafka 정책은 문서화 단계이며 실제 구현 전 notifications.event_id unique constraint, retry/DLQ 라우팅, OCI single-VM 디스크 보관 정책 확인 필요" -Blockers "None" -NextAction1 "notifications.event_id 저장 및 unique constraint 추가" -NextAction2 "docker-compose에 Kafka broker 추가" -NextAction3 "Spring Kafka producer/consumer와 retry/DLQ 라우팅 구현"
+- Tests Run + Result: git diff --check 성공; notification contract app-internal import 정적 검증 성공; ChatNotificationListener command boundary 정적 검증 성공; 문서 링크 rg 검증 성공
+- Open Risks: 현재 Kafka 정책은 문서화 단계이며 실제 구현 전 notifications.event_id unique constraint, retry/DLQ 라우팅, OCI single-VM 디스크 보관 정책 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) notifications.event_id 저장 및 unique constraint 추가, 2) docker-compose에 Kafka broker 추가, 3) Spring Kafka producer/consumer와 retry/DLQ 라우팅 구현
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 17:13:30 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): MSA 전환 준비용 notification command contract versioning
+- Scope (In/Out): In: notification contract package, ChatNotificationListener, command handler, architecture test/docs, AGENTS.md / Out: Kafka broker 의존성 추가, 물리 notification-service 분리, DB 분리, 배포 설정 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md,  M README.md,  M docs/architecture/modular-monolith.md,  M src/main/java/com/example/auth/event/ChatNotificationListener.java,  D src/main/java/com/example/auth/notification/NotificationCommand.java,  M src/main/java/com/example/auth/notification/NotificationCommandHandler.java,  M src/main/java/com/example/auth/notification/NotificationCommandPublisher.java,  M src/main/java/com/example/auth/notification/SpringNotificationCommandPublisher.java,  M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, ?? .ref-v0-movie-community-service/, ?? nul, ?? src/main/java/com/example/auth/notification/contract/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "MSA 전환 준비용 notification command contract versioning" -ScopeIn "notification contract package, ChatNotificationListener, command handler, architecture test/docs, AGENTS.md" -ScopeOut "Kafka broker 의존성 추가, 물리 notification-service 분리, DB 분리, 배포 설정 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; notification contract app-internal import 정적 검증 성공; ChatNotificationListener NotificationType/NotificationPublisher 직접 import 제거 정적 검증 성공; .\\gradlew.bat test --tests com.example.auth.architecture.ModularMonolithBoundaryTest는 로컬 Java 8로 Spring Boot 3.2 플러그인 Java 17 요구사항 때문에 실패" -OpenRisks "Java 17 환경/CI에서 아키텍처 테스트 재실행 필요; 실제 Kafka 도입 전 topic naming, retry/DLQ, idempotency key(eventId) 처리 정책 확정 필요" -Blockers "None" -NextAction1 "Java 17 환경에서 ./gradlew test 실행" -NextAction2 "Kafka topic/retry/DLQ/idempotency 정책 문서화" -NextAction3 "SpringNotificationCommandPublisher/NotificationCommandHandler를 Kafka producer/consumer로 교체하는 인프라 패치 진행"
+- Tests Run + Result: git diff --check 성공; notification contract app-internal import 정적 검증 성공; ChatNotificationListener NotificationType/NotificationPublisher 직접 import 제거 정적 검증 성공; .\\gradlew.bat test --tests com.example.auth.architecture.ModularMonolithBoundaryTest는 로컬 Java 8로 Spring Boot 3.2 플러그인 Java 17 요구사항 때문에 실패
+- Open Risks: Java 17 환경/CI에서 아키텍처 테스트 재실행 필요; 실제 Kafka 도입 전 topic naming, retry/DLQ, idempotency key(eventId) 처리 정책 확정 필요
+- Blockers: None
+- Next 3 Actions: 1) Java 17 환경에서 ./gradlew test 실행, 2) Kafka topic/retry/DLQ/idempotency 정책 문서화, 3) SpringNotificationCommandPublisher/NotificationCommandHandler를 Kafka producer/consumer로 교체하는 인프라 패치 진행
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 16:38:06 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -826,16 +858,4 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
-
-
-
-
-
-
-
-
-
-
-
 

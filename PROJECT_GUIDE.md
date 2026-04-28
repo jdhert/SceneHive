@@ -601,6 +601,16 @@ FRONTEND_URL=http://localhost:3000
 - `ChatNotificationListener`는 더 이상 `NotificationPublisher`에 직접 알림 생성을 요청하지 않고, `NotificationCommandPublisher`로 알림 command만 발행한다.
 - 현재는 Spring event 기반 단일 프로세스 동작을 유지하며, 이후 Kafka 도입 시 `SpringNotificationCommandPublisher`와 `NotificationCommandHandler`를 producer/consumer로 교체하는 흐름을 만든다.
 
+**5차 반영 사항:**
+- `NotificationCommand`를 `notification.contract` 패키지로 이동하고 `eventId`, `schemaVersion`, `occurredAt`을 추가해 Kafka topic payload로 사용할 수 있는 메시지 계약 형태로 고정했다.
+- command 계약은 더 이상 JPA entity enum인 `NotificationType`에 의존하지 않고, 별도 `NotificationCommandType`을 사용한다.
+- `ModularMonolithBoundaryTest`에 contract 패키지가 DTO/entity/repository/service를 import하지 못하도록 검증을 추가했다.
+
+**6차 반영 사항:**
+- `docs/architecture/notification-kafka-policy.md`에 알림 command topic, partition key, retry topic, DLQ, 보관 기간, idempotency 기준을 문서화했다.
+- 기본 topic은 `scenehive.notification.command.v1`, 메시지 key는 `recipientId`, 중복 방지 key는 `eventId`로 고정했다.
+- Kafka consumer 도입 전 `notifications.event_id` 저장 및 unique constraint 추가가 필요하다는 선행 조건을 명시했다.
+
 **서비스 분리 계획:**
 ```
 현재 (Monolith)                    →    MSA 구조

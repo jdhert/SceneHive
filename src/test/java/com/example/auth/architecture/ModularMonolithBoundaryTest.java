@@ -125,7 +125,8 @@ class ModularMonolithBoundaryTest {
                 "import com.example.auth.repository.WorkspaceMemberRepository;",
                 "import com.example.auth.service.WorkspaceService;",
                 "import com.example.auth.service.NotificationService;",
-                "import com.example.auth.notification.NotificationPublisher;"
+                "import com.example.auth.notification.NotificationPublisher;",
+                "import com.example.auth.entity.NotificationType;"
         );
 
         StringBuilder violations = new StringBuilder();
@@ -175,6 +176,41 @@ class ModularMonolithBoundaryTest {
 
         assertTrue(violations.isEmpty(),
                 "Query services must use chat/content read ports instead of write-model repositories:"
+                        + violations);
+    }
+
+    @Test
+    void notificationCommandContractDoesNotDependOnApplicationInternals() throws IOException {
+        Path contractRoot = SOURCE_ROOT.resolve("notification/contract");
+        List<String> forbiddenImports = List.of(
+                "import com.example.auth.dto.",
+                "import com.example.auth.entity.",
+                "import com.example.auth.repository.",
+                "import com.example.auth.service."
+        );
+
+        StringBuilder violations = new StringBuilder();
+        try (Stream<Path> files = Files.walk(contractRoot)) {
+            files.filter(path -> path.toString().endsWith(".java"))
+                    .forEach(source -> {
+                        try {
+                            String content = Files.readString(source);
+                            forbiddenImports.stream()
+                                    .filter(content::contains)
+                                    .forEach(forbiddenImport -> violations
+                                            .append(System.lineSeparator())
+                                            .append(" - ")
+                                            .append(SOURCE_ROOT.relativize(source).toString().replace('\\', '/'))
+                                            .append(" imports ")
+                                            .append(forbiddenImport));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        }
+
+        assertTrue(violations.isEmpty(),
+                "Notification command contracts must stay serializable and independent from app internals:"
                         + violations);
     }
 }

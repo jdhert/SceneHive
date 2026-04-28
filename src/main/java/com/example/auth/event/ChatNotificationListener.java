@@ -1,10 +1,10 @@
 package com.example.auth.event;
 
-import com.example.auth.entity.NotificationType;
 import com.example.auth.entity.WorkspaceMember;
 import com.example.auth.entity.User;
-import com.example.auth.notification.NotificationCommand;
 import com.example.auth.notification.NotificationCommandPublisher;
+import com.example.auth.notification.contract.NotificationCommand;
+import com.example.auth.notification.contract.NotificationCommandType;
 import com.example.auth.service.ChatPresenceTracker;
 import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.slf4j.Logger;
@@ -54,16 +54,16 @@ public class ChatNotificationListener {
                 if (user.getId().equals(event.senderId())) continue;
 
                 if (mentionedNames.contains(user.getName())) {
-                    publishNotificationCommand(new NotificationCommand(
+                    publishNotificationCommand(NotificationCommand.create(
                             user.getId(), event.senderId(), event.workspaceId(),
-                            NotificationType.MENTION,
+                            NotificationCommandType.MENTION,
                             event.senderName() + "님이 회원님을 멘션했습니다",
                             preview, relatedUrl
                     ));
                 } else if (!chatPresenceTracker.isUserActive(event.workspaceId(), user.getEmail())) {
-                    publishNotificationCommand(new NotificationCommand(
+                    publishNotificationCommand(NotificationCommand.create(
                             user.getId(), event.senderId(), event.workspaceId(),
-                            NotificationType.NEW_CHAT_MESSAGE,
+                            NotificationCommandType.NEW_CHAT_MESSAGE,
                             event.senderName() + "님이 메시지를 보냈습니다",
                             preview, relatedUrl
                     ));

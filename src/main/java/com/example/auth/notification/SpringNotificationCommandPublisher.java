@@ -1,5 +1,6 @@
 package com.example.auth.notification;
 
+import com.example.auth.notification.contract.NotificationCommand;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
