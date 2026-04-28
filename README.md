@@ -146,6 +146,9 @@ flowchart LR
 
 ## 아키텍처 개요
 
+SceneHive는 현재 하나의 Spring Boot 백엔드로 배포되지만, 내부 구조는 MSA 전환을 염두에 둔 **모듈러 모놀리스** 방향으로 정리 중입니다.
+운영 관점에서는 단일 애플리케이션이고 개발 관점에서는 `identity`, `workspace`, `content`, `chat`, `notification`, `query`, `platform` 경계를 기준으로 책임을 나눕니다.
+
 ```mermaid
 flowchart TD
     U[User Browser] --> F[Next.js Frontend]
@@ -161,6 +164,119 @@ flowchart TD
 
 프론트엔드는 `next.config.mjs`의 rewrite 설정을 통해 백엔드 API, WebSocket, OAuth 경로를 프록시합니다.  
 TMDB 기반 영화 데이터는 `frontend-next/src/app/api/**` 및 `frontend-next/src/lib/tmdb.ts`를 통해 처리합니다.
+
+## 백엔드 모듈러 모놀리스 구조
+
+### 내부 모듈 맵
+
+```mermaid
+flowchart TB
+    subgraph Backend["Spring Boot Backend - single deployable"]
+        Identity["identity\nAuth / OAuth / JWT\nUser / Settings"]
+        Workspace["workspace\nMovie Clubs\nMembership / Roles"]
+        Content["content\nReviews / Quote Snippets\nFavorites"]
+        Chat["chat\nMessages / STOMP\nPresence"]
+        Notification["notification\nIn-app Notifications\nChat Event Listener"]
+        Query["query\nDashboard\nIntegrated Search"]
+        Platform["platform\nConfig / Exception\nStorage / Mail / Redis"]
+    end
+
+    Frontend["Next.js Frontend"] --> Identity
+    Frontend --> Workspace
+    Frontend --> Content
+    Frontend --> Chat
+    Frontend --> Notification
+    Frontend --> Query
+
+    Identity --> DB[(PostgreSQL)]
+    Workspace --> DB
+    Content --> DB
+    Chat --> DB
+    Notification --> DB
+    Query --> DB
+    Platform --> Redis[(Redis)]
+    Platform --> Mail[SMTP Mail]
+```
+
+### 모듈 책임과 주요 코드 위치
+
+| 모듈 | 책임 | 주요 위치 |
+|------|------|----------|
+| `identity` | 인증, OAuth2, JWT, 사용자, 프로필, 설정 | `identity/`, `security/`, `AuthService`, `UserService`, `UserSettingsService` |
+| `workspace` | 영화 클럽, 멤버십, 초대코드, 역할 권한 | `workspace/`, `WorkspaceService`, `Workspace*` entity/repository |
+| `content` | 명대사 스니펫, 리뷰/감상문, 즐겨찾기 | `SnippetService`, `MemoService`, `FavoriteService` |
+| `chat` | 채팅 메시지, STOMP, 접속 상태, 채팅 이벤트 | `ChatService`, `ChatPresenceTracker`, `PresenceService`, `ChatMessageCreatedEvent` |
+| `notification` | 알림 생성, WebSocket 알림 전송, 채팅 알림 리스너 | `notification/`, `NotificationService`, `ChatNotificationListener` |
+| `query` | 대시보드 집계, 워크스페이스 통합 검색 | `DashboardService`, `SearchService` |
+| `platform` | 공통 설정, 예외 처리, 파일 저장, Redis, 메일 | `config/`, `exception/`, `FileStorageService`, `RedisService`, `service/mail/` |
+
+### 의존성 방향
+
+핵심 규칙은 **다른 모듈의 Repository를 직접 가져다 쓰지 않고, 작은 내부 포트 인터페이스를 통해 접근하는 것**입니다.
+
+```mermaid
+flowchart LR
+    subgraph Consumers["Consumer Modules"]
+        ChatService["ChatService\n(chat)"]
+        MemoService["MemoService\n(content)"]
+        SnippetService["SnippetService\n(content)"]
+        SearchService["SearchService\n(query)"]
+        DashboardService["DashboardService\n(query)"]
+        ChatListener["ChatNotificationListener\n(notification)"]
+    end
+
+    subgraph Ports["Internal Ports"]
+        IdentityReader["IdentityReader"]
+        WorkspaceAccessChecker["WorkspaceAccessChecker"]
+        NotificationPublisher["NotificationPublisher"]
+    end
+
+    subgraph Owners["Owning Modules"]
+        UserRepo["UserRepository\n(identity-owned)"]
+        WorkspaceRepos["WorkspaceRepository\nWorkspaceMemberRepository\n(workspace-owned)"]
+        NotificationSvc["NotificationService\n(notification-owned)"]
+    end
+
+    ChatService --> IdentityReader
+    ChatService --> WorkspaceAccessChecker
+    MemoService --> IdentityReader
+    MemoService --> WorkspaceAccessChecker
+    SnippetService --> IdentityReader
+    SnippetService --> WorkspaceAccessChecker
+    SearchService --> IdentityReader
+    SearchService --> WorkspaceAccessChecker
+    DashboardService --> IdentityReader
+    DashboardService --> WorkspaceAccessChecker
+    ChatListener --> WorkspaceAccessChecker
+    ChatListener --> NotificationPublisher
+
+    IdentityReader --> UserRepo
+    WorkspaceAccessChecker --> WorkspaceRepos
+    NotificationPublisher --> NotificationSvc
+```
+
+### 현재 적용된 내부 포트
+
+| 포트 | 구현체 | 목적 |
+|------|--------|------|
+| `IdentityReader` | `PersistenceIdentityReader` | 사용자 조회 책임을 identity 모듈 뒤로 숨김 |
+| `WorkspaceAccessChecker` | `PersistenceWorkspaceAccessChecker` | 워크스페이스 조회, 멤버십 확인, 관리자/소유자 권한 판단을 workspace 모듈로 집중 |
+| `NotificationPublisher` | `NotificationServicePublisher` | 이벤트 리스너가 `NotificationService`에 직접 묶이지 않고 알림 발행만 요청 |
+
+### MSA 전환 예상 흐름
+
+```mermaid
+flowchart LR
+    A["현재\nSingle Spring Boot App"] --> B["Modular Monolith\nInternal Ports + Module Owners"]
+    B --> C["notification-service\n이벤트 기반 알림 분리"]
+    C --> D["identity-service\n인증/사용자 분리"]
+    D --> E["workspace-service\n클럽/멤버십 분리"]
+    E --> F["chat-service\n실시간 채팅 분리"]
+    F --> G["content-service\n리뷰/명대사/즐겨찾기 분리"]
+    G --> H["query-service\n검색/대시보드 Read Model 분리"]
+```
+
+더 상세한 경계 규칙과 리팩터링 체크포인트는 [`docs/architecture/modular-monolith.md`](./docs/architecture/modular-monolith.md)에 정리되어 있습니다.
 
 ## 데이터 모델링
 
@@ -297,11 +413,16 @@ erDiagram
 ├── src/main/java/com/example/auth/   # Spring Boot 백엔드
 │   ├── config/                       # Security, WebSocket, Async, Storage 설정
 │   ├── controller/                   # 인증, 사용자, 워크스페이스, 채팅, 메모, 스니펫, 즐겨찾기 API
+│   ├── identity/                     # identity 모듈 내부 포트/어댑터
+│   ├── workspace/                    # workspace 모듈 내부 포트/어댑터
+│   ├── notification/                 # notification 모듈 내부 포트/어댑터
 │   ├── service/                      # 도메인 로직
 │   ├── repository/                   # JPA Repository
 │   ├── entity/                       # User, Workspace, Memo, Favorite 등
 │   ├── dto/                          # 요청/응답 DTO
 │   └── security/                     # JWT / OAuth2 인증 처리
+├── src/test/java/com/example/auth/
+│   └── architecture/                 # 모듈 경계 검증 테스트
 ├── src/main/resources/               # application.yml 등 백엔드 설정
 ├── frontend-next/                    # 메인 프론트엔드 (Next.js 14)
 │   ├── src/app/                      # App Router 페이지와 API route
@@ -313,6 +434,7 @@ erDiagram
 ├── docker-compose.yml                # 로컬 통합 실행
 ├── docker-compose.prod.yml           # 프로덕션 배포용 Compose
 ├── deploy.sh                         # 배포 스크립트
+├── docs/architecture/                # 아키텍처 의사결정과 리팩터링 체크포인트
 ├── PROJECT_GUIDE.md                  # 상세 프로젝트 가이드
 └── AGENTS.md                         # 에이전트 핸드오프 문서
 ```

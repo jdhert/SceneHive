@@ -162,6 +162,54 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 11:16:22 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README에 모듈러 모놀리스 아키텍처 시각화 추가
+- Scope (In/Out): In: README.md, AGENTS.md / Out: 프로덕션 코드 추가 변경, 배포 설정 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M PROJECT_GUIDE.md,  M README.md,  M src/main/java/com/example/auth/event/ChatNotificationListener.java,  M src/main/java/com/example/auth/service/ChatService.java,  M src/main/java/com/example/auth/service/DashboardService.java,  M src/main/java/com/example/auth/service/MemoService.java,  M src/main/java/com/example/auth/service/SearchService.java,  M src/main/java/com/example/auth/service/SnippetService.java,  M src/test/java/com/example/auth/service/SearchServiceTest.java, ?? .ref-v0-movie-community-service/, ?? docs/, ?? nul, ?? src/main/java/com/example/auth/identity/, ?? src/main/java/com/example/auth/notification/, ?? src/main/java/com/example/auth/workspace/, ?? src/test/java/com/example/auth/architecture/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README에 모듈러 모놀리스 아키텍처 시각화 추가" -ScopeIn "README.md, AGENTS.md" -ScopeOut "프로덕션 코드 추가 변경, 배포 설정 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; README Mermaid 다이어그램/섹션 위치 diff 검토 완료" -OpenRisks "Mermaid 미지원 뷰어에서는 다이어그램이 코드 블록으로 표시될 수 있음; Gradle 테스트는 이전과 동일하게 로컬 Java 8 이슈로 별도 실행 필요" -Blockers "None" -NextAction1 "Java 17 환경 또는 CI에서 백엔드 테스트 실행" -NextAction2 "변경사항 커밋 및 원격 push" -NextAction3 "GitHub README 렌더링에서 Mermaid 표시 확인"
+- Tests Run + Result: git diff --check 성공; README Mermaid 다이어그램/섹션 위치 diff 검토 완료
+- Open Risks: Mermaid 미지원 뷰어에서는 다이어그램이 코드 블록으로 표시될 수 있음; Gradle 테스트는 이전과 동일하게 로컬 Java 8 이슈로 별도 실행 필요
+- Blockers: None
+- Next 3 Actions: 1) Java 17 환경 또는 CI에서 백엔드 테스트 실행, 2) 변경사항 커밋 및 원격 push, 3) GitHub README 렌더링에서 Mermaid 표시 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 11:10:33 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 모듈러 모놀리스 1차 의존성 역전 리팩터링
+- Scope (In/Out): In: src/main/java/com/example/auth/{identity,workspace,notification}, chat/content/query 서비스, ChatNotificationListener, architecture test, docs / Out: 물리 패키지 대량 이동, DB 스키마 변경, 외부 MSA 분리
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M PROJECT_GUIDE.md,  M src/main/java/com/example/auth/event/ChatNotificationListener.java,  M src/main/java/com/example/auth/service/ChatService.java,  M src/main/java/com/example/auth/service/DashboardService.java,  M src/main/java/com/example/auth/service/MemoService.java,  M src/main/java/com/example/auth/service/SearchService.java,  M src/main/java/com/example/auth/service/SnippetService.java,  M src/test/java/com/example/auth/service/SearchServiceTest.java, ?? .ref-v0-movie-community-service/, ?? docs/, ?? nul, ?? src/main/java/com/example/auth/identity/, ?? src/main/java/com/example/auth/notification/, ?? src/main/java/com/example/auth/workspace/, ?? src/test/java/com/example/auth/architecture/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "모듈러 모놀리스 1차 의존성 역전 리팩터링" -ScopeIn "src/main/java/com/example/auth/{identity,workspace,notification}, chat/content/query 서비스, ChatNotificationListener, architecture test, docs" -ScopeOut "물리 패키지 대량 이동, DB 스키마 변경, 외부 MSA 분리" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; PowerShell source-level module owner mapping 성공; 금지 import 정적 체크 성공; Gradle 테스트는 로컬 Java 8로 인해 Spring Boot 3.2 플러그인 Java 17 요구사항에서 실패" -OpenRisks "Java 17 환경에서 Gradle 테스트 최종 실행 필요; WorkspaceAccessChecker 일부 메서드는 전환기라 엔티티를 반환하므로 후속 단계에서 DTO/Projection 포트로 좁히는 것이 좋음" -Blockers "로컬 JAVA_HOME/Path가 Java 8을 가리켜 Gradle 테스트 실행 불가" -NextAction1 "Java 17 환경에서 ./gradlew.bat test --tests com.example.auth.architecture.ModularMonolithBoundaryTest --tests com.example.auth.service.SearchServiceTest 실행" -NextAction2 "WorkspaceAccessChecker 반환 타입을 엔티티에서 목적별 DTO/Projection으로 축소" -NextAction3 "content/chat/query 물리 패키지 이동을 작은 단위로 진행"
+- Tests Run + Result: git diff --check 성공; PowerShell source-level module owner mapping 성공; 금지 import 정적 체크 성공; Gradle 테스트는 로컬 Java 8로 인해 Spring Boot 3.2 플러그인 Java 17 요구사항에서 실패
+- Open Risks: Java 17 환경에서 Gradle 테스트 최종 실행 필요; WorkspaceAccessChecker 일부 메서드는 전환기라 엔티티를 반환하므로 후속 단계에서 DTO/Projection 포트로 좁히는 것이 좋음
+- Blockers: 로컬 JAVA_HOME/Path가 Java 8을 가리켜 Gradle 테스트 실행 불가
+- Next 3 Actions: 1) Java 17 환경에서 ./gradlew.bat test --tests com.example.auth.architecture.ModularMonolithBoundaryTest --tests com.example.auth.service.SearchServiceTest 실행, 2) WorkspaceAccessChecker 반환 타입을 엔티티에서 목적별 DTO/Projection으로 축소, 3) content/chat/query 물리 패키지 이동을 작은 단위로 진행
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 10:54:05 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 모듈러 모놀리스 1차 전환 경계 수립
+- Scope (In/Out): In: docs/architecture/modular-monolith.md, PROJECT_GUIDE.md, src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, AGENTS.md / Out: 프로덕션 비즈니스 로직 및 패키지 대량 이동
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md, ?? .ref-v0-movie-community-service/, ?? docs/, ?? nul, ?? src/test/java/com/example/auth/architecture/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "모듈러 모놀리스 1차 전환 경계 수립" -ScopeIn "docs/architecture/modular-monolith.md, PROJECT_GUIDE.md, src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, AGENTS.md" -ScopeOut "프로덕션 비즈니스 로직 및 패키지 대량 이동" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; PowerShell source-level module owner mapping 검증 성공; Gradle 테스트는 로컬 Java 17 부재 및 Docker daemon 미실행으로 미수행" -OpenRisks "ModularMonolithBoundaryTest는 CI 또는 Java 17 로컬 환경에서 최종 실행 필요; 현재는 경계 정의/가드 추가 단계이며 의존성 역전은 후속 작업" -Blockers "None" -NextAction1 "IdentityReader/WorkspaceAccessChecker/NotificationPublisher 내부 포트 설계" -NextAction2 "UserRepository/WorkspaceMemberRepository 직접 의존을 포트로 교체" -NextAction3 "포트 전환 후 물리 패키지를 도메인 모듈 단위로 이동"
+- Tests Run + Result: git diff --check 성공; PowerShell source-level module owner mapping 검증 성공; Gradle 테스트는 로컬 Java 17 부재 및 Docker daemon 미실행으로 미수행
+- Open Risks: ModularMonolithBoundaryTest는 CI 또는 Java 17 로컬 환경에서 최종 실행 필요; 현재는 경계 정의/가드 추가 단계이며 의존성 역전은 후속 작업
+- Blockers: None
+- Next 3 Actions: 1) IdentityReader/WorkspaceAccessChecker/NotificationPublisher 내부 포트 설계, 2) UserRepository/WorkspaceMemberRepository 직접 의존을 포트로 교체, 3) 포트 전환 후 물리 패키지를 도메인 모듈 단위로 이동
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-15 17:43:18 +09:00
 - Agent Name: Codex
 - Branch: main
