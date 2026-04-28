@@ -218,7 +218,7 @@ Alerts:
 
 ## Implementation Checklist
 
-1. Add Kafka broker to local/OCI Docker Compose.
+1. Add Kafka broker to local/OCI Docker Compose. Done as an optional `kafka` profile.
 2. Add Spring Kafka dependency and JSON serializer/deserializer configuration.
 3. Add `eventId` column and unique index to `Notification`.
 4. Replace `SpringNotificationCommandPublisher` with `KafkaNotificationCommandPublisher`.
@@ -227,3 +227,26 @@ Alerts:
 7. Add idempotency tests for duplicate `eventId`.
 8. Run Java 17 backend tests and deployment smoke test.
 
+## Docker Compose Profile
+
+Kafka is optional until the producer/consumer implementation is merged.
+This keeps the current OCI single-VM deployment from paying the memory cost before it is needed.
+
+Local run:
+
+```bash
+docker compose --profile kafka up -d kafka kafka-init
+```
+
+Production compose run:
+
+```bash
+docker compose -f docker-compose.prod.yml --profile kafka up -d kafka kafka-init
+```
+
+Container-to-container bootstrap server:
+- `kafka:9092`
+
+Local host debugging endpoint:
+- `localhost:9094` in `docker-compose.yml`
+- No host port is exposed in `docker-compose.prod.yml`

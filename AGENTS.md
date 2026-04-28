@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 17:23:46 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Kafka optional compose profile 추가
+- Scope (In/Out): In: docker-compose.yml, docker-compose.prod.yml, env examples, Kafka policy docs, README/PROJECT_GUIDE, AGENTS.md / Out: Spring Kafka producer/consumer 구현, Kafka broker 실제 기동 검증, notifications.event_id DB 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .env.production.example,  M .env.staging.example,  M PROJECT_GUIDE.md,  M README.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M docs/architecture/notification-kafka-policy.md, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Kafka optional compose profile 추가" -ScopeIn "docker-compose.yml, docker-compose.prod.yml, env examples, Kafka policy docs, README/PROJECT_GUIDE, AGENTS.md" -ScopeOut "Spring Kafka producer/consumer 구현, Kafka broker 실제 기동 검증, notifications.event_id DB 변경" -Status "done" -PercentComplete "100" -TestsResult "docker compose config --quiet 성공; docker compose --profile kafka config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; docker compose -f docker-compose.prod.yml --profile kafka config --quiet 성공; git diff --check 성공" -OpenRisks "Kafka 실제 컨테이너 기동은 미실행; OCI 1GB 메모리에서는 profile 활성화 시 backend/frontend/db/redis와 동시 운영 메모리 확인 필요" -Blockers "None" -NextAction1 "Kafka profile 실제 기동 및 topic 생성 확인" -NextAction2 "notifications.event_id 저장 및 unique constraint 추가" -NextAction3 "Spring Kafka dependency/config 추가 후 producer/consumer 구현"
+- Tests Run + Result: docker compose config --quiet 성공; docker compose --profile kafka config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; docker compose -f docker-compose.prod.yml --profile kafka config --quiet 성공; git diff --check 성공
+- Open Risks: Kafka 실제 컨테이너 기동은 미실행; OCI 1GB 메모리에서는 profile 활성화 시 backend/frontend/db/redis와 동시 운영 메모리 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) Kafka profile 실제 기동 및 topic 생성 확인, 2) notifications.event_id 저장 및 unique constraint 추가, 3) Spring Kafka dependency/config 추가 후 producer/consumer 구현
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 17:16:02 +09:00
 - Agent Name: Codex
 - Branch: main

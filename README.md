@@ -308,6 +308,7 @@ sequenceDiagram
 
 `NotificationCommand`는 `notification.contract` 패키지에 두고 `eventId`, `schemaVersion`, `occurredAt`을 포함합니다. 이 계약 패키지는 애플리케이션 DTO/entity/repository/service를 import하지 않도록 아키텍처 테스트로 보호하며, 현재 기준 Kafka topic 후보는 `scenehive.notification.command.v1`입니다.
 Kafka topic, retry, DLQ, idempotency 정책은 [`docs/architecture/notification-kafka-policy.md`](./docs/architecture/notification-kafka-policy.md)에 별도로 고정합니다.
+Kafka broker는 아직 producer/consumer 구현 전이므로 optional profile로만 실행됩니다. 필요 시 `docker compose --profile kafka up -d kafka kafka-init`로 topic까지 준비합니다.
 
 ### MSA 전환 예상 흐름
 

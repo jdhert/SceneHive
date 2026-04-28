@@ -611,6 +611,11 @@ FRONTEND_URL=http://localhost:3000
 - 기본 topic은 `scenehive.notification.command.v1`, 메시지 key는 `recipientId`, 중복 방지 key는 `eventId`로 고정했다.
 - Kafka consumer 도입 전 `notifications.event_id` 저장 및 unique constraint 추가가 필요하다는 선행 조건을 명시했다.
 
+**7차 반영 사항:**
+- `docker-compose.yml`, `docker-compose.prod.yml`에 Kafka KRaft 단일 브로커를 optional `kafka` profile로 추가했다.
+- `kafka-init` 컨테이너가 알림 command/retry/DLQ topic을 생성하도록 구성했다.
+- OCI 단일 VM 메모리 부담을 줄이기 위해 기본 `docker compose up -d`에는 Kafka가 포함되지 않는다.
+
 **서비스 분리 계획:**
 ```
 현재 (Monolith)                    →    MSA 구조
