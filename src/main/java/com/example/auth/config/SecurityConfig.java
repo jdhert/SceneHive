@@ -4,6 +4,7 @@ import com.example.auth.security.JwtAuthenticationFilter;
 import com.example.auth.security.CustomOAuth2UserService;
 import com.example.auth.security.OAuth2AuthenticationFailureHandler;
 import com.example.auth.security.OAuth2AuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
@@ -38,17 +42,21 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final List<String> allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                          UserDetailsService userDetailsService,
                          CustomOAuth2UserService customOAuth2UserService,
                          OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
-                         OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
+                         OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
+                         @Value("${FRONTEND_URL:http://localhost:3000}") String frontendUrl,
+                         @Value("${CORS_ALLOWED_ORIGINS:}") String corsAllowedOrigins) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
         this.customOAuth2UserService = customOAuth2UserService;
         this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+        this.allowedOrigins = resolveAllowedOrigins(frontendUrl, corsAllowedOrigins);
     }
 
     @Bean
@@ -90,7 +98,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -117,5 +125,30 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private static List<String> resolveAllowedOrigins(String frontendUrl, String corsAllowedOrigins) {
+        Set<String> origins = new LinkedHashSet<>();
+        origins.add("http://localhost:3000");
+        origins.add("http://127.0.0.1:3000");
+        addOrigin(origins, frontendUrl);
+
+        if (corsAllowedOrigins != null) {
+            Arrays.stream(corsAllowedOrigins.split(","))
+                    .forEach(origin -> addOrigin(origins, origin));
+        }
+
+        return List.copyOf(origins);
+    }
+
+    private static void addOrigin(Set<String> origins, String origin) {
+        if (origin == null) {
+            return;
+        }
+
+        String trimmed = origin.trim();
+        if (!trimmed.isEmpty()) {
+            origins.add(trimmed);
+        }
     }
 }
