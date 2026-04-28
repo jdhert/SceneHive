@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 11:34:02 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): OCI Docker 배포 동작 검증 및 API redirect 수정
+- Scope (In/Out): In: src/main/java/com/example/auth/config/SecurityConfig.java, AGENTS.md / Out: 도메인 로직 변경, DB 스키마 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "OCI Docker 배포 동작 검증 및 API redirect 수정" -ScopeIn "src/main/java/com/example/auth/config/SecurityConfig.java, AGENTS.md" -ScopeOut "도메인 로직 변경, DB 스키마 변경" -Status "done" -PercentComplete "100" -TestsResult "GitHub Actions CI/CD 성공(run 25030580178); http://158.180.74.119/home 200; POST /api/auth/login 빈 요청 400 validation 응답; GET /api/users/me 미인증 요청 401 확인; git diff --check 성공; Gradle 테스트는 로컬 Java 8로 실행 불가" -OpenRisks "로컬 Gradle 테스트는 Java 17 환경에서 별도 실행 필요; 실제 로그인 플로우는 사용자 계정/브라우저 쿠키 기준 추가 확인 권장" -Blockers "None" -NextAction1 "브라우저에서 실제 로그인/대시보드 진입 확인" -NextAction2 "remote URL을 https://github.com/jdhert/SceneHive.git 로 갱신" -NextAction3 "WorkspaceAccessChecker 반환 타입 축소 등 모듈러 모놀리스 2차 리팩터링 진행"; git add AGENTS.md; git commit -m "OCI 배포 검증 기록 추가"; git push origin main
+- Tests Run + Result: GitHub Actions CI/CD 성공(run 25030580178); http://158.180.74.119/home 200; POST /api/auth/login 빈 요청 400 validation 응답; GET /api/users/me 미인증 요청 401 확인; git diff --check 성공; Gradle 테스트는 로컬 Java 8로 실행 불가
+- Open Risks: 로컬 Gradle 테스트는 Java 17 환경에서 별도 실행 필요; 실제 로그인 플로우는 사용자 계정/브라우저 쿠키 기준 추가 확인 권장
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 실제 로그인/대시보드 진입 확인, 2) remote URL을 https://github.com/jdhert/SceneHive.git 로 갱신, 3) WorkspaceAccessChecker 반환 타입 축소 등 모듈러 모놀리스 2차 리팩터링 진행
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 11:16:22 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -666,6 +682,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
