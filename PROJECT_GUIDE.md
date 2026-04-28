@@ -591,6 +591,11 @@ FRONTEND_URL=http://localhost:3000
 - `FavoriteService`, `NotificationService`, `PresenceService`에서 `UserRepository`, `WorkspaceRepository`, `WorkspaceService` 직접 의존을 제거했다.
 - `ModularMonolithBoundaryTest`의 금지 의존성 검증 범위를 위 서비스들까지 확장했다.
 
+**3차 반영 사항:**
+- `ChatQueryReader`, `ContentQueryReader` read port를 추가해 query 모듈의 직접 repository 조회를 차단했다.
+- `SearchService`, `DashboardService`에서 `ChatMessageRepository`, `CodeSnippetRepository`, `MemoRepository` 직접 의존을 제거했다.
+- `ModularMonolithBoundaryTest`에 query 서비스가 chat/content write-model repository를 import하지 못하도록 검증을 추가했다.
+
 **서비스 분리 계획:**
 ```
 현재 (Monolith)                    →    MSA 구조

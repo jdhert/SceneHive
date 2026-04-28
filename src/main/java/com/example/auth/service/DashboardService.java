@@ -1,5 +1,7 @@
 package com.example.auth.service;
 
+import com.example.auth.chat.ChatQueryReader;
+import com.example.auth.content.ContentQueryReader;
 import com.example.auth.dto.chat.ChatMessageResponse;
 import com.example.auth.dto.dashboard.DashboardResponse;
 import com.example.auth.dto.memo.MemoResponse;
@@ -7,9 +9,7 @@ import com.example.auth.dto.snippet.SnippetResponse;
 import com.example.auth.dto.workspace.WorkspaceResponse;
 import com.example.auth.entity.User;
 import com.example.auth.identity.IdentityReader;
-import com.example.auth.repository.*;
 import com.example.auth.workspace.WorkspaceAccessChecker;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,20 +21,17 @@ public class DashboardService {
 
     private final IdentityReader identityReader;
     private final WorkspaceAccessChecker workspaceAccessChecker;
-    private final ChatMessageRepository chatMessageRepository;
-    private final CodeSnippetRepository snippetRepository;
-    private final MemoRepository memoRepository;
+    private final ChatQueryReader chatQueryReader;
+    private final ContentQueryReader contentQueryReader;
 
     public DashboardService(IdentityReader identityReader,
                             WorkspaceAccessChecker workspaceAccessChecker,
-                            ChatMessageRepository chatMessageRepository,
-                            CodeSnippetRepository snippetRepository,
-                            MemoRepository memoRepository) {
+                            ChatQueryReader chatQueryReader,
+                            ContentQueryReader contentQueryReader) {
         this.identityReader = identityReader;
         this.workspaceAccessChecker = workspaceAccessChecker;
-        this.chatMessageRepository = chatMessageRepository;
-        this.snippetRepository = snippetRepository;
-        this.memoRepository = memoRepository;
+        this.chatQueryReader = chatQueryReader;
+        this.contentQueryReader = contentQueryReader;
     }
 
     @Transactional(readOnly = true)
@@ -52,22 +49,9 @@ public class DashboardService {
             return new DashboardResponse(workspaces, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
 
-        PageRequest pageRequest = PageRequest.of(0, limit);
-
-        List<ChatMessageResponse> recentMessages = chatMessageRepository
-                .findRecentByWorkspaceIds(workspaceIds, pageRequest)
-                .map(ChatMessageResponse::from)
-                .getContent();
-
-        List<SnippetResponse> recentSnippets = snippetRepository
-                .findRecentByWorkspaceIds(workspaceIds, pageRequest)
-                .map(SnippetResponse::from)
-                .getContent();
-
-        List<MemoResponse> recentMemos = memoRepository
-                .findRecentByWorkspaceIds(workspaceIds, pageRequest)
-                .map(MemoResponse::from)
-                .getContent();
+        List<ChatMessageResponse> recentMessages = chatQueryReader.findRecentMessages(workspaceIds, limit);
+        List<SnippetResponse> recentSnippets = contentQueryReader.findRecentSnippets(workspaceIds, limit);
+        List<MemoResponse> recentMemos = contentQueryReader.findRecentMemos(workspaceIds, limit);
 
         return new DashboardResponse(workspaces, recentMessages, recentSnippets, recentMemos);
     }

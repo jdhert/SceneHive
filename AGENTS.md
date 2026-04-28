@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 15:12:15 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): MSA 전환 준비용 모듈러 모놀리스 3차 query read port 리팩터링
+- Scope (In/Out): In: chat/content read ports, SearchService, DashboardService, architecture test, README/PROJECT_GUIDE/docs, AGENTS.md / Out: 물리 서비스 분리, DB 분리, Elasticsearch/read model 도입, 외부 메시지 브로커 도입
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md,  M README.md,  M docs/architecture/modular-monolith.md,  M src/main/java/com/example/auth/service/DashboardService.java,  M src/main/java/com/example/auth/service/SearchService.java,  M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java,  M src/test/java/com/example/auth/service/SearchServiceTest.java, ?? .ref-v0-movie-community-service/, ?? nul, ?? src/main/java/com/example/auth/chat/, ?? src/main/java/com/example/auth/content/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "MSA 전환 준비용 모듈러 모놀리스 3차 query read port 리팩터링" -ScopeIn "chat/content read ports, SearchService, DashboardService, architecture test, README/PROJECT_GUIDE/docs, AGENTS.md" -ScopeOut "물리 서비스 분리, DB 분리, Elasticsearch/read model 도입, 외부 메시지 브로커 도입" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; query 서비스 repository import 제거 rg 검증 성공; .\\gradlew.bat test는 로컬 Java 8로 Spring Boot 3.2 플러그인 Java 17 요구사항 때문에 실패" -OpenRisks "Java 17 환경 또는 CI에서 전체 Gradle 테스트 재실행 필요; read port 구현체는 아직 monolith JPA repository adapter이므로 실제 MSA 분리 전 read model/index 설계 필요" -Blockers "None" -NextAction1 "Java 17 환경에서 ./gradlew test 실행" -NextAction2 "notification-service 실제 분리 전 이벤트 계약/DTO 고정" -NextAction3 "content/chat 물리 패키지 이동 또는 ProtectedHeader 중복 제거 중 우선순위 선택"
+- Tests Run + Result: git diff --check 성공; query 서비스 repository import 제거 rg 검증 성공; .\\gradlew.bat test는 로컬 Java 8로 Spring Boot 3.2 플러그인 Java 17 요구사항 때문에 실패
+- Open Risks: Java 17 환경 또는 CI에서 전체 Gradle 테스트 재실행 필요; read port 구현체는 아직 monolith JPA repository adapter이므로 실제 MSA 분리 전 read model/index 설계 필요
+- Blockers: None
+- Next 3 Actions: 1) Java 17 환경에서 ./gradlew test 실행, 2) notification-service 실제 분리 전 이벤트 계약/DTO 고정, 3) content/chat 물리 패키지 이동 또는 ProtectedHeader 중복 제거 중 우선순위 선택
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 14:56:54 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -778,6 +794,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

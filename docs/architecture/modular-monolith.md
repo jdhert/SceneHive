@@ -52,6 +52,8 @@ Implemented the first dependency-inversion pass while keeping the single Spring 
 | `identity.IdentityPresenceUpdater` | `identity.PersistenceIdentityPresenceUpdater` | Lets chat presence update user status without importing `UserRepository`. |
 | `workspace.WorkspaceAccessChecker` | `workspace.PersistenceWorkspaceAccessChecker` | Centralizes workspace lookup, membership checks, role checks, and member/workspace reads. |
 | `notification.NotificationPublisher` | `notification.NotificationServicePublisher` | Lets event listeners publish notifications without coupling directly to `NotificationService`. |
+| `chat.ChatQueryReader` | `chat.PersistenceChatQueryReader` | Lets query services read chat messages without importing `ChatMessageRepository`. |
+| `content.ContentQueryReader` | `content.PersistenceContentQueryReader` | Lets query services read snippets and memos without importing content repositories. |
 
 Updated consumers:
 - `ChatService` now depends on `IdentityReader` and `WorkspaceAccessChecker`.
@@ -75,6 +77,19 @@ Extended the dependency-inversion boundary to services that were still crossing 
 
 Architecture guardrails now include these services and block direct imports of `WorkspaceService` in refactored cross-module consumers. This keeps WebSocket presence, favorites, and notifications deployable in the monolith while shaping them like future service clients.
 
+### Checkpoint 3 - Query Read Ports
+
+Moved dashboard and integrated search reads behind module-owned read ports:
+
+| Query consumer | Previous coupling | New boundary |
+| --- | --- | --- |
+| `SearchService` | `ChatMessageRepository`, `CodeSnippetRepository`, `MemoRepository` | `ChatQueryReader`, `ContentQueryReader` |
+| `DashboardService` | `ChatMessageRepository`, `CodeSnippetRepository`, `MemoRepository` | `ChatQueryReader`, `ContentQueryReader` |
+
+This keeps `query` as a read aggregation module while preventing it from reaching directly into chat/content persistence. When a real `query-service` or BFF is introduced, these ports can become HTTP clients, message-projected read models, or Elasticsearch adapters.
+
+Architecture guardrails now also prevent query services from importing chat/content write-model repositories.
+
 ## Recommended Extraction Order
 
 | Order | Extraction | Why |
@@ -89,8 +104,7 @@ Architecture guardrails now include these services and block direct imports of `
 ## Current Risks
 
 - Some owner services still use their own repositories directly; this is expected until physical package moves and service extraction start.
-- `DashboardService` and `SearchService` aggregate several repositories directly.
-- Query aggregation still reads chat/content repositories directly and should eventually move to read models or indexes.
+- Query aggregation is behind read ports, but the underlying adapters still use monolith JPA repositories until read models or indexes exist.
 - Entity relationships still point across future service boundaries.
 
 The next code step is dependency inversion, not service extraction. Once cross-module calls go through ports, moving a module into its own Spring Boot application becomes mostly an infrastructure change rather than a domain rewrite.

@@ -41,6 +41,7 @@ class ModularMonolithBoundaryTest {
         )));
         MODULE_OWNERS.put("content", Pattern.compile(String.join("|",
                 "^controller/(FavoriteController|MemoController|SnippetController)\\.java$",
+                "^content/.*\\.java$",
                 "^dto/(favorite|memo|snippet)/.*\\.java$",
                 "^entity/(CodeSnippet|Favorite|FavoriteType|Memo)\\.java$",
                 "^repository/(CodeSnippetRepository|FavoriteRepository|MemoRepository)\\.java$",
@@ -48,6 +49,7 @@ class ModularMonolithBoundaryTest {
         )));
         MODULE_OWNERS.put("chat", Pattern.compile(String.join("|",
                 "^config/WebSocket.*\\.java$",
+                "^chat/.*\\.java$",
                 "^controller/ChatController\\.java$",
                 "^dto/chat/.*\\.java$",
                 "^entity/(ChatMessage|MessageType)\\.java$",
@@ -140,6 +142,38 @@ class ModularMonolithBoundaryTest {
 
         assertTrue(violations.isEmpty(),
                 "Refactored cross-module services must use internal ports instead of foreign repositories:"
+                        + violations);
+    }
+
+    @Test
+    void queryServicesUseReadPortsInsteadOfWriteModelRepositories() throws IOException {
+        List<Path> querySources = List.of(
+                SOURCE_ROOT.resolve("service/SearchService.java"),
+                SOURCE_ROOT.resolve("service/DashboardService.java")
+        );
+
+        List<String> forbiddenImports = List.of(
+                "import com.example.auth.repository.ChatMessageRepository;",
+                "import com.example.auth.repository.CodeSnippetRepository;",
+                "import com.example.auth.repository.MemoRepository;",
+                "import com.example.auth.repository.*;"
+        );
+
+        StringBuilder violations = new StringBuilder();
+        for (Path source : querySources) {
+            String content = Files.readString(source);
+            forbiddenImports.stream()
+                    .filter(content::contains)
+                    .forEach(forbiddenImport -> violations
+                            .append(System.lineSeparator())
+                            .append(" - ")
+                            .append(SOURCE_ROOT.relativize(source).toString().replace('\\', '/'))
+                            .append(" imports ")
+                            .append(forbiddenImport));
+        }
+
+        assertTrue(violations.isEmpty(),
+                "Query services must use chat/content read ports instead of write-model repositories:"
                         + violations);
     }
 }

@@ -218,8 +218,10 @@ flowchart TB
 flowchart LR
     subgraph Consumers["Consumer Modules"]
         ChatService["ChatService\n(chat)"]
+        ChatQueryReader["ChatQueryReader\n(chat)"]
         MemoService["MemoService\n(content)"]
         SnippetService["SnippetService\n(content)"]
+        ContentQueryReader["ContentQueryReader\n(content)"]
         FavoriteService["FavoriteService\n(content)"]
         SearchService["SearchService\n(query)"]
         DashboardService["DashboardService\n(query)"]
@@ -243,6 +245,10 @@ flowchart LR
 
     ChatService --> IdentityReader
     ChatService --> WorkspaceAccessChecker
+    SearchService --> ChatQueryReader
+    DashboardService --> ChatQueryReader
+    SearchService --> ContentQueryReader
+    DashboardService --> ContentQueryReader
     MemoService --> IdentityReader
     MemoService --> WorkspaceAccessChecker
     SnippetService --> IdentityReader
@@ -261,6 +267,8 @@ flowchart LR
 
     IdentityReader --> UserRepo
     IdentityPresenceUpdater --> UserRepo
+    ChatQueryReader --> ChatRepos["ChatMessageRepository\n(chat-owned)"]
+    ContentQueryReader --> ContentRepos["CodeSnippetRepository\nMemoRepository\n(content-owned)"]
     WorkspaceAccessChecker --> WorkspaceRepos
     NotificationPublisher --> NotificationSvc
 ```
@@ -273,6 +281,8 @@ flowchart LR
 | `IdentityPresenceUpdater` | `PersistenceIdentityPresenceUpdater` | WebSocket 접속 상태 변경을 identity 모듈의 사용자 상태 쓰기로 격리 |
 | `WorkspaceAccessChecker` | `PersistenceWorkspaceAccessChecker` | 워크스페이스 조회, 멤버십 확인, 관리자/소유자 권한 판단을 workspace 모듈로 집중 |
 | `NotificationPublisher` | `NotificationServicePublisher` | 이벤트 리스너가 `NotificationService`에 직접 묶이지 않고 알림 발행만 요청 |
+| `ChatQueryReader` | `PersistenceChatQueryReader` | 대시보드/검색이 채팅 저장소를 직접 읽지 않고 chat 모듈 read port를 사용 |
+| `ContentQueryReader` | `PersistenceContentQueryReader` | 대시보드/검색이 명대사/리뷰 저장소를 직접 읽지 않고 content 모듈 read port를 사용 |
 
 ### MSA 전환 예상 흐름
 

@@ -3,10 +3,9 @@ package com.example.auth.service;
 import com.example.auth.dto.search.SearchResponse;
 import com.example.auth.entity.User;
 import com.example.auth.exception.CustomException;
+import com.example.auth.chat.ChatQueryReader;
+import com.example.auth.content.ContentQueryReader;
 import com.example.auth.identity.IdentityReader;
-import com.example.auth.repository.ChatMessageRepository;
-import com.example.auth.repository.CodeSnippetRepository;
-import com.example.auth.repository.MemoRepository;
 import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,13 +27,10 @@ import static org.mockito.Mockito.when;
 class SearchServiceTest {
 
     @Mock
-    private ChatMessageRepository chatMessageRepository;
+    private ChatQueryReader chatQueryReader;
 
     @Mock
-    private CodeSnippetRepository codeSnippetRepository;
-
-    @Mock
-    private MemoRepository memoRepository;
+    private ContentQueryReader contentQueryReader;
 
     @Mock
     private WorkspaceAccessChecker workspaceAccessChecker;
@@ -77,30 +73,30 @@ class SearchServiceTest {
     void searchAllQueriesAllRepositories() {
         User user = testUser(1L, "user@test.com");
         when(identityReader.requireUserByEmail("user@test.com")).thenReturn(user);
-        when(chatMessageRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
-        when(codeSnippetRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
-        when(memoRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
+        when(chatQueryReader.searchMessages(100L, "hello")).thenReturn(Collections.emptyList());
+        when(contentQueryReader.searchSnippets(100L, "hello")).thenReturn(Collections.emptyList());
+        when(contentQueryReader.searchMemos(100L, "hello")).thenReturn(Collections.emptyList());
 
         SearchResponse response = searchService.search(100L, "hello", "ALL", "user@test.com");
 
         assertEquals(0, response.totalCount());
-        verify(chatMessageRepository).searchByKeyword(100L, "hello");
-        verify(codeSnippetRepository).searchByKeyword(100L, "hello");
-        verify(memoRepository).searchByKeyword(100L, "hello");
+        verify(chatQueryReader).searchMessages(100L, "hello");
+        verify(contentQueryReader).searchSnippets(100L, "hello");
+        verify(contentQueryReader).searchMemos(100L, "hello");
     }
 
     @Test
     void searchChatTypeQueriesOnlyChatRepository() {
         User user = testUser(1L, "user@test.com");
         when(identityReader.requireUserByEmail("user@test.com")).thenReturn(user);
-        when(chatMessageRepository.searchByKeyword(100L, "hello")).thenReturn(Collections.emptyList());
+        when(chatQueryReader.searchMessages(100L, "hello")).thenReturn(Collections.emptyList());
 
         SearchResponse response = searchService.search(100L, "hello", "CHAT", "user@test.com");
 
         assertEquals(0, response.totalCount());
-        verify(chatMessageRepository).searchByKeyword(100L, "hello");
-        verify(codeSnippetRepository, never()).searchByKeyword(100L, "hello");
-        verify(memoRepository, never()).searchByKeyword(100L, "hello");
+        verify(chatQueryReader).searchMessages(100L, "hello");
+        verify(contentQueryReader, never()).searchSnippets(100L, "hello");
+        verify(contentQueryReader, never()).searchMemos(100L, "hello");
     }
 
     private User testUser(Long id, String email) {
