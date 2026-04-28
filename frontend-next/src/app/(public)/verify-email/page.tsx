@@ -76,7 +76,7 @@ function VerifyEmailContent() {
                 onChange={(e) => setCode(e.target.value)}
                 style={inputStyle} required />
             </div>
-            <Button type="submit" className="w-full font-bold py-5 text-white" disabled={isLoading}
+            <Button type="submit" className="w-full font-bold py-5 text-white mt-7" disabled={isLoading}
               style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})`, boxShadow: isLoading ? 'none' : '0 4px 15px rgba(85,168,255,0.3)' }}>
               {isLoading ? '인증 중...' : '이메일 인증하기'}
             </Button>
