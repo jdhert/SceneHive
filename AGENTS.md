@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 13:37:52 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): HTTP OCI 배포 환경 회원가입 실패 수정
+- Scope (In/Out): In: frontend-next/src/lib/crypto.ts, AGENTS.md / Out: 백엔드 도메인 로직 변경, DB 스키마 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "HTTP OCI 배포 환경 회원가입 실패 수정" -ScopeIn "frontend-next/src/lib/crypto.ts, AGENTS.md" -ScopeOut "백엔드 도메인 로직 변경, DB 스키마 변경" -Status "done" -PercentComplete "100" -TestsResult "npm run build 성공; SHA-256 fallback 결과를 Node crypto와 비교 성공; GitHub Actions CI/CD 성공(run 25034004319); /register 200 확인; POST /api/auth/register 200 확인" -OpenRisks "브라우저가 이전 JS 번들을 캐시 중이면 강력 새로고침 또는 캐시 비우기 필요; 실제 이메일 수신은 SMTP/메일함 상태에 따라 별도 확인 필요" -Blockers "None" -NextAction1 "브라우저에서 Ctrl+F5 후 회원가입 재시도" -NextAction2 "이메일 인증 코드 수신 및 /verify-email 검증" -NextAction3 "가능하면 HTTPS 적용 후 WebCrypto fallback 의존도 낮추기"; git add AGENTS.md; git commit -m "회원가입 실패 수정 검증 기록 추가 [skip ci]"; git push origin main
+- Tests Run + Result: npm run build 성공; SHA-256 fallback 결과를 Node crypto와 비교 성공; GitHub Actions CI/CD 성공(run 25034004319); /register 200 확인; POST /api/auth/register 200 확인
+- Open Risks: 브라우저가 이전 JS 번들을 캐시 중이면 강력 새로고침 또는 캐시 비우기 필요; 실제 이메일 수신은 SMTP/메일함 상태에 따라 별도 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 Ctrl+F5 후 회원가입 재시도, 2) 이메일 인증 코드 수신 및 /verify-email 검증, 3) 가능하면 HTTPS 적용 후 WebCrypto fallback 의존도 낮추기
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 13:26:09 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -698,6 +714,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
