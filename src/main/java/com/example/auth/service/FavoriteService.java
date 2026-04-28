@@ -6,8 +6,8 @@ import com.example.auth.entity.Favorite;
 import com.example.auth.entity.FavoriteType;
 import com.example.auth.entity.User;
 import com.example.auth.exception.CustomException;
+import com.example.auth.identity.IdentityReader;
 import com.example.auth.repository.FavoriteRepository;
-import com.example.auth.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +18,11 @@ import java.util.List;
 public class FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
-    private final UserRepository userRepository;
+    private final IdentityReader identityReader;
 
-    public FavoriteService(FavoriteRepository favoriteRepository, UserRepository userRepository) {
+    public FavoriteService(FavoriteRepository favoriteRepository, IdentityReader identityReader) {
         this.favoriteRepository = favoriteRepository;
-        this.userRepository = userRepository;
+        this.identityReader = identityReader;
     }
 
     @Transactional
@@ -72,8 +72,6 @@ public class FavoriteService {
     }
 
     private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        return identityReader.requireUserByEmail(email);
     }
 }
-

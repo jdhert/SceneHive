@@ -6,9 +6,9 @@ import com.example.auth.entity.Notification;
 import com.example.auth.entity.User;
 import com.example.auth.entity.Workspace;
 import com.example.auth.exception.CustomException;
+import com.example.auth.identity.IdentityReader;
 import com.example.auth.repository.NotificationRepository;
-import com.example.auth.repository.UserRepository;
-import com.example.auth.repository.WorkspaceRepository;
+import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -27,33 +27,33 @@ public class NotificationService {
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
-    private final WorkspaceRepository workspaceRepository;
+    private final IdentityReader identityReader;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
     private final SimpMessagingTemplate messagingTemplate;
 
     public NotificationService(NotificationRepository notificationRepository,
-                               UserRepository userRepository,
-                               WorkspaceRepository workspaceRepository,
+                               IdentityReader identityReader,
+                               WorkspaceAccessChecker workspaceAccessChecker,
                                SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
-        this.workspaceRepository = workspaceRepository;
+        this.identityReader = identityReader;
+        this.workspaceAccessChecker = workspaceAccessChecker;
         this.messagingTemplate = messagingTemplate;
     }
 
     @Transactional
     public NotificationResponse createAndSend(CreateNotificationRequest request) {
-        User recipient = userRepository.findById(request.recipientId())
+        User recipient = identityReader.findUserById(request.recipientId())
                 .orElseThrow(() -> new CustomException("알림 수신자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
 
         User sender = null;
         if (request.senderId() != null) {
-            sender = userRepository.findById(request.senderId()).orElse(null);
+            sender = identityReader.findUserById(request.senderId()).orElse(null);
         }
 
         Workspace workspace = null;
         if (request.workspaceId() != null) {
-            workspace = workspaceRepository.findById(request.workspaceId()).orElse(null);
+            workspace = workspaceAccessChecker.findWorkspace(request.workspaceId()).orElse(null);
         }
 
         Notification notification = Notification.builder()
@@ -136,7 +136,6 @@ public class NotificationService {
     }
 
     private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
+        return identityReader.requireUserByEmail(email);
     }
 }

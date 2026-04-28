@@ -8,5 +8,9 @@ public interface IdentityReader {
 
     User requireUserByEmail(String email);
 
+    User requireUserById(Long userId);
+
     Optional<User> findUserByEmail(String email);
+
+    Optional<User> findUserById(Long userId);
 }

@@ -586,6 +586,11 @@ FRONTEND_URL=http://localhost:3000
 - `ChatService`, `MemoService`, `SnippetService`, `SearchService`, `DashboardService`, `ChatNotificationListener`의 직접 저장소/서비스 의존 일부를 내부 포트로 교체했다.
 - `ModularMonolithBoundaryTest`로 모든 백엔드 클래스의 모듈 소유권과 1차 리팩터링 대상의 금지 의존성을 검증한다.
 
+**2차 반영 사항:**
+- `IdentityReader`를 id 기반 사용자 조회까지 확장하고 `IdentityPresenceUpdater` 쓰기 포트를 추가했다.
+- `FavoriteService`, `NotificationService`, `PresenceService`에서 `UserRepository`, `WorkspaceRepository`, `WorkspaceService` 직접 의존을 제거했다.
+- `ModularMonolithBoundaryTest`의 금지 의존성 검증 범위를 위 서비스들까지 확장했다.
+
 **서비스 분리 계획:**
 ```
 현재 (Monolith)                    →    MSA 구조

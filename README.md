@@ -220,13 +220,17 @@ flowchart LR
         ChatService["ChatService\n(chat)"]
         MemoService["MemoService\n(content)"]
         SnippetService["SnippetService\n(content)"]
+        FavoriteService["FavoriteService\n(content)"]
         SearchService["SearchService\n(query)"]
         DashboardService["DashboardService\n(query)"]
+        PresenceService["PresenceService\n(chat)"]
+        NotificationService["NotificationService\n(notification)"]
         ChatListener["ChatNotificationListener\n(notification)"]
     end
 
     subgraph Ports["Internal Ports"]
         IdentityReader["IdentityReader"]
+        IdentityPresenceUpdater["IdentityPresenceUpdater"]
         WorkspaceAccessChecker["WorkspaceAccessChecker"]
         NotificationPublisher["NotificationPublisher"]
     end
@@ -243,14 +247,20 @@ flowchart LR
     MemoService --> WorkspaceAccessChecker
     SnippetService --> IdentityReader
     SnippetService --> WorkspaceAccessChecker
+    FavoriteService --> IdentityReader
     SearchService --> IdentityReader
     SearchService --> WorkspaceAccessChecker
     DashboardService --> IdentityReader
     DashboardService --> WorkspaceAccessChecker
+    PresenceService --> IdentityPresenceUpdater
+    PresenceService --> WorkspaceAccessChecker
+    NotificationService --> IdentityReader
+    NotificationService --> WorkspaceAccessChecker
     ChatListener --> WorkspaceAccessChecker
     ChatListener --> NotificationPublisher
 
     IdentityReader --> UserRepo
+    IdentityPresenceUpdater --> UserRepo
     WorkspaceAccessChecker --> WorkspaceRepos
     NotificationPublisher --> NotificationSvc
 ```
@@ -259,7 +269,8 @@ flowchart LR
 
 | 포트 | 구현체 | 목적 |
 |------|--------|------|
-| `IdentityReader` | `PersistenceIdentityReader` | 사용자 조회 책임을 identity 모듈 뒤로 숨김 |
+| `IdentityReader` | `PersistenceIdentityReader` | 이메일/id 기반 사용자 조회 책임을 identity 모듈 뒤로 숨김 |
+| `IdentityPresenceUpdater` | `PersistenceIdentityPresenceUpdater` | WebSocket 접속 상태 변경을 identity 모듈의 사용자 상태 쓰기로 격리 |
 | `WorkspaceAccessChecker` | `PersistenceWorkspaceAccessChecker` | 워크스페이스 조회, 멤버십 확인, 관리자/소유자 권한 판단을 workspace 모듈로 집중 |
 | `NotificationPublisher` | `NotificationServicePublisher` | 이벤트 리스너가 `NotificationService`에 직접 묶이지 않고 알림 발행만 요청 |
 

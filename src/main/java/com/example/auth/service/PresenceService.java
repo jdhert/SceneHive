@@ -1,21 +1,17 @@
 package com.example.auth.service;
 
-import com.example.auth.entity.User;
-import com.example.auth.entity.UserStatus;
-import com.example.auth.repository.UserRepository;
-import com.example.auth.service.JwtService;
+import com.example.auth.identity.IdentityPresenceUpdater;
+import com.example.auth.workspace.WorkspaceAccessChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,20 +23,20 @@ public class PresenceService {
 
     private static final Logger log = LoggerFactory.getLogger(PresenceService.class);
 
-    private final UserRepository userRepository;
-    private final WorkspaceService workspaceService;
+    private final IdentityPresenceUpdater identityPresenceUpdater;
+    private final WorkspaceAccessChecker workspaceAccessChecker;
     private final SimpMessagingTemplate messagingTemplate;
     private final JwtService jwtService;
 
     private final ConcurrentMap<String, String> sessionToUser = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, AtomicInteger> userSessionCounts = new ConcurrentHashMap<>();
 
-    public PresenceService(UserRepository userRepository,
-                           WorkspaceService workspaceService,
+    public PresenceService(IdentityPresenceUpdater identityPresenceUpdater,
+                           WorkspaceAccessChecker workspaceAccessChecker,
                            SimpMessagingTemplate messagingTemplate,
                            JwtService jwtService) {
-        this.userRepository = userRepository;
-        this.workspaceService = workspaceService;
+        this.identityPresenceUpdater = identityPresenceUpdater;
+        this.workspaceAccessChecker = workspaceAccessChecker;
         this.messagingTemplate = messagingTemplate;
         this.jwtService = jwtService;
     }
@@ -118,31 +114,22 @@ public class PresenceService {
         return "true".equalsIgnoreCase(presence);
     }
 
-    @Transactional
     protected void updateStatus(String email, boolean online) {
-        User user = userRepository.findByEmail(email).orElse(null);
-        if (user == null) return;
-
-        UserStatus previous = user.getStatus();
-        if (online) {
-            if (user.getStatus() == UserStatus.OFFLINE) {
-                user.setStatus(UserStatus.ONLINE);
-            }
-        } else {
-            user.setStatus(UserStatus.OFFLINE);
-        }
-        user.setLastSeenAt(LocalDateTime.now());
-        userRepository.save(user);
-
-        if (previous != user.getStatus()) {
-            log.info("Presence change: {} {} -> {}", email, previous, user.getStatus());
-        }
-        notifyMembersUpdated(email);
+        identityPresenceUpdater.updatePresence(email, online)
+                .ifPresent(update -> {
+                    if (update.changed()) {
+                        log.info("Presence change: {} {} -> {}",
+                                email,
+                                update.previousStatus(),
+                                update.currentStatus());
+                    }
+                    notifyMembersUpdated(update);
+                });
     }
 
-    private void notifyMembersUpdated(String email) {
+    private void notifyMembersUpdated(IdentityPresenceUpdater.PresenceUpdate update) {
         try {
-            List<Long> workspaceIds = workspaceService.getWorkspaceIdsForUser(email);
+            List<Long> workspaceIds = workspaceAccessChecker.findWorkspaceIdsForUser(update.userId());
             for (Long workspaceId : workspaceIds) {
                 messagingTemplate.convertAndSend(
                         "/topic/workspace/" + workspaceId + "/members",
@@ -150,7 +137,7 @@ public class PresenceService {
                 );
             }
         } catch (Exception e) {
-            log.warn("Failed to notify member updates for {}", email, e);
+            log.warn("Failed to notify member updates for {}", update.email(), e);
         }
     }
 }

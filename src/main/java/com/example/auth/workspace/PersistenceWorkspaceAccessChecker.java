@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PersistenceWorkspaceAccessChecker implements WorkspaceAccessChecker {
@@ -29,6 +30,12 @@ public class PersistenceWorkspaceAccessChecker implements WorkspaceAccessChecker
     public Workspace requireWorkspace(Long workspaceId) {
         return workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new CustomException("워크스페이스를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Workspace> findWorkspace(Long workspaceId) {
+        return workspaceRepository.findById(workspaceId);
     }
 
     @Override

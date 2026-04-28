@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 14:25:56 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): MSA 전환 준비용 모듈러 모놀리스 2차 리팩터링
+- Scope (In/Out): In: identity/workspace 내부 포트 확장, FavoriteService, NotificationService, PresenceService, architecture test, README/PROJECT_GUIDE/docs / Out: 물리 서비스 분리, DB 분리, 외부 메시지 브로커 도입
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md,  M README.md,  M docs/architecture/modular-monolith.md,  M src/main/java/com/example/auth/identity/IdentityReader.java,  M src/main/java/com/example/auth/identity/PersistenceIdentityReader.java,  M src/main/java/com/example/auth/service/FavoriteService.java,  M src/main/java/com/example/auth/service/NotificationService.java,  M src/main/java/com/example/auth/service/PresenceService.java,  M src/main/java/com/example/auth/workspace/PersistenceWorkspaceAccessChecker.java,  M src/main/java/com/example/auth/workspace/WorkspaceAccessChecker.java,  M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, ?? .ref-v0-movie-community-service/, ?? nul, ?? src/main/java/com/example/auth/identity/IdentityPresenceUpdater.java, ?? src/main/java/com/example/auth/identity/PersistenceIdentityPresenceUpdater.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "MSA 전환 준비용 모듈러 모놀리스 2차 리팩터링" -ScopeIn "identity/workspace 내부 포트 확장, FavoriteService, NotificationService, PresenceService, architecture test, README/PROJECT_GUIDE/docs" -ScopeOut "물리 서비스 분리, DB 분리, 외부 메시지 브로커 도입" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; 금지 import rg 검증 성공; .\\gradlew.bat test는 로컬 Java 8로 Spring Boot 3.2 플러그인 Java 17 요구사항 때문에 실패; Docker 기반 Java 17 테스트는 Docker 데몬 미실행으로 불가" -OpenRisks "Java 17 환경 또는 CI에서 전체 Gradle 테스트 재실행 필요; Query 모듈은 아직 chat/content repository 직접 읽기 구조라 read model 분리 전까지 완전한 MSA 경계는 아님" -Blockers "None" -NextAction1 "Java 17 환경에서 ./gradlew test 실행" -NextAction2 "QueryService/DashboardService용 read model 또는 query port 설계" -NextAction3 "content/chat 패키지 물리 이동 전 import guardrail 확장"
+- Tests Run + Result: git diff --check 성공; 금지 import rg 검증 성공; .\\gradlew.bat test는 로컬 Java 8로 Spring Boot 3.2 플러그인 Java 17 요구사항 때문에 실패; Docker 기반 Java 17 테스트는 Docker 데몬 미실행으로 불가
+- Open Risks: Java 17 환경 또는 CI에서 전체 Gradle 테스트 재실행 필요; Query 모듈은 아직 chat/content repository 직접 읽기 구조라 read model 분리 전까지 완전한 MSA 경계는 아님
+- Blockers: None
+- Next 3 Actions: 1) Java 17 환경에서 ./gradlew test 실행, 2) QueryService/DashboardService용 read model 또는 query port 설계, 3) content/chat 패키지 물리 이동 전 import guardrail 확장
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 14:16:22 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -730,6 +746,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

@@ -49,6 +49,7 @@ Implemented the first dependency-inversion pass while keeping the single Spring 
 | Port | Adapter | Purpose |
 | --- | --- | --- |
 | `identity.IdentityReader` | `identity.PersistenceIdentityReader` | Allows chat, content, and query modules to resolve users without importing `UserRepository`. |
+| `identity.IdentityPresenceUpdater` | `identity.PersistenceIdentityPresenceUpdater` | Lets chat presence update user status without importing `UserRepository`. |
 | `workspace.WorkspaceAccessChecker` | `workspace.PersistenceWorkspaceAccessChecker` | Centralizes workspace lookup, membership checks, role checks, and member/workspace reads. |
 | `notification.NotificationPublisher` | `notification.NotificationServicePublisher` | Lets event listeners publish notifications without coupling directly to `NotificationService`. |
 
@@ -61,6 +62,18 @@ Updated consumers:
 Architecture guardrails:
 - `ModularMonolithBoundaryTest` verifies every backend class is assigned to a planned module owner.
 - The same test now prevents the refactored cross-module services from re-importing `UserRepository`, `WorkspaceRepository`, `WorkspaceMemberRepository`, or `NotificationService`.
+
+### Checkpoint 2 - Presence and Secondary Consumers
+
+Extended the dependency-inversion boundary to services that were still crossing module ownership lines:
+
+| Service | Previous coupling | New boundary |
+| --- | --- | --- |
+| `FavoriteService` | `UserRepository` | `IdentityReader` |
+| `NotificationService` | `UserRepository`, `WorkspaceRepository` | `IdentityReader`, `WorkspaceAccessChecker` |
+| `PresenceService` | `UserRepository`, `WorkspaceService` | `IdentityPresenceUpdater`, `WorkspaceAccessChecker` |
+
+Architecture guardrails now include these services and block direct imports of `WorkspaceService` in refactored cross-module consumers. This keeps WebSocket presence, favorites, and notifications deployable in the monolith while shaping them like future service clients.
 
 ## Recommended Extraction Order
 
@@ -75,10 +88,9 @@ Architecture guardrails:
 
 ## Current Risks
 
-- `UserRepository`, `WorkspaceRepository`, and `WorkspaceMemberRepository` are used across multiple services.
+- Some owner services still use their own repositories directly; this is expected until physical package moves and service extraction start.
 - `DashboardService` and `SearchService` aggregate several repositories directly.
-- `ChatNotificationListener` mixes chat events, workspace membership, presence, and notification creation.
-- WebSocket presence currently updates user status directly.
+- Query aggregation still reads chat/content repositories directly and should eventually move to read models or indexes.
 - Entity relationships still point across future service boundaries.
 
 The next code step is dependency inversion, not service extraction. Once cross-module calls go through ports, moving a module into its own Spring Boot application becomes mostly an infrastructure change rather than a domain rewrite.

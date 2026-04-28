@@ -111,6 +111,9 @@ class ModularMonolithBoundaryTest {
                 SOURCE_ROOT.resolve("service/SnippetService.java"),
                 SOURCE_ROOT.resolve("service/SearchService.java"),
                 SOURCE_ROOT.resolve("service/DashboardService.java"),
+                SOURCE_ROOT.resolve("service/FavoriteService.java"),
+                SOURCE_ROOT.resolve("service/NotificationService.java"),
+                SOURCE_ROOT.resolve("service/PresenceService.java"),
                 SOURCE_ROOT.resolve("event/ChatNotificationListener.java")
         );
 
@@ -118,6 +121,7 @@ class ModularMonolithBoundaryTest {
                 "import com.example.auth.repository.UserRepository;",
                 "import com.example.auth.repository.WorkspaceRepository;",
                 "import com.example.auth.repository.WorkspaceMemberRepository;",
+                "import com.example.auth.service.WorkspaceService;",
                 "import com.example.auth.service.NotificationService;"
         );
 
