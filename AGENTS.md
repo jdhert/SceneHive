@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 13:26:09 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): OCI 배포 CORS 오류 수정
+- Scope (In/Out): In: SecurityConfig.java, WebSocketConfig.java, env examples, AGENTS.md / Out: 도메인 로직 변경, DB 스키마 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "OCI 배포 CORS 오류 수정" -ScopeIn "SecurityConfig.java, WebSocketConfig.java, env examples, AGENTS.md" -ScopeOut "도메인 로직 변경, DB 스키마 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; GitHub Actions CI/CD 성공(run 25033673157); OPTIONS /api/auth/refresh Origin http://158.180.74.119 200 및 access-control-allow-origin 확인; POST /api/auth/register 빈 요청 400 validation + CORS header 확인; /register 200 확인; Gradle 테스트는 로컬 Java 8로 실행 불가" -OpenRisks "실제 회원가입은 메일/OAuth 환경변수와 SMTP 상태에 따라 추가 확인 필요" -Blockers "None" -NextAction1 "브라우저에서 회원가입/이메일 인증 또는 기존 계정 로그인 확인" -NextAction2 "CI/CD paths-ignore로 문서-only 배포 방지" -NextAction3 "HTTPS/도메인 적용 시 FRONTEND_URL 또는 CORS_ALLOWED_ORIGINS 갱신"; git add AGENTS.md; git commit -m "CORS 검증 기록 추가 [skip ci]"; git push origin main; git status -sb
+- Tests Run + Result: git diff --check 성공; GitHub Actions CI/CD 성공(run 25033673157); OPTIONS /api/auth/refresh Origin http://158.180.74.119 200 및 access-control-allow-origin 확인; POST /api/auth/register 빈 요청 400 validation + CORS header 확인; /register 200 확인; Gradle 테스트는 로컬 Java 8로 실행 불가
+- Open Risks: 실제 회원가입은 메일/OAuth 환경변수와 SMTP 상태에 따라 추가 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 회원가입/이메일 인증 또는 기존 계정 로그인 확인, 2) CI/CD paths-ignore로 문서-only 배포 방지, 3) HTTPS/도메인 적용 시 FRONTEND_URL 또는 CORS_ALLOWED_ORIGINS 갱신
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 11:34:02 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -682,6 +698,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
