@@ -73,7 +73,7 @@ export default function ProfileEditPage() {
         style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.9)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/workspaces" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
               <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
             </Link>

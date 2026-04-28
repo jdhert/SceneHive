@@ -185,7 +185,7 @@ export default function WorkspacePage() {
         style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(11,11,20,0.9)', backdropFilter: 'blur(10px)' }}>
         <div className="px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push('/workspaces')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <button onClick={() => router.push('/home')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
               <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>SceneHive</span>
             </button>

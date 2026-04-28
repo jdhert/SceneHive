@@ -70,7 +70,7 @@ export default function DashboardPage() {
         }}
       >
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link href="/workspaces" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
             <span className="text-lg font-bold hidden md:inline" style={{ color: AMBER }}>
               SceneHive
@@ -315,4 +315,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
