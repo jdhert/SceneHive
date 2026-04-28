@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-28 15:54:32 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 로그인 버튼 로그인 페이지 이동 불가 수정
+- Scope (In/Out): In: frontend-next/src/middleware.ts, frontend-next/src/app/(public)/home/page.tsx, AGENTS.md / Out: 백엔드 인증 로직 변경, 쿠키 발급 정책 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/page.tsx,  M frontend-next/src/middleware.ts, ?? .ref-v0-movie-community-service/, ?? nul
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 로그인 버튼 로그인 페이지 이동 불가 수정" -ScopeIn "frontend-next/src/middleware.ts, frontend-next/src/app/(public)/home/page.tsx, AGENTS.md" -ScopeOut "백엔드 인증 로직 변경, 쿠키 발급 정책 변경" -Status "done" -PercentComplete "100" -TestsResult "frontend-next npm run build 성공(기존 img/metadata/hook 경고만 존재); git diff --check 성공" -OpenRisks "이미 배포된 브라우저에 오래된 JS/쿠키가 남아 있으면 강력 새로고침 또는 쿠키 정리가 필요할 수 있음; public-only redirect 제거로 로그인 사용자가 /login 직접 접근 시 로그인 페이지를 볼 수 있음" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 /home 로그인 버튼 클릭으로 /login 이동 확인" -NextAction3 "원하면 로그인 페이지에서 실제 user context가 있을 때만 client-side /home redirect 추가"
+- Tests Run + Result: frontend-next npm run build 성공(기존 img/metadata/hook 경고만 존재); git diff --check 성공
+- Open Risks: 이미 배포된 브라우저에 오래된 JS/쿠키가 남아 있으면 강력 새로고침 또는 쿠키 정리가 필요할 수 있음; public-only redirect 제거로 로그인 사용자가 /login 직접 접근 시 로그인 페이지를 볼 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 /home 로그인 버튼 클릭으로 /login 이동 확인, 3) 원하면 로그인 페이지에서 실제 user context가 있을 때만 client-side /home redirect 추가
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 15:12:15 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -794,6 +810,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

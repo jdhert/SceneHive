@@ -296,15 +296,15 @@ export default function HomePage() {
               </>
             ) : (
               <>
-                <Button onClick={() => router.push('/login')} variant="outline"
+                <Button asChild variant="outline"
                   className="font-medium"
                   style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
-                  로그인
+                  <Link href="/login">로그인</Link>
                 </Button>
-                <Button onClick={() => router.push('/register')}
+                <Button asChild
                   className="hidden sm:inline-flex font-bold text-white"
                   style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
-                  회원가입
+                  <Link href="/register">회원가입</Link>
                 </Button>
               </>
             )}
