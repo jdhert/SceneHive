@@ -622,6 +622,13 @@ FRONTEND_URL=http://localhost:3000
 - `NotificationService`는 동일한 `eventId`의 알림이 이미 있으면 새 알림을 만들지 않고 기존 알림을 반환한다.
 - Kafka consumer 도입 전 필요한 at-least-once 메시지 중복 처리 기반을 먼저 확보했다.
 
+**9차 반영 사항:**
+- Spring Kafka 의존성과 JSON serializer/deserializer 설정을 추가했다.
+- `KAFKA_NOTIFICATIONS_ENABLED=true`일 때 `KafkaNotificationCommandPublisher`가 `scenehive.notification.command.v1`로 command를 발행한다.
+- `KafkaNotificationCommandConsumer`가 같은 topic을 소비해 기존 `NotificationCommandHandler`/`NotificationService` 경로로 알림을 생성한다.
+- Kafka 비활성 상태에서는 기존 `SpringNotificationCommandPublisher` 기반 Spring event fallback을 유지한다.
+- 초기 실패 처리는 짧은 local retry 후 DLQ topic으로 보내며, 1m/5m delayed retry topic 라우팅은 다음 단계로 남겨둔다.
+
 **배포 헬스체크 조정 사항:**
 - OCI 단일 VM에서 Spring Boot 부팅 시간이 길어 GitHub Actions 로그에 health check retry가 과도하게 찍히던 문제를 줄이기 위해 초기 대기 시간을 둔다.
 - 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=45`, `HEALTHCHECK_ATTEMPTS=12`, `HEALTHCHECK_SLEEP_SECONDS=10`이다.

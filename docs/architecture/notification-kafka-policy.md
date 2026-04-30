@@ -218,18 +218,18 @@ Alerts:
 ## Implementation Checklist
 
 1. Add Kafka broker to local/OCI Docker Compose. Done as an optional `kafka` profile using the official `apache/kafka:3.7.2` image.
-2. Add Spring Kafka dependency and JSON serializer/deserializer configuration.
+2. Add Spring Kafka dependency and JSON serializer/deserializer configuration. Done behind `KAFKA_NOTIFICATIONS_ENABLED`.
 3. Add `eventId` column and unique index to `Notification`. Done at the JPA model/service boundary.
-4. Replace `SpringNotificationCommandPublisher` with `KafkaNotificationCommandPublisher`.
-5. Replace `NotificationCommandHandler` event listener with `KafkaNotificationCommandConsumer`.
-6. Add retry topic and DLQ routing.
+4. Replace `SpringNotificationCommandPublisher` with `KafkaNotificationCommandPublisher`. Done when Kafka is enabled; Spring event remains the fallback.
+5. Replace `NotificationCommandHandler` event listener with `KafkaNotificationCommandConsumer`. Done when Kafka is enabled; the handler remains the mapping/application boundary.
+6. Add retry topic and DLQ routing. Initial local retry + DLQ is done; delayed retry topics are still pending.
 7. Add idempotency tests for duplicate `eventId`.
 8. Run Java 17 backend tests and deployment smoke test.
 
 ## Docker Compose Profile
 
-Kafka is optional until the producer/consumer implementation is merged.
-This keeps the current OCI single-VM deployment from paying the memory cost before it is needed.
+Kafka remains optional and is activated independently from ordinary `docker compose up`.
+This keeps local development and small OCI deployments from paying the memory cost before it is needed.
 The compose files use the official Apache Kafka Docker image because the previous `bitnami/kafka:3.7` tag is not reliably pullable from Docker Hub.
 
 Local run:
@@ -250,3 +250,12 @@ Container-to-container bootstrap server:
 Local host debugging endpoint:
 - `localhost:9094` in `docker-compose.yml`
 - No host port is exposed in `docker-compose.prod.yml`
+
+Application transport toggle:
+
+```bash
+KAFKA_NOTIFICATIONS_ENABLED=true
+KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+```
+
+When disabled or omitted, `NotificationCommandPublisher` falls back to in-process Spring events.

@@ -73,7 +73,7 @@ class ModularMonolithBoundaryTest {
         )));
         MODULE_OWNERS.put("platform", Pattern.compile(String.join("|",
                 "^AuthApplication\\.java$",
-                "^config/(AsyncConfig|FileStorageConfig|JwtConfig|MailAsyncProperties|SecurityConfig)\\.java$",
+                "^config/(AsyncConfig|FileStorageConfig|JwtConfig|MailAsyncProperties|NotificationKafkaConfig|SecurityConfig)\\.java$",
                 "^exception/.*\\.java$",
                 "^service/FileStorageService\\.java$",
                 "^service/RedisService\\.java$",

@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-30 17:54:47 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Notification command Kafka transport 1차 구현
+- Scope (In/Out): In: Spring Kafka dependency/config, Kafka notification producer/consumer, compose/env toggles, README/PROJECT_GUIDE/architecture docs, AGENTS.md / Out: 1m/5m delayed retry topic routing, 물리 notification-service 분리, OCI .env 직접 변경, 원격 push
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: M .env.production.example, M .env.staging.example, M AGENTS.md, M PROJECT_GUIDE.md, M README.md, M build.gradle, M docker-compose.prod.yml, M docker-compose.yml, M docs/architecture/modular-monolith.md, M docs/architecture/notification-kafka-policy.md, A src/main/java/com/example/auth/config/NotificationKafkaConfig.java, A src/main/java/com/example/auth/notification/KafkaNotificationCommandConsumer.java, A src/main/java/com/example/auth/notification/KafkaNotificationCommandPublisher.java, M src/main/java/com/example/auth/notification/SpringNotificationCommandPublisher.java, M src/main/resources/application.yml, M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java
+- Commands Run: Get-Content AGENTS.md/PROJECT_GUIDE.md, git status -sb, Get-Content build.gradle/application.yml/notification classes, docker compose config --quiet, docker compose --profile kafka config --quiet, docker compose -f docker-compose.prod.yml config --quiet, docker compose -f docker-compose.prod.yml --profile kafka config --quiet, .\gradlew.bat test --tests com.example.auth.architecture.ModularMonolithBoundaryTest --tests com.example.auth.service.NotificationServiceTest, docker build -t scenehive-backend:kafka-transport-check ., rg static checks, git diff --check, Get-Date
+- Tests Run + Result: git diff --check 성공; docker compose config 4종 성공; notification contract 금지 import rg 검증 성공; refactored service 금지 import rg 검증 성공; Gradle targeted test는 로컬 JAVA_HOME이 Java 8이라 Spring Boot 3.2 Java 17 요구사항으로 실패; Docker build는 Docker Desktop daemon 미실행으로 실패
+- Open Risks: 실제 컴파일/테스트는 Java 17 CI 또는 Docker daemon 환경에서 확인 필요; Kafka 활성화는 `KAFKA_NOTIFICATIONS_ENABLED=true`와 topic 준비가 필요; 1m/5m delayed retry topic은 아직 실제 라우팅 미구현
+- Blockers: 로컬 Java 17 부재; Docker daemon 미실행
+- Next 3 Actions: 1) Java 17 CI에서 backend build/test 확인, 2) OCI .env에 KAFKA_NOTIFICATIONS_ENABLED=true 추가 후 배포/로그 확인, 3) delayed retry topic routing 또는 Testcontainers Kafka 통합 테스트 추가
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-30 17:01:53 +09:00
 - Agent Name: Codex
 - Branch: main

@@ -27,6 +27,26 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: ${KAFKA_NOTIFICATION_CONSUMER_GROUP:scenehive-notification-service}
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.value.default.type: com.example.auth.notification.contract.NotificationCommand
+        spring.json.trusted.packages: com.example.auth.notification.contract
+        spring.json.use.type.headers: false
+    listener:
+      ack-mode: record
   servlet:
     multipart:
       max-file-size: 5MB
@@ -100,6 +120,14 @@ app:
         backoff-multiplier: 2.0
         batch-size: 20
         poll-interval-ms: 3000
+  kafka:
+    notifications:
+      enabled: ${KAFKA_NOTIFICATIONS_ENABLED:false}
+      command-topic: ${KAFKA_NOTIFICATION_COMMAND_TOPIC:scenehive.notification.command.v1}
+      retry-1m-topic: ${KAFKA_NOTIFICATION_RETRY_1M_TOPIC:scenehive.notification.command.retry.1m.v1}
+      retry-5m-topic: ${KAFKA_NOTIFICATION_RETRY_5M_TOPIC:scenehive.notification.command.retry.5m.v1}
+      dlq-topic: ${KAFKA_NOTIFICATION_DLQ_TOPIC:scenehive.notification.command.dlq.v1}
+      consumer-group-id: ${KAFKA_NOTIFICATION_CONSUMER_GROUP:scenehive-notification-service}
   file-storage:
     upload-dir: ./uploads
     avatar-dir: avatars
