@@ -28,7 +28,8 @@ public class NotificationCommandHandler {
                 NotificationType.valueOf(command.type().name()),
                 command.title(),
                 command.message(),
-                command.relatedUrl()
+                command.relatedUrl(),
+                command.eventId()
         );
     }
 }

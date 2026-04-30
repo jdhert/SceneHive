@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class NotificationService {
@@ -43,6 +44,12 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponse createAndSend(CreateNotificationRequest request) {
+        Optional<Notification> existingNotification = findExistingNotification(request.eventId());
+        if (existingNotification.isPresent()) {
+            log.info("Skip duplicate notification command. eventId={}", request.eventId());
+            return NotificationResponse.from(existingNotification.get());
+        }
+
         User recipient = identityReader.findUserById(request.recipientId())
                 .orElseThrow(() -> new CustomException("알림 수신자를 찾을 수 없습니다", HttpStatus.NOT_FOUND));
 
@@ -57,6 +64,7 @@ public class NotificationService {
         }
 
         Notification notification = Notification.builder()
+                .eventId(request.eventId())
                 .recipient(recipient)
                 .sender(sender)
                 .workspace(workspace)
@@ -81,6 +89,14 @@ public class NotificationService {
         }
 
         return response;
+    }
+
+    private Optional<Notification> findExistingNotification(String eventId) {
+        if (eventId == null || eventId.isBlank()) {
+            return Optional.empty();
+        }
+
+        return notificationRepository.findByEventId(eventId);
     }
 
     @Transactional(readOnly = true)

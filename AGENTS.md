@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-04-30 17:01:53 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): MSA 전환용 notification eventId 멱등성 저장 기반 추가
+- Scope (In/Out): In: Notification entity/repository/service/request/handler, notification idempotency test, README/PROJECT_GUIDE/architecture docs, AGENTS.md / Out: Spring Kafka producer/consumer 구현, 물리 notification-service 분리, 운영 DB 직접 마이그레이션 실행
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: M README.md, M PROJECT_GUIDE.md, M docs/architecture/modular-monolith.md, M docs/architecture/notification-kafka-policy.md, M src/main/java/com/example/auth/dto/notification/CreateNotificationRequest.java, M src/main/java/com/example/auth/entity/Notification.java, M src/main/java/com/example/auth/notification/NotificationCommandHandler.java, M src/main/java/com/example/auth/repository/NotificationRepository.java, M src/main/java/com/example/auth/service/NotificationService.java, A src/test/java/com/example/auth/service/NotificationServiceTest.java, M AGENTS.md
+- Commands Run: rg -n "CreateNotificationRequest|NotificationCommandHandler|NotificationService|NotificationRepository|eventId|event_id" src/main src/test, Get-Content Notification/Repository/Service/request/handler/docs, git diff --check, rg -n "eventId|event_id|NotificationServiceTest|findByEventId" ..., .\gradlew.bat test --tests com.example.auth.service.NotificationServiceTest --tests com.example.auth.architecture.ModularMonolithBoundaryTest, cmd /c gradlew.bat test --tests com.example.auth.service.NotificationServiceTest --tests com.example.auth.architecture.ModularMonolithBoundaryTest, java -version, git status --short
+- Tests Run + Result: git diff --check 성공; rg 정적 확인 성공; Gradle targeted test는 로컬 그룹 정책으로 gradlew.bat 실행 차단되어 실패; java -version은 Java 8로 Spring Boot 3.2 테스트 실행 요건(Java 17+) 미충족
+- Open Risks: OCI 기존 DB에서 `ddl-auto=update`가 `notifications.event_id` unique constraint까지 기대대로 반영했는지 배포 후 확인 필요; 실제 Kafka producer/consumer/retry/DLQ는 아직 미구현
+- Blockers: 로컬 Windows 그룹 정책이 gradlew.bat 실행을 차단함; 로컬 Java가 8로 설정되어 백엔드 테스트 실행 환경 미충족
+- Next 3 Actions: 1) Java 17 또는 CI에서 NotificationServiceTest/ModularMonolithBoundaryTest 실행, 2) 배포 후 OCI DB의 notifications.event_id 컬럼/unique constraint 확인, 3) Spring Kafka dependency/config 추가 후 publisher/consumer transport 교체
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-28 17:47:49 +09:00
 - Agent Name: Codex
 - Branch: main

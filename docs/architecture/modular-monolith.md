@@ -117,6 +117,18 @@ Architecture guardrails now prevent the command contract package from importing 
 
 Kafka topic, retry, DLQ, and idempotency policy is defined in [`notification-kafka-policy.md`](./notification-kafka-policy.md).
 
+### Checkpoint 5 - Notification Idempotency Storage
+
+Closed the last persistence prerequisite before introducing a Kafka consumer for notifications:
+
+| Concern | Current implementation | Later MSA replacement |
+| --- | --- | --- |
+| Command identity | `NotificationCommand.eventId` is copied into `CreateNotificationRequest`. | Kafka message key/header can carry the same `eventId`. |
+| Duplicate detection | `NotificationService` checks existing notifications by `eventId` before creating a row. | `notification-service` consumer acknowledges duplicate commands without creating another notification. |
+| Final guard | `notifications.event_id` is modeled as a unique column. | Same unique constraint remains in the notification service database. |
+
+This keeps the current Spring event flow intact, but makes the notification write path safe for at-least-once message delivery. The next Kafka step can focus on replacing the publisher/handler transport instead of changing notification business behavior.
+
 ## Recommended Extraction Order
 
 | Order | Extraction | Why |
@@ -134,5 +146,6 @@ Kafka topic, retry, DLQ, and idempotency policy is defined in [`notification-kaf
 - Query aggregation is behind read ports, but the underlying adapters still use monolith JPA repositories until read models or indexes exist.
 - Entity relationships still point across future service boundaries.
 - `NotificationCommandHandler` still maps the contract type to the monolith `NotificationType`; when `notification-service` is physically extracted, that mapping should live inside the extracted service only.
+- `notifications.event_id` is modeled in JPA, but existing OCI databases should be checked after deploy because `ddl-auto=update` may not always add every unique constraint exactly as intended.
 
-The next code step is dependency inversion, not service extraction. Once cross-module calls go through ports, moving a module into its own Spring Boot application becomes mostly an infrastructure change rather than a domain rewrite.
+The next code step is transport replacement for notification commands: add Spring Kafka configuration, publish `NotificationCommand` to `scenehive.notification.command.v1`, and consume it through the same notification application path.

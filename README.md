@@ -303,10 +303,12 @@ sequenceDiagram
     Listener->>CommandPub: NotificationCommand 발행
     CommandPub->>Handler: Spring event 전달
     Handler->>Notification: CreateNotificationRequest 변환 후 생성
+    Notification->>Notification: eventId 중복이면 기존 알림 반환
     Note over CommandPub,Handler: Kafka 도입 시 이 구간을 producer/consumer로 교체
 ```
 
 `NotificationCommand`는 `notification.contract` 패키지에 두고 `eventId`, `schemaVersion`, `occurredAt`을 포함합니다. 이 계약 패키지는 애플리케이션 DTO/entity/repository/service를 import하지 않도록 아키텍처 테스트로 보호하며, 현재 기준 Kafka topic 후보는 `scenehive.notification.command.v1`입니다.
+`eventId`는 `notifications.event_id`에 저장되며, 같은 command가 다시 처리되어도 알림을 중복 생성하지 않는 멱등성 기준으로 사용합니다.
 Kafka topic, retry, DLQ, idempotency 정책은 [`docs/architecture/notification-kafka-policy.md`](./docs/architecture/notification-kafka-policy.md)에 별도로 고정합니다.
 Kafka broker는 아직 producer/consumer 구현 전이므로 optional profile로만 실행됩니다. 필요 시 `docker compose --profile kafka up -d kafka kafka-init`로 topic까지 준비합니다.
 

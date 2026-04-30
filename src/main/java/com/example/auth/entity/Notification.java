@@ -6,9 +6,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications", indexes = {
-    @Index(name = "idx_notification_recipient_read", columnList = "recipient_id, is_read, created_at")
-})
+@Table(name = "notifications",
+        indexes = {
+                @Index(name = "idx_notification_recipient_read", columnList = "recipient_id, is_read, created_at")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_notification_event_id", columnNames = "event_id")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +23,9 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "event_id", length = 80)
+    private String eventId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)

@@ -616,6 +616,12 @@ FRONTEND_URL=http://localhost:3000
 - `kafka-init` 컨테이너가 알림 command/retry/DLQ topic을 생성하도록 구성했다.
 - OCI 단일 VM 메모리 부담을 줄이기 위해 기본 `docker compose up -d`에는 Kafka가 포함되지 않는다.
 
+**8차 반영 사항:**
+- `Notification` 엔티티에 `eventId`/`event_id`를 추가하고 unique constraint를 모델링했다.
+- `NotificationCommandHandler`가 command의 `eventId`를 알림 생성 요청까지 전달하도록 연결했다.
+- `NotificationService`는 동일한 `eventId`의 알림이 이미 있으면 새 알림을 만들지 않고 기존 알림을 반환한다.
+- Kafka consumer 도입 전 필요한 at-least-once 메시지 중복 처리 기반을 먼저 확보했다.
+
 **배포 헬스체크 조정 사항:**
 - OCI 단일 VM에서 Spring Boot 부팅 시간이 길어 GitHub Actions 로그에 health check retry가 과도하게 찍히던 문제를 줄이기 위해 초기 대기 시간을 둔다.
 - 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=45`, `HEALTHCHECK_ATTEMPTS=12`, `HEALTHCHECK_SLEEP_SECONDS=10`이다.

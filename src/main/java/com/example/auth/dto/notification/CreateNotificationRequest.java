@@ -9,5 +9,18 @@ public record CreateNotificationRequest(
     NotificationType type,
     String title,
     String message,
-    String relatedUrl
-) {}
+    String relatedUrl,
+    String eventId
+) {
+    public CreateNotificationRequest(
+            Long recipientId,
+            Long senderId,
+            Long workspaceId,
+            NotificationType type,
+            String title,
+            String message,
+            String relatedUrl
+    ) {
+        this(recipientId, senderId, workspaceId, type, title, message, relatedUrl, null);
+    }
+}

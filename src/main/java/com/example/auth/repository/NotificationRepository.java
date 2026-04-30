@@ -9,8 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    Optional<Notification> findByEventId(String eventId);
 
     @Query("SELECT n FROM Notification n " +
            "LEFT JOIN FETCH n.sender " +

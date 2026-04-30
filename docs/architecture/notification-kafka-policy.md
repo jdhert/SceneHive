@@ -11,7 +11,6 @@ In scope:
 - retry, DLQ, idempotency, observability 기준
 
 Out of scope:
-- Kafka broker Docker Compose 추가
 - Spring Kafka 의존성/설정 추가
 - 실제 `notification-service` 물리 분리
 - 알림 저장소 DB 분리
@@ -184,7 +183,7 @@ Idempotency key:
 - `eventId`
 
 Required storage:
-- Add `event_id` to notification persistence before Kafka consumer goes live.
+- `Notification` persists `event_id` as the Kafka command idempotency key.
 - Unique constraint: `notifications.event_id`
 
 Consumer behavior:
@@ -194,8 +193,8 @@ Consumer behavior:
 
 Current monolith transition:
 - `NotificationCommand` already has `eventId`.
-- `Notification` entity does not yet persist it.
-- Before replacing Spring event with Kafka, add the field and unique index.
+- `Notification` now persists `eventId` and `NotificationService` skips duplicate commands before creating a new row.
+- Before replacing Spring event with Kafka, verify the deployed database has the `event_id` column and unique constraint.
 
 ## Observability
 
@@ -220,7 +219,7 @@ Alerts:
 
 1. Add Kafka broker to local/OCI Docker Compose. Done as an optional `kafka` profile using the official `apache/kafka:3.7.2` image.
 2. Add Spring Kafka dependency and JSON serializer/deserializer configuration.
-3. Add `eventId` column and unique index to `Notification`.
+3. Add `eventId` column and unique index to `Notification`. Done at the JPA model/service boundary.
 4. Replace `SpringNotificationCommandPublisher` with `KafkaNotificationCommandPublisher`.
 5. Replace `NotificationCommandHandler` event listener with `KafkaNotificationCommandConsumer`.
 6. Add retry topic and DLQ routing.
