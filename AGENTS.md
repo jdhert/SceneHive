@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-07 13:53:51 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 회원가입 중복 이메일 SQL 오류 노출 및 미인증 재가입 흐름 수정
+- Scope (In/Out): In: AuthService duplicate email handling, GlobalExceptionHandler data integrity response, frontend register submit normalization, AGENTS.md / Out: DB 직접 수정, 원격 push, 이메일 재발송 전용 API 추가
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: M AGENTS.md, M src/main/java/com/example/auth/service/AuthService.java, M src/main/java/com/example/auth/exception/GlobalExceptionHandler.java, M frontend-next/src/app/(public)/register/page.tsx
+- Commands Run: Get-Content AGENTS.md/PROJECT_GUIDE.md, git status -sb, rg register/error paths, Get-Content AuthService/GlobalExceptionHandler/Register page, git diff --check, rg static checks, .\gradlew.bat test --tests com.example.auth.service.AuthServiceTest, Get-Date
+- Tests Run + Result: git diff --check 성공; rg 정적 확인 성공; Gradle targeted test는 로컬 JAVA_HOME이 Java 8이라 Spring Boot 3.2 Java 17 요구사항으로 실패
+- Open Risks: Java 17 CI 또는 Docker build 환경에서 최종 컴파일 확인 필요; 실제 이메일 재발송은 SMTP 설정/메일 큐 상태에 의존
+- Blockers: 로컬 Java 17 부재
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) GitHub Actions/OCI 배포 후 기존 미인증 이메일로 재가입 시 인증 코드 재발송 확인, 3) 가능하면 이메일 인증 코드 재발송 전용 버튼/API 추가
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-04-30 17:54:47 +09:00
 - Agent Name: Codex
 - Branch: main

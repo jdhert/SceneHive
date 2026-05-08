@@ -27,13 +27,21 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+
     setError('');
     setIsLoading(true);
 
     try {
+      const normalizedEmail = form.email.trim().toLowerCase();
+      const trimmedName = form.name.trim();
       const hashedPassword = await hashPassword(form.password);
-      await authService.register({ ...form, password: hashedPassword });
-      router.push('/verify-email?email=' + encodeURIComponent(form.email));
+      await authService.register({
+        email: normalizedEmail,
+        name: trimmedName,
+        password: hashedPassword,
+      });
+      router.push('/verify-email?email=' + encodeURIComponent(normalizedEmail));
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setError(axiosErr.response?.data?.message || '회원가입에 실패했습니다.');
@@ -107,4 +115,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

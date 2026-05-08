@@ -12,6 +12,7 @@ import com.example.auth.entity.User;
 import com.example.auth.exception.CustomException;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.service.mail.MailDispatchService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,31 +53,47 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
+        String email = normalizeEmail(request.email());
+        String name = request.name().trim();
+
+        User existingUser = userRepository.findByEmail(email).orElse(null);
+        if (existingUser != null) {
+            if (!existingUser.isVerified()) {
+                sendVerificationCode(existingUser);
+                return AuthResponse.ofRegister(
+                        "이미 가입된 이메일입니다. 이메일 인증 코드를 다시 발송했습니다. (유효시간 5분)",
+                        existingUser.getId()
+                );
+            }
+
             throw new CustomException("이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST);
         }
 
         User user = User.builder()
-                .email(request.email())
+                .email(email)
                 .password(passwordEncoder.encode(request.password()))
-                .name(request.name())
+                .name(name)
                 .provider(AuthProvider.LOCAL)
                 .isVerified(false)
                 .build();
 
-        User savedUser = userRepository.save(user);
+        User savedUser;
+        try {
+            savedUser = userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException("이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST);
+        }
 
-        String verificationCode = generateVerificationCode();
-        redisService.setDataExpire(savedUser.getEmail(), verificationCode, 60 * 5L);
-
-        mailDispatchService.sendVerificationEmail(user.getEmail(), verificationCode);
+        sendVerificationCode(savedUser);
 
         return AuthResponse.ofRegister("회원가입 성공. 이메일 인증을 완료해주세요. (유효시간 5분)", savedUser.getId());
     }
 
     @Transactional(noRollbackFor = CustomException.class)
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        String email = normalizeEmail(request.email());
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (user.getProvider() != AuthProvider.LOCAL) {
@@ -90,7 +107,7 @@ public class AuthService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.email(),
+                            email,
                             request.password()
                     )
             );
@@ -127,7 +144,7 @@ public class AuthService {
             userRepository.save(user);
         }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.email());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
         String accessToken = jwtService.generateAccessToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
@@ -143,6 +160,7 @@ public class AuthService {
     }
 
     public void resendUnlockEmail(String email) {
+        email = normalizeEmail(email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -174,6 +192,7 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(String email, String code) {
+        email = normalizeEmail(email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -198,6 +217,12 @@ public class AuthService {
 
     private String generateVerificationCode() {
         return String.valueOf((int) (Math.random() * 900000) + 100000);
+    }
+
+    private void sendVerificationCode(User user) {
+        String verificationCode = generateVerificationCode();
+        redisService.setDataExpire(user.getEmail(), verificationCode, 60 * 5L);
+        mailDispatchService.sendVerificationEmail(user.getEmail(), verificationCode);
     }
 
     public AuthResponse refreshToken(String refreshToken) {
@@ -236,6 +261,7 @@ public class AuthService {
     }
 
     public void requestPasswordReset(String email) {
+        email = normalizeEmail(email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("해당 이메일로 가입된 사용자가 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -262,5 +288,9 @@ public class AuthService {
         userRepository.save(user);
 
         redisService.deleteData(redisKey);
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
     }
 }
