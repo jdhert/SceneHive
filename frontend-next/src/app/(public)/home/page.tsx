@@ -75,6 +75,16 @@ type GenrePayload = {
   genres: Genre[];
 };
 
+type HomePayload = {
+  trending: MovieListPayload;
+  trendingTv: TvListPayload;
+  trendingPeople: PersonListPayload;
+  nowPlaying: MovieListPayload;
+  upcoming: MovieListPayload;
+  topRated: MovieListPayload;
+  genres: GenrePayload;
+};
+
 type MovieTrailerPayload = {
   videos?: {
     results?: Array<{
@@ -104,7 +114,7 @@ function shortText(text: string, maxLength = 120) {
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
   const [trending, setTrending] = useState<Movie[]>([]);
   const [trendingTv, setTrendingTv] = useState<Tv[]>([]);
   const [trendingPeople, setTrendingPeople] = useState<Person[]>([]);
@@ -167,41 +177,22 @@ export default function HomePage() {
         setIsMovieLoading(true);
         setMovieError(null);
 
-        const [trendingRes, trendingTvRes, trendingPeopleRes, nowPlayingRes, upcomingRes, topRatedRes, genresRes] = await Promise.all([
-          fetch('/api/movies/trending'),
-          fetch('/api/tv/trending'),
-          fetch('/api/people/trending'),
-          fetch('/api/movies/now-playing'),
-          fetch('/api/movies/upcoming'),
-          fetch('/api/movies/top-rated'),
-          fetch('/api/movies/genres'),
-        ]);
-
-        const responses = [trendingRes, trendingTvRes, trendingPeopleRes, nowPlayingRes, upcomingRes, topRatedRes, genresRes];
-        const hasFailure = responses.some((res) => !res.ok);
-        if (hasFailure) {
+        const response = await fetch('/api/home');
+        if (!response.ok) {
           throw new Error('영화 데이터를 불러오지 못했습니다.');
         }
 
-        const [trendingData, trendingTvData, trendingPeopleData, nowPlayingData, upcomingData, topRatedData, genresData] = (await Promise.all([
-          trendingRes.json(),
-          trendingTvRes.json(),
-          trendingPeopleRes.json(),
-          nowPlayingRes.json(),
-          upcomingRes.json(),
-          topRatedRes.json(),
-          genresRes.json(),
-        ])) as [MovieListPayload, TvListPayload, PersonListPayload, MovieListPayload, MovieListPayload, MovieListPayload, GenrePayload];
+        const data = (await response.json()) as HomePayload;
 
         if (!isMounted) return;
 
-        setTrending(trendingData.results ?? []);
-        setTrendingTv(trendingTvData.results ?? []);
-        setTrendingPeople(trendingPeopleData.results ?? []);
-        setNowPlaying(nowPlayingData.results ?? []);
-        setUpcoming(upcomingData.results ?? []);
-        setTopRated(topRatedData.results ?? []);
-        setGenres(genresData.genres ?? []);
+        setTrending(data.trending.results ?? []);
+        setTrendingTv(data.trendingTv.results ?? []);
+        setTrendingPeople(data.trendingPeople.results ?? []);
+        setNowPlaying(data.nowPlaying.results ?? []);
+        setUpcoming(data.upcoming.results ?? []);
+        setTopRated(data.topRated.results ?? []);
+        setGenres(data.genres.genres ?? []);
       } catch (error) {
         if (!isMounted) return;
         const message = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
@@ -254,14 +245,6 @@ export default function HomePage() {
       isMounted = false;
     };
   }, [heroMovie?.id, heroMovie?.title]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
-        <div className="text-amber-400 text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>

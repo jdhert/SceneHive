@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-13 17:27:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 최초 접근 로딩 시간 단축
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/api/home/route.ts, AGENTS.md / Out: TMDB 이미지 next/image 전환, CDN/프록시 캐시 설정, 백엔드 인증 API 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/page.tsx, ?? frontend-next/src/app/api/home/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 최초 접근 로딩 시간 단축" -ScopeIn "frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/api/home/route.ts, AGENTS.md" -ScopeOut "TMDB 이미지 next/image 전환, CDN/프록시 캐시 설정, 백엔드 인증 API 변경" -Status "done" -PercentComplete "100" -TestsResult "frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재)" -OpenRisks "첫 배포 직후 TMDB 캐시가 비어 있으면 /api/home 첫 요청은 외부 TMDB 응답 시간에 영향받음; 추가 개선은 next/image 및 서버/CDN 캐시 계층 필요" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 /home 최초 접근 네트워크 waterfall에서 /api/home 단일 호출 확인" -NextAction3 "추가 지연이 남으면 홈 이미지 next/image priority 적용 또는 Nginx 캐시 검토"
+- Tests Run + Result: frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재)
+- Open Risks: 첫 배포 직후 TMDB 캐시가 비어 있으면 /api/home 첫 요청은 외부 TMDB 응답 시간에 영향받음; 추가 개선은 next/image 및 서버/CDN 캐시 계층 필요
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 /home 최초 접근 네트워크 waterfall에서 /api/home 단일 호출 확인, 3) 추가 지연이 남으면 홈 이미지 next/image priority 적용 또는 Nginx 캐시 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-07 13:53:51 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -954,4 +970,5 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
