@@ -159,6 +159,10 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true
   health:
     defaults:
       enabled: true
+    mail:
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:false}

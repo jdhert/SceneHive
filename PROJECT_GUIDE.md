@@ -631,9 +631,10 @@ FRONTEND_URL=http://localhost:3000
 
 **배포 헬스체크 조정 사항:**
 - 배포 시 `docker compose down`으로 전체 스택을 내리지 않고, DB/Redis는 유지한 채 `backend frontend` 애플리케이션 컨테이너만 재생성한다.
-- health check는 배포 성공/롤백 판단을 위해 유지하되, 고정 45초 대기를 제거하고 즉시 짧은 간격으로 확인한다.
+- health check는 배포 성공/롤백 판단을 위해 유지하되, 외부 SMTP/Redis 검사가 포함되는 `/actuator/health` 대신 `/actuator/health/liveness`를 사용한다.
 - 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=0`, `HEALTHCHECK_ATTEMPTS=60`, `HEALTHCHECK_SLEEP_SECONDS=3`, `HEALTHCHECK_LOG_EVERY_ATTEMPTS=5`이다.
 - 최대 대기 시간은 약 180초지만 정상 기동 즉시 통과하며, GitHub Actions 로그는 5회 시도마다 한 번만 출력한다.
+- Gmail SMTP는 운영 기능 로그로 확인하며, Actuator mail health는 기본 비활성화한다.
 
 **서비스 분리 계획:**
 ```

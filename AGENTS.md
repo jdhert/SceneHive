@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 17:47:35 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 배포 healthcheck liveness 전환 및 메일/Redis 로그 안정화
+- Scope (In/Out): In: deploy.sh, src/main/resources/application.yml, src/main/java/com/example/auth/config/SecurityConfig.java, src/main/java/com/example/auth/service/mail/MailDispatchService.java, docker-compose.yml, docker-compose.prod.yml, PROJECT_GUIDE.md, AGENTS.md / Out: 메일 발송 설정 변경, Redis 컨테이너 설정 변경, GitHub Actions 구조 변경, 서버 직접 배포 실행
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md,  M deploy.sh,  M docker-compose.prod.yml,  M docker-compose.yml,  M src/main/java/com/example/auth/config/SecurityConfig.java,  M src/main/java/com/example/auth/service/mail/MailDispatchService.java,  M src/main/resources/application.yml
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "배포 healthcheck liveness 전환 및 메일/Redis 로그 안정화" -ScopeIn "deploy.sh, src/main/resources/application.yml, src/main/java/com/example/auth/config/SecurityConfig.java, src/main/java/com/example/auth/service/mail/MailDispatchService.java, docker-compose.yml, docker-compose.prod.yml, PROJECT_GUIDE.md, AGENTS.md" -ScopeOut "메일 발송 설정 변경, Redis 컨테이너 설정 변경, GitHub Actions 구조 변경, 서버 직접 배포 실행" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패; docker build는 Docker Desktop daemon 미실행으로 실패" -OpenRisks "메일 실제 발송 실패 여부는 MailDispatchService 기능 로그로 봐야 함; liveness는 SMTP/Redis 상태를 배포 성공 판정에서 제외하므로 dependency 모니터링은 별도 필요" -Blockers "로컬 JAVA_HOME이 Java 8; Docker Desktop daemon 미실행" -NextAction1 "변경분 커밋 및 push" -NextAction2 "다음 배포에서 /actuator/health/liveness 통과 시간 확인" -NextAction3 "Redis unresolved가 계속 나오면 서버 compose 네트워크/redis 컨테이너 상태 확인"
+- Tests Run + Result: git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패; docker build는 Docker Desktop daemon 미실행으로 실패
+- Open Risks: 메일 실제 발송 실패 여부는 MailDispatchService 기능 로그로 봐야 함; liveness는 SMTP/Redis 상태를 배포 성공 판정에서 제외하므로 dependency 모니터링은 별도 필요
+- Blockers: 로컬 JAVA_HOME이 Java 8; Docker Desktop daemon 미실행
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 다음 배포에서 /actuator/health/liveness 통과 시간 확인, 3) Redis unresolved가 계속 나오면 서버 compose 네트워크/redis 컨테이너 상태 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 17:28:03 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1098,6 +1114,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

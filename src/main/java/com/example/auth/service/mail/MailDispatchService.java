@@ -87,10 +87,15 @@ public class MailDispatchService {
 
     @Scheduled(fixedDelayString = "${app.async.mail.retry.poll-interval-ms:3000}")
     public void processRetryQueue() {
-        int batchSize = mailAsyncProperties.getRetry().getBatchSize();
-        List<MailTask> tasks = retryQueueService.popDueTasks(batchSize);
-        for (MailTask task : tasks) {
-            sendNow(task);
+        try {
+            int batchSize = mailAsyncProperties.getRetry().getBatchSize();
+            List<MailTask> tasks = retryQueueService.popDueTasks(batchSize);
+            for (MailTask task : tasks) {
+                sendNow(task);
+            }
+        } catch (Exception ex) {
+            log.warn("Mail retry queue polling skipped. reason={}, message={}",
+                    ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
 }
