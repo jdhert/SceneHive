@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 15:30:22 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 회원가입 인증 메일 커밋 후 비동기 이벤트 처리
+- Scope (In/Out): In: src/main/java/com/example/auth/service/AuthService.java, src/main/java/com/example/auth/event/VerificationEmailRequestedEvent.java, src/main/java/com/example/auth/event/VerificationEmailListener.java, AGENTS.md / Out: 회원가입 DB 조회/BCrypt 제거, 프론트 화면 전환 로직 변경, SMTP 서버 설정 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M src/main/java/com/example/auth/service/AuthService.java, ?? src/main/java/com/example/auth/event/VerificationEmailListener.java, ?? src/main/java/com/example/auth/event/VerificationEmailRequestedEvent.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "회원가입 인증 메일 커밋 후 비동기 이벤트 처리" -ScopeIn "src/main/java/com/example/auth/service/AuthService.java, src/main/java/com/example/auth/event/VerificationEmailRequestedEvent.java, src/main/java/com/example/auth/event/VerificationEmailListener.java, AGENTS.md" -ScopeOut "회원가입 DB 조회/BCrypt 제거, 프론트 화면 전환 로직 변경, SMTP 서버 설정 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패" -OpenRisks "신규 회원가입 첫 요청 지연이 DB cold query 또는 BCrypt/DB commit 구간이면 이번 변경만으로 완전히 제거되지는 않음; Java 17 CI에서 컴파일 확인 필요" -Blockers "로컬 JAVA_HOME이 Java 8" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 회원가입 로그에서 requestElapsedMs와 totalElapsedMs 확인" -NextAction3 "totalElapsedMs가 계속 10초 이상이면 DB/VM 리소스 또는 커넥션풀 warm-up을 추가 진단"
+- Tests Run + Result: git diff --check 성공; docker compose config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패
+- Open Risks: 신규 회원가입 첫 요청 지연이 DB cold query 또는 BCrypt/DB commit 구간이면 이번 변경만으로 완전히 제거되지는 않음; Java 17 CI에서 컴파일 확인 필요
+- Blockers: 로컬 JAVA_HOME이 Java 8
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 회원가입 로그에서 requestElapsedMs와 totalElapsedMs 확인, 3) totalElapsedMs가 계속 10초 이상이면 DB/VM 리소스 또는 커넥션풀 warm-up을 추가 진단
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 14:42:17 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1018,6 +1034,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

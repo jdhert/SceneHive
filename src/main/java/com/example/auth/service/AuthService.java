@@ -9,6 +9,7 @@ import com.example.auth.dto.ResetPasswordRequest;
 import com.example.auth.dto.UserResponse;
 import com.example.auth.entity.AuthProvider;
 import com.example.auth.entity.User;
+import com.example.auth.event.VerificationEmailRequestedEvent;
 import com.example.auth.exception.CustomException;
 import com.example.auth.repository.UserRepository;
 import com.example.auth.service.mail.MailDispatchService;
@@ -16,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,11 +42,12 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final MailDispatchService mailDispatchService;
     private final RedisService redisService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                       JwtService jwtService, AuthenticationManager authenticationManager,
                       UserDetailsService userDetailsService, MailDispatchService mailDispatchService,
-                      RedisService redisService) {
+                      RedisService redisService, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -52,6 +55,7 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
         this.mailDispatchService = mailDispatchService;
         this.redisService = redisService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -67,9 +71,9 @@ public class AuthService {
         if (existingUser != null) {
             if (!existingUser.isVerified()) {
                 long verificationStartedAt = System.nanoTime();
-                sendVerificationCode(existingUser);
+                requestVerificationEmail(existingUser);
                 log.info(
-                        "Register verification code re-queued for unverified user. email={}, verificationElapsedMs={}, totalElapsedMs={}",
+                        "Register verification email requested for unverified user. email={}, requestElapsedMs={}, totalElapsedMs={}",
                         maskedEmail,
                         elapsedMillis(verificationStartedAt),
                         elapsedMillis(startedAt)
@@ -107,9 +111,9 @@ public class AuthService {
         }
 
         long verificationStartedAt = System.nanoTime();
-        sendVerificationCode(savedUser);
+        requestVerificationEmail(savedUser);
         log.info(
-                "Register verification code queued. email={}, userId={}, verificationElapsedMs={}, totalElapsedMs={}",
+                "Register verification email requested. email={}, userId={}, requestElapsedMs={}, totalElapsedMs={}",
                 maskedEmail,
                 savedUser.getId(),
                 elapsedMillis(verificationStartedAt),
@@ -245,14 +249,8 @@ public class AuthService {
         redisService.deleteData(email);
     }
 
-    private String generateVerificationCode() {
-        return String.valueOf((int) (Math.random() * 900000) + 100000);
-    }
-
-    private void sendVerificationCode(User user) {
-        String verificationCode = generateVerificationCode();
-        redisService.setDataExpire(user.getEmail(), verificationCode, 60 * 5L);
-        mailDispatchService.sendVerificationEmail(user.getEmail(), verificationCode);
+    private void requestVerificationEmail(User user) {
+        eventPublisher.publishEvent(new VerificationEmailRequestedEvent(user.getId(), user.getEmail()));
     }
 
     public AuthResponse refreshToken(String refreshToken) {
