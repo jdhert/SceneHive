@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 16:54:03 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): DB 커넥션 cold start 완화용 Hikari/Warm-up 명시화
+- Scope (In/Out): In: src/main/java/com/example/auth/config/ApplicationWarmup.java, src/main/resources/application.yml, docker-compose.yml, docker-compose.prod.yml, AGENTS.md / Out: DB 인덱스 변경, 서버 직접 튜닝, PostgreSQL 설정 변경, JVM 메모리 옵션 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M docker-compose.prod.yml,  M docker-compose.yml,  M src/main/java/com/example/auth/config/ApplicationWarmup.java,  M src/main/resources/application.yml
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "DB 커넥션 cold start 완화용 Hikari/Warm-up 명시화" -ScopeIn "src/main/java/com/example/auth/config/ApplicationWarmup.java, src/main/resources/application.yml, docker-compose.yml, docker-compose.prod.yml, AGENTS.md" -ScopeOut "DB 인덱스 변경, 서버 직접 튜닝, PostgreSQL 설정 변경, JVM 메모리 옵션 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패; docker build는 Docker Desktop daemon 미실행으로 실패" -OpenRisks "swap 970Mi 사용 이력이 있어 서버 메모리 압박/스왑 지연 가능성은 남음; Java 17 CI에서 컴파일 확인 필요" -Blockers "로컬 JAVA_HOME이 Java 8; Docker Desktop daemon 미실행" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 Application warm-up datasource/user lookup 로그 확인" -NextAction3 "회원가입 totalElapsedMs가 계속 길면 서버 docker stats/free/vmstat 기준으로 swap/JVM/Postgres 리소스 튜닝"
+- Tests Run + Result: git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패; docker build는 Docker Desktop daemon 미실행으로 실패
+- Open Risks: swap 970Mi 사용 이력이 있어 서버 메모리 압박/스왑 지연 가능성은 남음; Java 17 CI에서 컴파일 확인 필요
+- Blockers: 로컬 JAVA_HOME이 Java 8; Docker Desktop daemon 미실행
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 Application warm-up datasource/user lookup 로그 확인, 3) 회원가입 totalElapsedMs가 계속 길면 서버 docker stats/free/vmstat 기준으로 swap/JVM/Postgres 리소스 튜닝
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 15:30:22 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1034,6 +1050,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
