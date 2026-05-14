@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 14:42:17 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 회원가입 cold start 병목 완화
+- Scope (In/Out): In: ApplicationWarmup, JPA SQL logging config, register timeout, compose env, AGENTS.md / Out: 운영 서버 직접 SSH 수정, DB 스펙 변경, BCrypt strength 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/services/api.ts,  M src/main/resources/application.yml, ?? src/main/java/com/example/auth/config/ApplicationWarmup.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "회원가입 cold start 병목 완화" -ScopeIn "ApplicationWarmup, JPA SQL logging config, register timeout, compose env, AGENTS.md" -ScopeOut "운영 서버 직접 SSH 수정, DB 스펙 변경, BCrypt strength 변경" -Status "done" -PercentComplete "100" -TestsResult "docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); git diff --check 성공; .\\gradlew.bat compileJava는 로컬 Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패" -OpenRisks "배포 후 Application warm-up 로그와 Register elapsedMs 재확인 필요; Kafka enabled 상태가 리소스 사용에 영향을 줄 수 있어 서버 env 확인 권장" -Blockers "로컬 Java 17 부재" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 docker logs에서 Application warm-up user lookup/password encoder elapsedMs 확인" -NextAction3 "재시도 회원가입에서 Register user lookup elapsedMs가 낮아졌는지 확인"
+- Tests Run + Result: docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); git diff --check 성공; .\\gradlew.bat compileJava는 로컬 Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패
+- Open Risks: 배포 후 Application warm-up 로그와 Register elapsedMs 재확인 필요; Kafka enabled 상태가 리소스 사용에 영향을 줄 수 있어 서버 env 확인 권장
+- Blockers: 로컬 Java 17 부재
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 docker logs에서 Application warm-up user lookup/password encoder elapsedMs 확인, 3) 재시도 회원가입에서 Register user lookup elapsedMs가 낮아졌는지 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 14:17:30 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1002,6 +1018,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

@@ -30,7 +30,7 @@ import type {
 } from '@/types';
 
 export const authService = {
-  register: (data: RegisterRequest) => api.post('/auth/register', data, { timeout: 15000 }),
+  register: (data: RegisterRequest) => api.post('/auth/register', data, { timeout: 30000 }),
   login: (data: LoginRequest) => api.post<AuthResponse>('/auth/login', data),
   refresh: () => refreshApi.post<AuthResponse>('/auth/refresh'),
   logout: () => refreshApi.post('/auth/logout'),
