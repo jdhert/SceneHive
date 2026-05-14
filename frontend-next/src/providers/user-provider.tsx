@@ -27,6 +27,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const autoOnlineRef = useRef(false);
+  const isInitializingRef = useRef(false);
 
   const fetchUser = useCallback(async ({ suppressLoading = false } = {}) => {
     try {
@@ -52,6 +53,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        isInitializingRef.current = true;
         setIsLoading(true);
         const refreshResponse = await authService.refresh();
         const token = refreshResponse.data?.accessToken;
@@ -68,6 +70,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         clearSessionCookie();
         setUser(null);
       } finally {
+        isInitializingRef.current = false;
         setIsLoading(false);
       }
     };
@@ -77,7 +80,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = subscribeAccessToken((token) => {
-      if (!token) {
+      if (!token || isInitializingRef.current) {
         return;
       }
       fetchUser({ suppressLoading: true });

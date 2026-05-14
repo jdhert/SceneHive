@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -53,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 final String userEmail = jwtService.extractUsername(jwt);
 
                 if (userEmail != null) {
-                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                    UserDetails userDetails = resolveUserDetails(jwt, userEmail);
 
                     if (jwtService.isTokenValid(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -71,5 +73,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private UserDetails resolveUserDetails(String jwt, String userEmail) {
+        String role = jwtService.extractRole(jwt);
+        if (StringUtils.hasText(role)) {
+            return new org.springframework.security.core.userdetails.User(
+                    userEmail,
+                    "",
+                    Collections.singletonList(new SimpleGrantedAuthority(role))
+            );
+        }
+
+        return this.userDetailsService.loadUserByUsername(userEmail);
     }
 }

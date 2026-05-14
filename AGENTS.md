@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 18:02:49 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 프론트→백엔드 요청 지연 완화: JWT 인증 DB 조회 및 중복 getMe 제거
+- Scope (In/Out): In: src/main/java/com/example/auth/service/JwtService.java, src/main/java/com/example/auth/security/JwtAuthenticationFilter.java, frontend-next/src/providers/user-provider.tsx, frontend-next/src/components/snippet/snippet-container.tsx, frontend-next/src/components/memo/memo-container.tsx, AGENTS.md / Out: Next.js 프록시 구조 변경, Nginx 도입, 백엔드 전체 서비스 쿼리 리팩터링, 운영 서버 직접 측정
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/components/memo/memo-container.tsx,  M frontend-next/src/components/snippet/snippet-container.tsx,  M frontend-next/src/providers/user-provider.tsx,  M src/main/java/com/example/auth/security/JwtAuthenticationFilter.java,  M src/main/java/com/example/auth/service/JwtService.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "프론트→백엔드 요청 지연 완화: JWT 인증 DB 조회 및 중복 getMe 제거" -ScopeIn "src/main/java/com/example/auth/service/JwtService.java, src/main/java/com/example/auth/security/JwtAuthenticationFilter.java, frontend-next/src/providers/user-provider.tsx, frontend-next/src/components/snippet/snippet-container.tsx, frontend-next/src/components/memo/memo-container.tsx, AGENTS.md" -ScopeOut "Next.js 프록시 구조 변경, Nginx 도입, 백엔드 전체 서비스 쿼리 리팩터링, 운영 서버 직접 측정" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); docker compose -f docker-compose.prod.yml config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패" -OpenRisks "기존 access token은 role claim이 없어 만료/refresh 전까지 JWT 필터가 DB fallback을 사용함; 서비스 내부 findByEmail 호출은 별도 리팩터링 대상" -Blockers "로컬 JAVA_HOME이 Java 8" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 새 로그인/refresh 이후 보호 API에서 DB 조회 시간 감소 확인" -NextAction3 "여전히 느리면 Next rewrite proxy와 backend 직접 curl 응답시간을 분리 측정"
+- Tests Run + Result: git diff --check 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); docker compose -f docker-compose.prod.yml config --quiet 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패
+- Open Risks: 기존 access token은 role claim이 없어 만료/refresh 전까지 JWT 필터가 DB fallback을 사용함; 서비스 내부 findByEmail 호출은 별도 리팩터링 대상
+- Blockers: 로컬 JAVA_HOME이 Java 8
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 새 로그인/refresh 이후 보호 API에서 DB 조회 시간 감소 확인, 3) 여전히 느리면 Next rewrite proxy와 backend 직접 curl 응답시간을 분리 측정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 17:47:35 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1114,6 +1130,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

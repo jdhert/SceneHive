@@ -24,6 +24,7 @@ import java.util.function.Function;
 public class JwtService {
 
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+    private static final String ROLE_CLAIM = "role";
 
     private final JwtConfig jwtConfig;
 
@@ -49,11 +50,15 @@ public class JwtService {
     }
 
     public String generateAccessToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, jwtConfig.getAccessTokenExpiration());
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        addRoleClaim(claims, userDetails);
+        return buildToken(claims, userDetails, jwtConfig.getAccessTokenExpiration());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, jwtConfig.getRefreshTokenExpiration());
+        Map<String, Object> claims = new HashMap<>();
+        addRoleClaim(claims, userDetails);
+        return buildToken(claims, userDetails, jwtConfig.getRefreshTokenExpiration());
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
@@ -69,6 +74,10 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get(ROLE_CLAIM, String.class));
     }
 
     public boolean validateToken(String token) {
@@ -119,5 +128,11 @@ public class JwtService {
 
     public long getRefreshTokenExpiration() {
         return jwtConfig.getRefreshTokenExpiration();
+    }
+
+    private void addRoleClaim(Map<String, Object> claims, UserDetails userDetails) {
+        userDetails.getAuthorities().stream()
+                .findFirst()
+                .ifPresent(authority -> claims.put(ROLE_CLAIM, authority.getAuthority()));
     }
 }

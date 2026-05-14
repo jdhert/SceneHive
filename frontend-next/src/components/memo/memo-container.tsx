@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { memoService, userService } from '@/services/api';
+import { memoService } from '@/services/api';
+import { useUser } from '@/providers/user-provider';
 import type { Memo, CreateMemoRequest, UpdateMemoRequest } from '@/types';
 import MemoList from '@/components/memo/memo-list';
 import MemoEditor from '@/components/memo/memo-editor';
@@ -17,11 +18,12 @@ export function MemoContainer({ workspaceId }: MemoContainerProps) {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [currentUserId, setCurrentUserId] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const { user } = useUser();
 
   const wid = parseInt(workspaceId);
+  const currentUserId = user?.id ?? 0;
 
   const fetchMemos = useCallback(async () => {
     try {
@@ -56,9 +58,6 @@ export function MemoContainer({ workspaceId }: MemoContainerProps) {
 
   useEffect(() => {
     fetchMemos();
-    userService.getMe().then((res) => {
-      setCurrentUserId(res.data.id);
-    });
   }, [fetchMemos]);
 
   const handleView = async (memo: Memo) => {

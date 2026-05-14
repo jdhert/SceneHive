@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { snippetService, userService } from '@/services/api';
+import { snippetService } from '@/services/api';
+import { useUser } from '@/providers/user-provider';
 import type { CodeSnippet, CreateSnippetRequest, UpdateSnippetRequest } from '@/types';
 import SnippetList from '@/components/snippet/snippet-list';
 import SnippetEditor from '@/components/snippet/snippet-editor';
@@ -17,10 +18,11 @@ export function SnippetContainer({ workspaceId }: SnippetContainerProps) {
   const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<CodeSnippet | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [currentUserId, setCurrentUserId] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useUser();
 
   const wid = parseInt(workspaceId);
+  const currentUserId = user?.id ?? 0;
 
   const fetchSnippets = useCallback(async () => {
     try {
@@ -36,9 +38,6 @@ export function SnippetContainer({ workspaceId }: SnippetContainerProps) {
 
   useEffect(() => {
     fetchSnippets();
-    userService.getMe().then((res) => {
-      setCurrentUserId(res.data.id);
-    });
   }, [fetchSnippets]);
 
   const handleView = async (snippet: CodeSnippet) => {
