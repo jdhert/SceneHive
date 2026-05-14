@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/services/api';
@@ -43,8 +44,19 @@ export default function RegisterPage() {
       });
       router.push('/verify-email?email=' + encodeURIComponent(normalizedEmail));
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || '회원가입에 실패했습니다.');
+      if (axios.isAxiosError(err)) {
+        if (err.code === 'ECONNABORTED') {
+          setError('회원가입 요청 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.');
+        } else if (err.response?.data && typeof err.response.data === 'object' && 'message' in err.response.data) {
+          setError(String(err.response.data.message));
+        } else if (!err.response) {
+          setError('서버와 연결할 수 없습니다. 네트워크 상태를 확인해주세요.');
+        } else {
+          setError('회원가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+      } else {
+        setError('회원가입에 실패했습니다.');
+      }
     } finally {
       setIsLoading(false);
     }

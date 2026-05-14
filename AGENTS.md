@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 14:14:51 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 회원가입 지연/실패 UX 및 인프라 timeout 보완
+- Scope (In/Out): In: register page, auth API client, Redis/Mail timeout config, docker-compose prod/local, AGENTS.md / Out: 회원가입 도메인 설계 변경, 메일 큐 영속화, 운영 서버 직접 로그 조회
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/register/page.tsx,  M frontend-next/src/services/api.ts,  M src/main/resources/application.yml
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "회원가입 지연/실패 UX 및 인프라 timeout 보완" -ScopeIn "register page, auth API client, Redis/Mail timeout config, docker-compose prod/local, AGENTS.md" -ScopeOut "회원가입 도메인 설계 변경, 메일 큐 영속화, 운영 서버 직접 로그 조회" -Status "done" -PercentComplete "100" -TestsResult "docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재)" -OpenRisks "운영에서 실제 실패 원인은 다음 배포 후 브라우저/서버 로그로 재확인 필요; bcrypt 비용은 여전히 회원가입 경로에 남아 있어 저사양 VM에서 1초 내외 지연 가능" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 동일 회원가입 시도에서 오류 문구/응답 시간 확인" -NextAction3 "계속 느리면 BCrypt strength/회원가입 비동기 인증 코드 발급 구조 검토"
+- Tests Run + Result: docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재)
+- Open Risks: 운영에서 실제 실패 원인은 다음 배포 후 브라우저/서버 로그로 재확인 필요; bcrypt 비용은 여전히 회원가입 경로에 남아 있어 저사양 VM에서 1초 내외 지연 가능
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 동일 회원가입 시도에서 오류 문구/응답 시간 확인, 3) 계속 느리면 BCrypt strength/회원가입 비동기 인증 코드 발급 구조 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-13 17:27:54 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -970,5 +986,6 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
