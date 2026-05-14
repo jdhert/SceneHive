@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 17:03:58 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Hikari 초기화 실패 타임아웃 배포 실패 핫픽스
+- Scope (In/Out): In: src/main/resources/application.yml, docker-compose.yml, docker-compose.prod.yml, AGENTS.md / Out: DB warm-up 로직 변경, 서버 직접 롤백, JVM/PostgreSQL 튜닝
+- Current Status: done
+- Percent Complete: 100
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Hikari 초기화 실패 타임아웃 배포 실패 핫픽스" -ScopeIn "src/main/resources/application.yml, docker-compose.yml, docker-compose.prod.yml, AGENTS.md" -ScopeOut "DB warm-up 로직 변경, 서버 직접 롤백, JVM/PostgreSQL 튜닝" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공" -OpenRisks "애플리케이션 부팅 자체가 50초 이상 걸리는 문제는 남아 있어 배포 후 warm-up 로그와 서버 리소스 재확인 필요" -Blockers "None" -NextAction1 "배포 후 Hikari bind error 사라졌는지 확인" -NextAction2 "Application warm-up datasource/user lookup 로그 확인" -NextAction3 "부팅 시간이 계속 길면 Redis repository scan/Kafka/JVM 메모리 옵션 최적화 검토"
+- Tests Run + Result: git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공
+- Open Risks: 애플리케이션 부팅 자체가 50초 이상 걸리는 문제는 남아 있어 배포 후 warm-up 로그와 서버 리소스 재확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 배포 후 Hikari bind error 사라졌는지 확인, 2) Application warm-up datasource/user lookup 로그 확인, 3) 부팅 시간이 계속 길면 Redis repository scan/Kafka/JVM 메모리 옵션 최적화 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 16:54:03 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1050,6 +1066,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
