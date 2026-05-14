@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 17:28:03 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): CI/CD 배포 시간 단축: 상태 저장 서비스 유지 및 healthcheck 최적화
+- Scope (In/Out): In: deploy.sh, PROJECT_GUIDE.md, AGENTS.md / Out: GitHub Actions job 구조 변경, 서버 직접 배포 실행, 무중단 blue-green 전환, 백엔드 코드 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md,  M deploy.sh
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "CI/CD 배포 시간 단축: 상태 저장 서비스 유지 및 healthcheck 최적화" -ScopeIn "deploy.sh, PROJECT_GUIDE.md, AGENTS.md" -ScopeOut "GitHub Actions job 구조 변경, 서버 직접 배포 실행, 무중단 blue-green 전환, 백엔드 코드 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; bash -n deploy.sh는 로컬 WSL /bin/bash 부재로 실패" -OpenRisks "첫 배포처럼 DB/Redis가 완전히 새로 뜨는 경우 backend가 의존 서비스 준비 전 시작할 수 있어 healthcheck/rollback에 의존함; 진짜 무중단 배포는 blue-green 또는 reverse proxy 전환 필요" -Blockers "로컬 bash 실행 환경 부재" -NextAction1 "변경분 커밋 및 push" -NextAction2 "다음 GitHub Actions 배포 로그에서 docker compose down 제거와 healthcheck 로그 빈도 감소 확인" -NextAction3 "배포 시간이 여전히 길면 backend 부팅 시간 자체를 Spring profile/의존성/Kafka 비활성화 기준으로 추가 최적화"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; bash -n deploy.sh는 로컬 WSL /bin/bash 부재로 실패
+- Open Risks: 첫 배포처럼 DB/Redis가 완전히 새로 뜨는 경우 backend가 의존 서비스 준비 전 시작할 수 있어 healthcheck/rollback에 의존함; 진짜 무중단 배포는 blue-green 또는 reverse proxy 전환 필요
+- Blockers: 로컬 bash 실행 환경 부재
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 다음 GitHub Actions 배포 로그에서 docker compose down 제거와 healthcheck 로그 빈도 감소 확인, 3) 배포 시간이 여전히 길면 backend 부팅 시간 자체를 Spring profile/의존성/Kafka 비활성화 기준으로 추가 최적화
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 17:18:00 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1082,6 +1098,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 

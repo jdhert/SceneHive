@@ -18,9 +18,13 @@ COMPOSE_FILE="docker-compose.prod.yml"
 BACKUP_DIR="/opt/scenehive_backups"
 DEPLOY_ENV_FILE=".deploy.env"
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-http://localhost:8081/actuator/health}"
-HEALTHCHECK_INITIAL_DELAY_SECONDS="${HEALTHCHECK_INITIAL_DELAY_SECONDS:-45}"
-HEALTHCHECK_ATTEMPTS="${HEALTHCHECK_ATTEMPTS:-12}"
-HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-10}"
+HEALTHCHECK_INITIAL_DELAY_SECONDS="${HEALTHCHECK_INITIAL_DELAY_SECONDS:-0}"
+HEALTHCHECK_ATTEMPTS="${HEALTHCHECK_ATTEMPTS:-60}"
+HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-3}"
+HEALTHCHECK_CURL_TIMEOUT_SECONDS="${HEALTHCHECK_CURL_TIMEOUT_SECONDS:-2}"
+HEALTHCHECK_LOG_EVERY_ATTEMPTS="${HEALTHCHECK_LOG_EVERY_ATTEMPTS:-5}"
+STATEFUL_SERVICES="${STATEFUL_SERVICES:-db redis}"
+APP_SERVICES="${APP_SERVICES:-backend frontend}"
 
 # Full image paths
 BACKEND_IMAGE="${REGISTRY}/${IMAGE_NAME}-backend"
@@ -127,22 +131,40 @@ compose_cmd() {
     ssh_cmd "cd ${PROJECT_DIR} && docker compose --env-file .env --env-file ${DEPLOY_ENV_FILE} ${command}"
 }
 
+ensure_stateful_services() {
+    log_info "Ensuring stateful services are running: ${STATEFUL_SERVICES}"
+    compose_cmd "up -d ${STATEFUL_SERVICES}"
+}
+
+recreate_app_services() {
+    log_info "Recreating application services: ${APP_SERVICES}"
+    compose_cmd "up -d --no-deps --force-recreate ${APP_SERVICES}"
+}
+
 wait_for_health() {
     local attempt=1
+    local log_every="${HEALTHCHECK_LOG_EVERY_ATTEMPTS}"
 
-    log_info "Waiting for services to become healthy..."
+    if [ "$log_every" -lt 1 ]; then
+        log_every=1
+    fi
+
+    log_info "Waiting for backend health: ${HEALTHCHECK_URL}"
     if [ "$HEALTHCHECK_INITIAL_DELAY_SECONDS" -gt 0 ]; then
         log_info "Giving services ${HEALTHCHECK_INITIAL_DELAY_SECONDS}s warm-up time before health checks..."
         sleep "${HEALTHCHECK_INITIAL_DELAY_SECONDS}"
     fi
 
     while [ "$attempt" -le "$HEALTHCHECK_ATTEMPTS" ]; do
-        if ssh_cmd "curl -sf ${HEALTHCHECK_URL}" >/dev/null 2>&1; then
+        if ssh_cmd "curl -sf --max-time ${HEALTHCHECK_CURL_TIMEOUT_SECONDS} ${HEALTHCHECK_URL}" >/dev/null 2>&1; then
             log_info "Health check passed on attempt ${attempt}/${HEALTHCHECK_ATTEMPTS}"
             return 0
         fi
 
-        log_info "Health check not ready (${attempt}/${HEALTHCHECK_ATTEMPTS}). Retrying in ${HEALTHCHECK_SLEEP_SECONDS}s..."
+        if [ "$attempt" -eq 1 ] || [ $((attempt % log_every)) -eq 0 ] || [ "$attempt" -eq "$HEALTHCHECK_ATTEMPTS" ]; then
+            log_info "Health check not ready (${attempt}/${HEALTHCHECK_ATTEMPTS}). Retrying every ${HEALTHCHECK_SLEEP_SECONDS}s..."
+        fi
+
         sleep "${HEALTHCHECK_SLEEP_SECONDS}"
         attempt=$((attempt + 1))
     done
@@ -178,13 +200,9 @@ deploy_staging() {
     log_info "Pulling images..."
     compose_cmd "pull backend frontend"
 
-    # Stop old containers
-    log_info "Stopping old containers..."
-    compose_cmd "down" || true
-
-    # Start services
-    log_info "Starting services..."
-    compose_cmd "up -d"
+    # Keep stateful services warm and recreate only application containers.
+    ensure_stateful_services
+    recreate_app_services
 
     # Health check
     if wait_for_health; then
@@ -221,13 +239,9 @@ deploy_production() {
     log_info "Pulling images..."
     compose_cmd "pull backend frontend"
     
-    # Stop old containers
-    log_info "Stopping old containers..."
-    compose_cmd "down"
-    
-    # Start services
-    log_info "Starting services..."
-    compose_cmd "up -d"
+    # Keep stateful services warm and recreate only application containers.
+    ensure_stateful_services
+    recreate_app_services
     
     # Health check
     if wait_for_health; then
@@ -257,9 +271,9 @@ rollback() {
     ssh_cmd "[ -f ${LATEST_BACKUP}/.env ] && cp ${LATEST_BACKUP}/.env ${PROJECT_DIR}/.env || true"
     ssh_cmd "[ -f ${LATEST_BACKUP}/${DEPLOY_ENV_FILE} ] && cp ${LATEST_BACKUP}/${DEPLOY_ENV_FILE} ${PROJECT_DIR}/${DEPLOY_ENV_FILE} || true"
     
-    # Restart services
-    compose_cmd "down"
-    compose_cmd "up -d"
+    # Keep DB/Redis warm during rollback and recreate only application containers.
+    ensure_stateful_services
+    recreate_app_services
     
     log_info "✅ Rollback completed!"
 }

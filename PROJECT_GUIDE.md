@@ -630,9 +630,10 @@ FRONTEND_URL=http://localhost:3000
 - 초기 실패 처리는 짧은 local retry 후 DLQ topic으로 보내며, 1m/5m delayed retry topic 라우팅은 다음 단계로 남겨둔다.
 
 **배포 헬스체크 조정 사항:**
-- OCI 단일 VM에서 Spring Boot 부팅 시간이 길어 GitHub Actions 로그에 health check retry가 과도하게 찍히던 문제를 줄이기 위해 초기 대기 시간을 둔다.
-- 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=45`, `HEALTHCHECK_ATTEMPTS=12`, `HEALTHCHECK_SLEEP_SECONDS=10`이다.
-- 최대 대기 시간은 기존 120초에서 약 165초로 늘어나지만, 정상 배포 시 실패 retry 로그는 크게 줄어든다.
+- 배포 시 `docker compose down`으로 전체 스택을 내리지 않고, DB/Redis는 유지한 채 `backend frontend` 애플리케이션 컨테이너만 재생성한다.
+- health check는 배포 성공/롤백 판단을 위해 유지하되, 고정 45초 대기를 제거하고 즉시 짧은 간격으로 확인한다.
+- 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=0`, `HEALTHCHECK_ATTEMPTS=60`, `HEALTHCHECK_SLEEP_SECONDS=3`, `HEALTHCHECK_LOG_EVERY_ATTEMPTS=5`이다.
+- 최대 대기 시간은 약 180초지만 정상 기동 즉시 통과하며, GitHub Actions 로그는 5회 시도마다 한 번만 출력한다.
 
 **서비스 분리 계획:**
 ```
