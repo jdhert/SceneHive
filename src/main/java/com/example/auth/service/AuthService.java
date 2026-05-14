@@ -14,6 +14,8 @@ import com.example.auth.repository.UserRepository;
 import com.example.auth.service.mail.MailDispatchService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +30,7 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private static final int MAX_FAILED_ATTEMPTS = 5;
 
     private final UserRepository userRepository;
@@ -53,25 +56,41 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        long startedAt = System.nanoTime();
         String email = normalizeEmail(request.email());
+        String maskedEmail = maskEmail(email);
         String name = request.name().trim();
 
+        long lookupStartedAt = System.nanoTime();
         User existingUser = userRepository.findByEmail(email).orElse(null);
+        log.info("Register user lookup completed. email={}, elapsedMs={}", maskedEmail, elapsedMillis(lookupStartedAt));
         if (existingUser != null) {
             if (!existingUser.isVerified()) {
+                long verificationStartedAt = System.nanoTime();
                 sendVerificationCode(existingUser);
+                log.info(
+                        "Register verification code re-queued for unverified user. email={}, verificationElapsedMs={}, totalElapsedMs={}",
+                        maskedEmail,
+                        elapsedMillis(verificationStartedAt),
+                        elapsedMillis(startedAt)
+                );
                 return AuthResponse.ofRegister(
                         "이미 가입된 이메일입니다. 이메일 인증 코드를 다시 발송했습니다. (유효시간 5분)",
                         existingUser.getId()
                 );
             }
 
+            log.info("Register rejected for existing verified user. email={}, totalElapsedMs={}", maskedEmail, elapsedMillis(startedAt));
             throw new CustomException("이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST);
         }
 
+        long passwordEncodeStartedAt = System.nanoTime();
+        String encodedPassword = passwordEncoder.encode(request.password());
+        log.info("Register password encoded. email={}, elapsedMs={}", maskedEmail, elapsedMillis(passwordEncodeStartedAt));
+
         User user = User.builder()
                 .email(email)
-                .password(passwordEncoder.encode(request.password()))
+                .password(encodedPassword)
                 .name(name)
                 .provider(AuthProvider.LOCAL)
                 .isVerified(false)
@@ -79,12 +98,23 @@ public class AuthService {
 
         User savedUser;
         try {
+            long saveStartedAt = System.nanoTime();
             savedUser = userRepository.saveAndFlush(user);
+            log.info("Register user saved. email={}, userId={}, elapsedMs={}", maskedEmail, savedUser.getId(), elapsedMillis(saveStartedAt));
         } catch (DataIntegrityViolationException e) {
+            log.info("Register failed by data integrity violation. email={}, totalElapsedMs={}", maskedEmail, elapsedMillis(startedAt));
             throw new CustomException("이미 존재하는 이메일입니다.", HttpStatus.BAD_REQUEST);
         }
 
+        long verificationStartedAt = System.nanoTime();
         sendVerificationCode(savedUser);
+        log.info(
+                "Register verification code queued. email={}, userId={}, verificationElapsedMs={}, totalElapsedMs={}",
+                maskedEmail,
+                savedUser.getId(),
+                elapsedMillis(verificationStartedAt),
+                elapsedMillis(startedAt)
+        );
 
         return AuthResponse.ofRegister("회원가입 성공. 이메일 인증을 완료해주세요. (유효시간 5분)", savedUser.getId());
     }
@@ -292,5 +322,22 @@ public class AuthService {
 
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private static long elapsedMillis(long startedAtNanos) {
+        return (System.nanoTime() - startedAtNanos) / 1_000_000L;
+    }
+
+    private static String maskEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return "<blank>";
+        }
+
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 1) {
+            return "***" + (atIndex >= 0 ? email.substring(atIndex) : "");
+        }
+
+        return email.charAt(0) + "***" + email.substring(atIndex);
     }
 }

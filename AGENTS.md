@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 14:17:30 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 회원가입 서버 단계별 지연 로그 추가
+- Scope (In/Out): In: AuthService register timing logs, AGENTS.md / Out: 운영 서버 SSH 로그 직접 조회, 회원가입 플로우 구조 변경, 비밀번호 인코더 정책 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M src/main/java/com/example/auth/service/AuthService.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "회원가입 서버 단계별 지연 로그 추가" -ScopeIn "AuthService register timing logs, AGENTS.md" -ScopeOut "운영 서버 SSH 로그 직접 조회, 회원가입 플로우 구조 변경, 비밀번호 인코더 정책 변경" -Status "done" -PercentComplete "100" -TestsResult ".\\gradlew.bat compileJava는 로컬 JAVA_HOME이 Java 8이라 Spring Boot 3.2 Java 17 요구사항으로 실패" -OpenRisks "배포 후 실제 회원가입 재현 로그를 확인해야 정확한 병목 확정 가능; 로그는 이메일 마스킹 처리됨" -Blockers "로컬 Java 17 부재" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 완료 후 docker logs에서 Register 단계별 elapsedMs 확인" -NextAction3 "병목 단계가 password encoded면 BCrypt 비용, verification이면 Redis/mail queue 경로 추가 조정"
+- Tests Run + Result: .\\gradlew.bat compileJava는 로컬 JAVA_HOME이 Java 8이라 Spring Boot 3.2 Java 17 요구사항으로 실패
+- Open Risks: 배포 후 실제 회원가입 재현 로그를 확인해야 정확한 병목 확정 가능; 로그는 이메일 마스킹 처리됨
+- Blockers: 로컬 Java 17 부재
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 완료 후 docker logs에서 Register 단계별 elapsedMs 확인, 3) 병목 단계가 password encoded면 BCrypt 비용, verification이면 Redis/mail queue 경로 추가 조정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 14:14:51 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -986,6 +1002,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
