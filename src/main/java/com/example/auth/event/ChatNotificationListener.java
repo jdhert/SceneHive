@@ -38,7 +38,7 @@ public class ChatNotificationListener {
         this.chatPresenceTracker = chatPresenceTracker;
     }
 
-    @Async
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onChatMessageCreated(ChatMessageCreatedEvent event) {
         try {

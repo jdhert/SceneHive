@@ -25,7 +25,7 @@ public class VerificationEmailListener {
         this.mailDispatchService = mailDispatchService;
     }
 
-    @Async
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onVerificationEmailRequested(VerificationEmailRequestedEvent event) {
         long startedAt = System.nanoTime();

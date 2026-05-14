@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-14 17:18:00 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 회원가입 지연 로그 기반 런타임 안정화
+- Scope (In/Out): In: src/main/java/com/example/auth/config/AsyncConfig.java, src/main/java/com/example/auth/event/ChatNotificationListener.java, src/main/java/com/example/auth/event/VerificationEmailListener.java, src/main/resources/application.yml, docker-compose.yml, docker-compose.prod.yml, AGENTS.md / Out: BCrypt strength 하향, 운영 서버 .env 직접 수정, Kafka 물리 제거, DB 스키마 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M docker-compose.prod.yml,  M docker-compose.yml,  M src/main/java/com/example/auth/config/AsyncConfig.java,  M src/main/java/com/example/auth/event/ChatNotificationListener.java,  M src/main/java/com/example/auth/event/VerificationEmailListener.java,  M src/main/resources/application.yml
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "회원가입 지연 로그 기반 런타임 안정화" -ScopeIn "src/main/java/com/example/auth/config/AsyncConfig.java, src/main/java/com/example/auth/event/ChatNotificationListener.java, src/main/java/com/example/auth/event/VerificationEmailListener.java, src/main/resources/application.yml, docker-compose.yml, docker-compose.prod.yml, AGENTS.md" -ScopeOut "BCrypt strength 하향, 운영 서버 .env 직접 수정, Kafka 물리 제거, DB 스키마 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; rg 정적 확인 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패; docker build는 Docker Desktop daemon 미실행으로 실패" -OpenRisks "서버 .env에서 KAFKA_NOTIFICATIONS_ENABLED=true이면 Kafka consumer는 계속 기동됨; BCrypt 1.5초는 보안 강도 기본값 영향으로 남음; Java 17 CI에서 컴파일 확인 필요" -Blockers "로컬 JAVA_HOME이 Java 8; Docker Desktop daemon 미실행" -NextAction1 "변경분 커밋 및 push" -NextAction2 "서버 .env/GitHub secret에서 KAFKA_NOTIFICATIONS_ENABLED=false 확인" -NextAction3 "배포 후 Register lookup/save/async 로그 재확인"
+- Tests Run + Result: git diff --check 성공; docker compose config --quiet 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; rg 정적 확인 성공; .\\gradlew.bat compileJava는 로컬 JAVA_HOME Java 8로 Spring Boot 3.2 Java 17 요구사항 때문에 실패; docker build는 Docker Desktop daemon 미실행으로 실패
+- Open Risks: 서버 .env에서 KAFKA_NOTIFICATIONS_ENABLED=true이면 Kafka consumer는 계속 기동됨; BCrypt 1.5초는 보안 강도 기본값 영향으로 남음; Java 17 CI에서 컴파일 확인 필요
+- Blockers: 로컬 JAVA_HOME이 Java 8; Docker Desktop daemon 미실행
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 서버 .env/GitHub secret에서 KAFKA_NOTIFICATIONS_ENABLED=false 확인, 3) 배포 후 Register lookup/save/async 로그 재확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 17:03:58 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1066,6 +1082,7 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
+
 
 
 
