@@ -3,6 +3,8 @@
 영화 팬을 위한 커뮤니티 플랫폼입니다.  
 사용자는 TMDB 기반으로 영화를 탐색하고, 영화 클럽에 참여해 실시간으로 대화하고, 명대사와 리뷰를 축적할 수 있습니다.
 
+http://158.180.74.119/
+
 <img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/67943a8c-1c24-4f59-a0b8-178055575bc5" />
 
 ## 한눈에 보는 프로젝트
