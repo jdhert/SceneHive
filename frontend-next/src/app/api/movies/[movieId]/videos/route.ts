@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { fetchPersonDetails } from '@/lib/tmdb';
+import { fetchMovieVideos } from '@/lib/tmdb';
 
 type RouteContext = {
   params: {
-    personId: string;
+    movieId: string;
   };
 };
 
@@ -14,14 +14,14 @@ const CACHE_HEADERS = {
 };
 
 export async function GET(_: Request, { params }: RouteContext) {
-  const personId = Number(params.personId);
-  if (Number.isNaN(personId) || personId <= 0) {
-    return NextResponse.json({ message: 'Invalid person id' }, { status: 400 });
+  const movieId = Number(params.movieId);
+  if (Number.isNaN(movieId) || movieId <= 0) {
+    return NextResponse.json({ message: 'Invalid movie id' }, { status: 400 });
   }
 
   try {
-    const person = await fetchPersonDetails(personId);
-    return NextResponse.json(person, { headers: CACHE_HEADERS });
+    const videos = await fetchMovieVideos(movieId);
+    return NextResponse.json(videos, { headers: CACHE_HEADERS });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected TMDB error';
     return NextResponse.json({ message }, { status: 500 });

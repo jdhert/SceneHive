@@ -635,6 +635,7 @@ FRONTEND_URL=http://localhost:3000
 - 기본값은 `HEALTHCHECK_INITIAL_DELAY_SECONDS=0`, `HEALTHCHECK_ATTEMPTS=60`, `HEALTHCHECK_SLEEP_SECONDS=3`, `HEALTHCHECK_LOG_EVERY_ATTEMPTS=5`이다.
 - 최대 대기 시간은 약 180초지만 정상 기동 즉시 통과하며, GitHub Actions 로그는 5회 시도마다 한 번만 출력한다.
 - Gmail SMTP는 운영 기능 로그로 확인하며, Actuator mail health는 기본 비활성화한다.
+- 배포 성공 직후 `FRONTEND_WARMUP_ENABLED=true`이면 백그라운드에서 `http://localhost:3000/home`, `http://localhost:3000/api/home`을 호출해 Next.js/TMDB 캐시를 미리 데운다.
 
 **서비스 분리 계획:**
 ```

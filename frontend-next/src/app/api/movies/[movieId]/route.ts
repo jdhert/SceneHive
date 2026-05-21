@@ -7,6 +7,12 @@ type RouteContext = {
   };
 };
 
+export const revalidate = 600;
+
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1800',
+};
+
 export async function GET(_: Request, { params }: RouteContext) {
   const movieId = Number(params.movieId);
   if (Number.isNaN(movieId) || movieId <= 0) {
@@ -15,7 +21,7 @@ export async function GET(_: Request, { params }: RouteContext) {
 
   try {
     const movie = await fetchMovieDetails(movieId);
-    return NextResponse.json(movie);
+    return NextResponse.json(movie, { headers: CACHE_HEADERS });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected TMDB error';
     return NextResponse.json({ message }, { status: 500 });

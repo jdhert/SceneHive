@@ -23,6 +23,11 @@ HEALTHCHECK_ATTEMPTS="${HEALTHCHECK_ATTEMPTS:-60}"
 HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-3}"
 HEALTHCHECK_CURL_TIMEOUT_SECONDS="${HEALTHCHECK_CURL_TIMEOUT_SECONDS:-2}"
 HEALTHCHECK_LOG_EVERY_ATTEMPTS="${HEALTHCHECK_LOG_EVERY_ATTEMPTS:-5}"
+FRONTEND_WARMUP_ENABLED="${FRONTEND_WARMUP_ENABLED:-true}"
+FRONTEND_WARMUP_URLS="${FRONTEND_WARMUP_URLS:-http://localhost:3000/home http://localhost:3000/api/home}"
+FRONTEND_WARMUP_ATTEMPTS="${FRONTEND_WARMUP_ATTEMPTS:-5}"
+FRONTEND_WARMUP_SLEEP_SECONDS="${FRONTEND_WARMUP_SLEEP_SECONDS:-2}"
+FRONTEND_WARMUP_TIMEOUT_SECONDS="${FRONTEND_WARMUP_TIMEOUT_SECONDS:-8}"
 STATEFUL_SERVICES="${STATEFUL_SERVICES:-db redis}"
 APP_SERVICES="${APP_SERVICES:-backend frontend}"
 
@@ -175,6 +180,16 @@ wait_for_health() {
     return 1
 }
 
+warmup_frontend() {
+    if [ "${FRONTEND_WARMUP_ENABLED}" != "true" ]; then
+        log_info "Frontend warm-up disabled."
+        return
+    fi
+
+    log_info "Starting frontend warm-up in background: ${FRONTEND_WARMUP_URLS}"
+    ssh_cmd "nohup sh -c 'for url in ${FRONTEND_WARMUP_URLS}; do attempt=1; while [ \"\$attempt\" -le ${FRONTEND_WARMUP_ATTEMPTS} ]; do if curl -fsS --max-time ${FRONTEND_WARMUP_TIMEOUT_SECONDS} \"\$url\" >/dev/null 2>&1; then echo \"[INFO] warmed \$url on attempt \$attempt\"; break; fi; attempt=\$((attempt + 1)); sleep ${FRONTEND_WARMUP_SLEEP_SECONDS}; done; done' >/tmp/scenehive_frontend_warmup.log 2>&1 &"
+}
+
 # Deploy staging
 deploy_staging() {
     local SHA="${SHA:-staging}"
@@ -206,6 +221,7 @@ deploy_staging() {
 
     # Health check
     if wait_for_health; then
+        warmup_frontend
         log_info "✅ Staging deployment completed successfully!"
     else
         log_error "Health check failed! Rolling back..."
@@ -245,6 +261,7 @@ deploy_production() {
     
     # Health check
     if wait_for_health; then
+        warmup_frontend
         log_info "✅ Production deployment completed successfully!"
     else
         log_error "Health check failed! Rolling back..."

@@ -86,13 +86,11 @@ type HomePayload = {
 };
 
 type MovieTrailerPayload = {
-  videos?: {
-    results?: Array<{
-      key: string;
-      site: string;
-      type: string;
-    }>;
-  };
+  results?: Array<{
+    key: string;
+    site: string;
+    type: string;
+  }>;
 };
 
 function movieImage(path: string | null, size: 'w500' | 'w780' | 'w1280' | 'original' = 'w500') {
@@ -221,10 +219,10 @@ export default function HomePage() {
       }
 
       try {
-        const res = await fetch(`/api/movies/${heroMovie.id}`);
+        const res = await fetch(`/api/movies/${heroMovie.id}/videos`);
         if (!res.ok) throw new Error('failed');
         const data = (await res.json()) as MovieTrailerPayload;
-        const trailer = data.videos?.results?.find(
+        const trailer = data.results?.find(
           (video) => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')
         );
         if (!isMounted) return;

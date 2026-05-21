@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-05-21 09:43:43 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): OCI 최초 홈 로딩 지연 완화
+- Scope (In/Out): In: deploy.sh, frontend-next/src/providers/user-provider.tsx, frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/api/movies/[movieId]/videos/route.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/app/api/people/[personId]/route.ts, frontend-next/src/lib/tmdb.ts, PROJECT_GUIDE.md, AGENTS.md / Out: Nginx/CDN 도입, 이미지 next/image 전환, 운영 서버 직접 성능 측정, 백엔드 부팅 최적화 추가
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M PROJECT_GUIDE.md,  M deploy.sh,  M frontend-next/src/app/(public)/home/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/people/[personId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/lib/tmdb.ts,  M frontend-next/src/providers/user-provider.tsx, ?? frontend-next/src/app/api/movies/[movieId]/videos/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "OCI 최초 홈 로딩 지연 완화" -ScopeIn "deploy.sh, frontend-next/src/providers/user-provider.tsx, frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/api/movies/[movieId]/videos/route.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/app/api/people/[personId]/route.ts, frontend-next/src/lib/tmdb.ts, PROJECT_GUIDE.md, AGENTS.md" -ScopeOut "Nginx/CDN 도입, 이미지 next/image 전환, 운영 서버 직접 성능 측정, 백엔드 부팅 최적화 추가" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); bash -n deploy.sh는 로컬 WSL /bin/bash 부재로 실패" -OpenRisks "배포 warm-up은 백그라운드 실행이라 배포 직후 즉시 접속하면 아직 캐시가 덜 데워졌을 수 있음; 첫 방문 LCP는 여전히 TMDB 이미지 원본과 <img> 사용 영향을 받음" -Blockers "로컬 bash 실행 환경 부재" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 /tmp/scenehive_frontend_warmup.log와 /home 최초 응답 체감 확인" -NextAction3 "여전히 느리면 next/image 전환 또는 Nginx/CDN 캐시 도입 검토"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); bash -n deploy.sh는 로컬 WSL /bin/bash 부재로 실패
+- Open Risks: 배포 warm-up은 백그라운드 실행이라 배포 직후 즉시 접속하면 아직 캐시가 덜 데워졌을 수 있음; 첫 방문 LCP는 여전히 TMDB 이미지 원본과 <img> 사용 영향을 받음
+- Blockers: 로컬 bash 실행 환경 부재
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 /tmp/scenehive_frontend_warmup.log와 /home 최초 응답 체감 확인, 3) 여전히 느리면 next/image 전환 또는 Nginx/CDN 캐시 도입 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-14 18:02:49 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1130,14 +1146,6 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
-
-
-
-
-
-
-
 
 
 

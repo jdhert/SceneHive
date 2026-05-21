@@ -150,6 +150,18 @@ export type TmdbMovieDetail = {
   };
 };
 
+export type TmdbVideoListResponse = {
+  results: {
+    id: string;
+    key: string;
+    name: string;
+    site: string;
+    type: string;
+    official: boolean;
+    published_at: string;
+  }[];
+};
+
 export type TmdbPersonDetail = {
   id: number;
   name: string;
@@ -445,6 +457,34 @@ export async function fetchMoviesByGenres(genreIds: number[], page = 1) {
 
 export async function fetchGenres() {
   return tmdbFetch<TmdbGenreListResponse>('/genre/movie/list');
+}
+
+export async function fetchMovieVideos(movieId: number) {
+  const primary = await tmdbFetch<TmdbVideoListResponse>(`/movie/${movieId}/videos`);
+  const hasTrailer = (primary.results ?? []).some(
+    (video) => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')
+  );
+
+  if (hasTrailer) {
+    return primary;
+  }
+
+  try {
+    const fallbackEn = await tmdbFetch<TmdbVideoListResponse>(
+      `/movie/${movieId}/videos`,
+      {},
+      { language: 'en-US' }
+    );
+
+    return {
+      results: [...(primary.results ?? []), ...(fallbackEn.results ?? [])].filter(
+        (video, index, array) =>
+          array.findIndex((item) => item.key === video.key && item.site === video.site) === index
+      ),
+    };
+  } catch {
+    return primary;
+  }
 }
 
 export async function fetchSearchMovies(query: string, page = 1) {

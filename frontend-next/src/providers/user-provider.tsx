@@ -13,6 +13,12 @@ function clearSessionCookie() {
   document.cookie = 'has_session=; path=/; max-age=0; SameSite=Lax';
 }
 
+function hasSessionCookie() {
+  return document.cookie
+    .split(';')
+    .some((cookie) => cookie.trim().startsWith('has_session='));
+}
+
 interface UserContextType {
   user: User | null;
   isLoading: boolean;
@@ -55,6 +61,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       try {
         isInitializingRef.current = true;
         setIsLoading(true);
+
+        if (!getAccessToken() && !hasSessionCookie()) {
+          clearAccessToken();
+          clearSessionCookie();
+          setUser(null);
+          localStorage.removeItem('user');
+          return;
+        }
+
         const refreshResponse = await authService.refresh();
         const token = refreshResponse.data?.accessToken;
         if (token) {
