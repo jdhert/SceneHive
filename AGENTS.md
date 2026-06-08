@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-08 13:36:37 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 개인화 홈 MVP 추가
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, frontend-next/src/lib/recently-viewed.ts, frontend-next/src/queries/favorites.ts, AGENTS.md / Out: 백엔드 추천 API, 서버 저장형 시청 기록, 관심 장르 온보딩 저장, 알림 UX, 운영 서버 직접 측정
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/queries/favorites.ts, ?? frontend-next/src/lib/recently-viewed.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "개인화 홈 MVP 추가" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, frontend-next/src/lib/recently-viewed.ts, frontend-next/src/queries/favorites.ts, AGENTS.md" -ScopeOut "백엔드 추천 API, 서버 저장형 시청 기록, 관심 장르 온보딩 저장, 알림 UX, 운영 서버 직접 측정" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); 로컬 next start /home 200 응답 확인" -OpenRisks "최근 본 콘텐츠는 localStorage 기반이라 기기/브라우저별로만 유지됨; 즐겨찾기는 로그인 사용자에게만 조회됨; 실제 시각 검증은 브라우저 자동화 도구 미노출로 수행하지 못함" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 상세 페이지 방문 -> 홈 복귀 시 최근 본 콘텐츠 섹션 노출 확인" -NextAction3 "다음 단계로 관심 장르/찜 기반 TMDB 추천 섹션 확장 검토"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); 로컬 next start /home 200 응답 확인
+- Open Risks: 최근 본 콘텐츠는 localStorage 기반이라 기기/브라우저별로만 유지됨; 즐겨찾기는 로그인 사용자에게만 조회됨; 실제 시각 검증은 브라우저 자동화 도구 미노출로 수행하지 못함
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 상세 페이지 방문 -> 홈 복귀 시 최근 본 콘텐츠 섹션 노출 확인, 3) 다음 단계로 관심 장르/찜 기반 TMDB 추천 섹션 확장 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-08 12:00:53 +09:00
 - Agent Name: Codex
 - Branch: main

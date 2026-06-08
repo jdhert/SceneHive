@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
+import { useFavorites } from '@/queries/favorites';
+import { getRecentlyViewed, type RecentlyViewedItem } from '@/lib/recently-viewed';
+import type { FavoriteItem, FavoriteTargetType } from '@/types';
 import type { Genre, HomePayload, Movie, Person, Tv } from '@/types/home';
 
 const BG = '#04060C';
@@ -50,6 +53,46 @@ function shortText(text: string, maxLength = 120) {
   return `${text.slice(0, maxLength).trim()}...`;
 }
 
+function targetTypeLabel(type: FavoriteTargetType) {
+  if (type === 'MOVIE') return '영화';
+  if (type === 'TV') return 'TV';
+  return '인물';
+}
+
+function favoriteHref(item: FavoriteItem) {
+  if (item.targetType === 'MOVIE') return `/movies/${item.targetId}`;
+  if (item.targetType === 'TV') return `/tv/${item.targetId}`;
+  return `/people/${item.targetId}`;
+}
+
+function recentToMovie(item: RecentlyViewedItem): Movie {
+  return {
+    id: item.targetId,
+    title: item.title,
+    overview: item.subtitle || '최근 확인한 콘텐츠입니다.',
+    poster_path: item.imagePath ?? null,
+    backdrop_path: null,
+    vote_average: 0,
+    release_date: '',
+    href: item.href,
+    display_meta: `${targetTypeLabel(item.targetType)} · 최근 본 콘텐츠`,
+  };
+}
+
+function favoriteToMovie(item: FavoriteItem): Movie {
+  return {
+    id: item.targetId,
+    title: item.displayName,
+    overview: '내가 찜한 콘텐츠입니다.',
+    poster_path: item.imagePath ?? null,
+    backdrop_path: null,
+    vote_average: 0,
+    release_date: '',
+    href: favoriteHref(item),
+    display_meta: `${targetTypeLabel(item.targetType)} · 즐겨찾기`,
+  };
+}
+
 type HomeClientProps = {
   initialData: HomePayload | null;
   initialError?: string | null;
@@ -68,6 +111,8 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const [isMovieLoading, setIsMovieLoading] = useState(!initialData && !initialError);
   const [movieError, setMovieError] = useState<string | null>(initialError);
   const [heroTrailerUrl, setHeroTrailerUrl] = useState<string | null>(null);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
+  const { data: favorites = [], isLoading: isFavoritesLoading } = useFavorites(undefined, Boolean(user));
   const handleBrandReload = () => {
     window.location.reload();
   };
@@ -82,6 +127,9 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       .slice(0, 3);
   }, [heroMovie, genres]);
   const trendingWithoutHero = useMemo(() => (trending.length > 1 ? trending.slice(1) : trending), [trending]);
+  const recentMovies = useMemo(() => recentlyViewed.map(recentToMovie), [recentlyViewed]);
+  const favoriteMovies = useMemo(() => (user ? favorites.slice(0, 12).map(favoriteToMovie) : []), [favorites, user]);
+  const shouldShowPersonalizationPrompt = Boolean(user) && !isFavoritesLoading && !recentMovies.length && !favoriteMovies.length;
   const trendingTvAsMovies = useMemo(
     () =>
       trendingTv.map((show) => ({
@@ -111,6 +159,21 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       })),
     [trendingPeople]
   );
+
+  useEffect(() => {
+    const syncRecentlyViewed = () => {
+      setRecentlyViewed(getRecentlyViewed(12));
+    };
+
+    syncRecentlyViewed();
+    window.addEventListener('focus', syncRecentlyViewed);
+    window.addEventListener('storage', syncRecentlyViewed);
+
+    return () => {
+      window.removeEventListener('focus', syncRecentlyViewed);
+      window.removeEventListener('storage', syncRecentlyViewed);
+    };
+  }, []);
 
   useEffect(() => {
     if (initialData) {
@@ -372,6 +435,22 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           </Card>
         )}
 
+        {shouldShowPersonalizationPrompt && <PersonalizationPromptCard />}
+
+        <MovieCarouselSection
+          id="recently-viewed"
+          title="최근 본 콘텐츠"
+          subtitle="방금 둘러본 영화, TV, 인물"
+          movies={recentMovies}
+        />
+        {user && (
+          <MovieCarouselSection
+            id="my-favorites"
+            title="내가 찜한 콘텐츠"
+            subtitle="다시 보고 싶은 작품과 인물"
+            movies={favoriteMovies}
+          />
+        )}
         <MovieCarouselSection
           id="trending"
           title="Trending"
@@ -460,6 +539,37 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
         </div>
       </footer>
     </div>
+  );
+}
+
+function PersonalizationPromptCard() {
+  return (
+    <Card
+      className="border-0 mb-12 overflow-hidden"
+      style={{
+        background: 'linear-gradient(135deg, rgba(85,168,255,0.14), rgba(255,255,255,0.04))',
+        border: '1px solid rgba(85,168,255,0.20)',
+      }}
+    >
+      <CardContent className="py-6 px-5 sm:px-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <div>
+          <p className="text-sm font-semibold mb-2" style={{ color: '#CFE7FF' }}>
+            취향을 알려주세요
+          </p>
+          <h3 className="text-xl font-black text-white">좋아하는 작품을 찜하면 홈이 더 개인화됩니다</h3>
+          <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.58)' }}>
+            처음에는 인기작을 보여주고, 찜과 방문 기록이 쌓이면 내 취향 섹션이 먼저 나타납니다.
+          </p>
+        </div>
+        <Button
+          asChild
+          className="text-white font-semibold shrink-0"
+          style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}
+        >
+          <Link href="/search">작품 찾아보기</Link>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -679,7 +789,7 @@ function MovieCarouselSection({
       >
         {movies.map((movie, index) => (
           <MoviePosterCard
-            key={movie.id}
+            key={movie.href ?? movie.id}
             movie={movie}
             index={index}
             numbered={numbered}

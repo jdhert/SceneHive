@@ -10,6 +10,7 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
+import { recordRecentlyViewed } from '@/lib/recently-viewed';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.58)';
@@ -371,6 +372,14 @@ export default function MovieDetailPage() {
         const data = (await res.json()) as MovieDetail;
         if (!isMounted) return;
         setMovie(data);
+        recordRecentlyViewed({
+          targetType: 'MOVIE',
+          targetId: data.id,
+          title: data.title,
+          imagePath: data.poster_path,
+          subtitle: `${toYear(data.release_date)} · 영화`,
+          href: `/movies/${data.id}`,
+        });
       } catch (e) {
         if (!isMounted) return;
         const message = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';

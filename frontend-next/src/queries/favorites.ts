@@ -7,13 +7,13 @@ export const favoritesKeys = {
   list: (type?: FavoriteTargetType) => [...favoritesKeys.all, type ?? 'ALL'] as const,
 };
 
-export function useFavorites(type?: FavoriteTargetType) {
+export function useFavorites(type?: FavoriteTargetType, enabled = true) {
   return useQuery({
     queryKey: favoritesKeys.list(type),
     queryFn: async () => {
       const response = await favoriteService.getAll(type);
       return response.data;
     },
+    enabled,
   });
 }
-
