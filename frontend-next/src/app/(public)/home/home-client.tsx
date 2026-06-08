@@ -126,6 +126,10 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       .filter((name): name is string => Boolean(name))
       .slice(0, 3);
   }, [heroMovie, genres]);
+  const heroOverview = useMemo(
+    () => shortText(heroMovie?.overview ?? '줄거리 정보가 아직 등록되지 않았습니다.', 170),
+    [heroMovie?.overview]
+  );
   const trendingWithoutHero = useMemo(() => (trending.length > 1 ? trending.slice(1) : trending), [trending]);
   const recentMovies = useMemo(() => recentlyViewed.map(recentToMovie), [recentlyViewed]);
   const favoriteMovies = useMemo(() => (user ? favorites.slice(0, 12).map(favoriteToMovie) : []), [favorites, user]);
@@ -372,10 +376,13 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
                     <span style={{ color: 'rgba(255,255,255,0.66)' }}>{heroMovie.vote_count.toLocaleString()} votes</span>
                   ) : null}
                 </div>
-                <p className="mt-7 text-lg md:text-xl leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}>
-                  {heroMovie.overview || '줄거리 정보가 아직 등록되지 않았습니다.'}
+                <p
+                  className="mt-6 max-w-[620px] text-base md:text-lg leading-relaxed line-clamp-4"
+                  style={{ color: 'rgba(255,255,255,0.76)' }}
+                >
+                  {heroOverview}
                 </p>
-                <div className="mt-9 flex flex-wrap gap-3">
+                <div className="mt-8 flex flex-wrap gap-3">
                 <Button
                   asChild
                   className="text-white font-semibold px-7 py-6 text-base rounded-2xl"
