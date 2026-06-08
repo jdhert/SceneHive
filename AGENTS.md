@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-08 11:35:50 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 첫 로딩 및 TMDB 이미지 최적화
+- Scope (In/Out): In: frontend-next/next.config.mjs, frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, frontend-next/src/app/(public)/people/page.tsx, frontend-next/src/app/(public)/search/page.tsx, frontend-next/src/app/(public)/genres/[genreId]/page.tsx, frontend-next/src/app/(protected)/dashboard/page.tsx, AGENTS.md / Out: 사용자 업로드 이미지, 마크다운 본문 이미지, Nginx/CDN 도입, 백엔드 변경, 운영 서버 성능 측정
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/next.config.mjs,  M frontend-next/src/app/(protected)/dashboard/page.tsx,  M frontend-next/src/app/(public)/genres/[genreId]/page.tsx,  M frontend-next/src/app/(public)/home/page.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/people/page.tsx,  M frontend-next/src/app/(public)/search/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "첫 로딩 및 TMDB 이미지 최적화" -ScopeIn "frontend-next/next.config.mjs, frontend-next/src/app/(public)/home/page.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, frontend-next/src/app/(public)/people/page.tsx, frontend-next/src/app/(public)/search/page.tsx, frontend-next/src/app/(public)/genres/[genreId]/page.tsx, frontend-next/src/app/(protected)/dashboard/page.tsx, AGENTS.md" -ScopeOut "사용자 업로드 이미지, 마크다운 본문 이미지, Nginx/CDN 도입, 백엔드 변경, 운영 서버 성능 측정" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(사용자 업로드/마크다운 img 경고와 기존 hook/themeColor 경고만 잔존); 로컬 Next 서버 /home 200 응답 확인" -OpenRisks "next/image 최적화는 Next 서버를 거치므로 대량 트래픽에서는 캐시/CDN 구성이 추가로 필요함; 사용자 업로드/마크다운 이미지는 이번 범위에서 제외" -Blockers "브라우저 자동화 도구 미노출로 실제 스크린샷 검증은 못함" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 /home LCP와 이미지 응답 시간을 브라우저 Network 탭에서 확인" -NextAction3 "추가 최적화가 필요하면 Nginx/CDN 캐시 또는 사용자 업로드 이미지 처리까지 확장"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(사용자 업로드/마크다운 img 경고와 기존 hook/themeColor 경고만 잔존); 로컬 Next 서버 /home 200 응답 확인
+- Open Risks: next/image 최적화는 Next 서버를 거치므로 대량 트래픽에서는 캐시/CDN 구성이 추가로 필요함; 사용자 업로드/마크다운 이미지는 이번 범위에서 제외
+- Blockers: 브라우저 자동화 도구 미노출로 실제 스크린샷 검증은 못함
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 /home LCP와 이미지 응답 시간을 브라우저 Network 탭에서 확인, 3) 추가 최적화가 필요하면 Nginx/CDN 캐시 또는 사용자 업로드 이미지 처리까지 확장
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-05-21 09:43:43 +09:00
 - Agent Name: Codex
 - Branch: main
@@ -1146,7 +1162,5 @@
 - Next 3 Actions: 1) Run before long tasks, 2) Run before risky commands, 3) Run at task end
 - Resume Command: git status --short && git branch --show-current
 <!-- HANDOFF_LOG_END -->
-
-
 
 

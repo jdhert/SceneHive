@@ -3,6 +3,16 @@ const backendUrl = process.env.BACKEND_URL || 'http://localhost:8081';
 
 const nextConfig = {
   output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        pathname: '/t/p/**',
+      },
+    ],
+    formats: ['image/avif', 'image/webp'],
+  },
   async rewrites() {
     return {
       fallback: [

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ExternalLink, Search } from 'lucide-react';
@@ -370,10 +371,17 @@ export default function PersonDetailPage() {
           <>
             <section className="rounded-[2rem] border p-6 md:p-8 shadow-[0_24px_70px_rgba(0,0,0,0.45)]" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
               <div className="flex flex-col md:flex-row md:items-start gap-6">
-                <div className="w-48 h-[320px] shrink-0 rounded-xl overflow-hidden border hidden md:block"
+                <div className="relative w-48 h-[320px] shrink-0 rounded-xl overflow-hidden border hidden md:block"
                   style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
                   {person.profile_path ? (
-                    <img src={imageUrl(person.profile_path, 'w500')} alt={person.name} className="w-full h-full object-cover" />
+                    <Image
+                      src={imageUrl(person.profile_path, 'w500')}
+                      alt={person.name}
+                      fill
+                      priority
+                      sizes="12rem"
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="w-full h-72 flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                       NO IMAGE
@@ -474,9 +482,15 @@ export default function PersonDetailPage() {
                       className="group rounded-lg border p-2 block"
                       style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
-                      <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {work.movie.poster_path ? (
-                          <img src={imageUrl(work.movie.poster_path, 'w500')} alt={work.movie.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <Image
+                            src={imageUrl(work.movie.poster_path, 'w500')}
+                            alt={work.movie.title}
+                            fill
+                            sizes="(min-width: 768px) 25vw, 50vw"
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                             NO POSTER
@@ -536,9 +550,15 @@ export default function PersonDetailPage() {
                               className="group rounded-lg border p-2 block"
                               style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                             >
-                              <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                              <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                                 {work.movie.poster_path ? (
-                                  <img src={imageUrl(work.movie.poster_path, 'w500')} alt={work.movie.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                                  <Image
+                                    src={imageUrl(work.movie.poster_path, 'w500')}
+                                    alt={work.movie.title}
+                                    fill
+                                    sizes="(min-width: 1280px) 16.66vw, (min-width: 768px) 33vw, 50vw"
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                  />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                                     NO POSTER

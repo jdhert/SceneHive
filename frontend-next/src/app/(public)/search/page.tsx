@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, Suspense, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Star } from 'lucide-react';
@@ -419,17 +420,19 @@ function SearchResultCard({ item }: { item: MultiSearchItem }) {
   return (
     <Link href={getItemHref(item)} className="group block">
       <div
-        className="rounded-xl overflow-hidden border"
+        className="relative aspect-[2/3] rounded-xl overflow-hidden border"
         style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.03)' }}
       >
         {(item.poster_path || item.profile_path) ? (
-          <img
+          <Image
             src={imageUrl(item.poster_path || item.profile_path)}
             alt={getItemTitle(item)}
-            className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            sizes="(min-width: 1280px) 16.66vw, (min-width: 768px) 25vw, 50vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full aspect-[2/3] flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
             NO POSTER
           </div>
         )}

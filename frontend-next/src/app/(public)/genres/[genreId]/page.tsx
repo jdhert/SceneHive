@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, Search, Star } from 'lucide-react';
@@ -310,17 +311,19 @@ export default function GenreMoviesPage() {
               {movies.map((movie) => (
                 <Link key={movie.id} href={`/movies/${movie.id}`} className="group block">
                   <div
-                    className="rounded-xl overflow-hidden border"
+                    className="relative aspect-[2/3] rounded-xl overflow-hidden border"
                     style={{ borderColor: 'rgba(245,158,11,0.18)', background: 'rgba(255,255,255,0.03)' }}
                   >
                     {movie.poster_path ? (
-                      <img
+                      <Image
                         src={imageUrl(movie.poster_path)}
                         alt={movie.title}
-                        className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
+                        fill
+                        sizes="(min-width: 1280px) 16.66vw, (min-width: 768px) 25vw, 50vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full aspect-[2/3] flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                      <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                         NO POSTER
                       </div>
                     )}

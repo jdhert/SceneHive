@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Clock3, ExternalLink, PlayCircle, Star } from 'lucide-react';
@@ -88,7 +89,7 @@ type TvDetail = {
   };
 };
 
-function imageUrl(path: string | null, size: 'w500' | 'w780' = 'w780') {
+function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
 }
@@ -384,20 +385,35 @@ export default function TvDetailPage() {
               style={{ background: PANEL }}
             >
               {tv.backdrop_path && (
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `linear-gradient(180deg, rgba(6,9,16,0.12) 0%, rgba(6,9,16,0.90) 74%), linear-gradient(90deg, rgba(6,9,16,0.92) 0%, rgba(6,9,16,0.34) 56%, rgba(6,9,16,0.88) 100%), url(${imageUrl(tv.backdrop_path, 'w780')})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                />
+                <div className="absolute inset-0">
+                  <Image
+                    src={imageUrl(tv.backdrop_path, 'w1280')}
+                    alt=""
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="object-cover"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(6,9,16,0.12) 0%, rgba(6,9,16,0.90) 74%), linear-gradient(90deg, rgba(6,9,16,0.92) 0%, rgba(6,9,16,0.34) 56%, rgba(6,9,16,0.88) 100%)',
+                    }}
+                  />
+                </div>
               )}
               <div className="relative flex flex-col md:flex-row gap-6">
-                <div className="w-48 shrink-0 rounded-xl overflow-hidden border hidden md:block"
+                <div className="relative w-48 h-72 shrink-0 rounded-xl overflow-hidden border hidden md:block"
                   style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
                   {tv.poster_path ? (
-                    <img src={imageUrl(tv.poster_path, 'w500')} alt={tv.name} className="w-full h-full object-cover" />
+                    <Image
+                      src={imageUrl(tv.poster_path, 'w500')}
+                      alt={tv.name}
+                      fill
+                      sizes="12rem"
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="w-full h-72 flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                       NO POSTER
@@ -548,9 +564,15 @@ export default function TvDetailPage() {
                       className="rounded-lg border p-2 block"
                       style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
-                      <div className="w-full aspect-square rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="relative w-full aspect-square rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {cast.profile_path ? (
-                          <img src={imageUrl(cast.profile_path, 'w500')} alt={cast.name} className="w-full h-full object-cover" />
+                          <Image
+                            src={imageUrl(cast.profile_path, 'w500')}
+                            alt={cast.name}
+                            fill
+                            sizes="(min-width: 1280px) 8rem, (min-width: 768px) 25vw, 50vw"
+                            className="object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                             NO IMAGE
@@ -608,9 +630,16 @@ export default function TvDetailPage() {
                       className="group rounded-lg border p-2 block w-40 md:w-48 shrink-0"
                       style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
-                      <div className="w-full h-56 md:h-72 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="relative w-full h-56 md:h-72 rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         {item.poster_path ? (
-                          <img src={imageUrl(item.poster_path, 'w500')} alt={item.name} draggable={false} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          <Image
+                            src={imageUrl(item.poster_path, 'w500')}
+                            alt={item.name}
+                            fill
+                            sizes="(min-width: 768px) 12rem, 10rem"
+                            draggable={false}
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                             NO POSTER

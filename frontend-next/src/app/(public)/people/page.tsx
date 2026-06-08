@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, Suspense, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
@@ -232,9 +233,15 @@ function PeopleSearchContent() {
                     className="group rounded-lg border p-2 block"
                     style={{ borderColor: 'rgba(245,158,11,0.12)', background: 'rgba(255,255,255,0.03)' }}
                   >
-                    <div className="w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                       {person.profile_path ? (
-                        <img src={imageUrl(person.profile_path, 'w500')} alt={person.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                        <Image
+                          src={imageUrl(person.profile_path, 'w500')}
+                          alt={person.name}
+                          fill
+                          sizes="(min-width: 1280px) 20vw, (min-width: 768px) 33vw, 50vw"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
                           NO IMAGE

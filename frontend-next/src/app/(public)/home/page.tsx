@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Info, Play, Search, Star } from 'lucide-react';
@@ -299,15 +300,20 @@ export default function HomePage() {
       >
         <div className="absolute inset-0 pointer-events-none">
           {heroMovie?.backdrop_path ? (
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `url(${movieImage(heroMovie.backdrop_path, 'original')})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center',
-                filter: 'saturate(1.04) contrast(1.06)',
-              }}
-            />
+            <div className="absolute inset-0">
+              <Image
+                src={movieImage(heroMovie.backdrop_path, 'w1280')}
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+                style={{
+                  objectPosition: 'center center',
+                  filter: 'saturate(1.04) contrast(1.06)',
+                }}
+              />
+            </div>
           ) : null}
           <div
             className="absolute inset-0"
@@ -761,18 +767,20 @@ function MoviePosterCard({
         </span>
       )}
       <div
-        className="rounded-xl overflow-hidden"
+        className="relative h-56 md:h-72 rounded-xl overflow-hidden"
         style={{ background: 'rgba(255,255,255,0.02)', boxShadow: '0 12px 34px rgba(0,0,0,0.42)' }}
       >
         {movie.poster_path ? (
-          <img
+          <Image
             src={movieImage(movie.poster_path)}
             alt={movie.title}
+            fill
+            sizes="(min-width: 768px) 12rem, 10rem"
             draggable={false}
-            className="w-full h-56 md:h-72 object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-56 md:h-72 flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
             NO POSTER
           </div>
         )}
