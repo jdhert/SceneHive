@@ -319,7 +319,7 @@ type TmdbFetchOptions = {
   language?: string;
 };
 
-function hasOverview(text: string | null | undefined) {
+function hasOverview(text: string | null | undefined): text is string {
   return Boolean(text?.trim());
 }
 
