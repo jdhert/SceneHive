@@ -10,10 +10,11 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 
-const BG = '#070912';
+const BG = '#04060C';
 const PANEL = '#0d1020';
-const AMBER = '#F59E0B';
-const AMBER_DARK = '#B45309';
+const BLUE = '#55A8FF';
+const BLUE_DARK = '#2A6FD2';
+const RATING = '#F7B267';
 const TMDB_IMAGE_BASE = process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p';
 
 type Movie = {
@@ -185,19 +186,19 @@ export default function GenreMoviesPage() {
   if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
-        <div className="text-amber-400 text-xl">Loading...</div>
+        <div className="text-xl" style={{ color: BLUE }}>Loading...</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
-      <header className="sticky top-0 z-40 border-b" style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(7,9,18,0.88)', backdropFilter: 'blur(12px)' }}>
+      <header className="sticky top-0 z-40 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(5,8,15,0.86)', backdropFilter: 'blur(12px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-3">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
-              <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
+              <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
             </Link>
             <span className="text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>
               장르별 영화
@@ -206,7 +207,7 @@ export default function GenreMoviesPage() {
           <div className="flex items-center gap-3">
             <Button asChild variant="outline"
               className="font-medium"
-              style={{ borderColor: 'rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.08)', color: 'rgba(245,158,11,0.95)' }}>
+              style={{ borderColor: 'rgba(255,255,255,0.20)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.90)' }}>
               <Link href="/search" className="inline-flex items-center gap-1.5">
                 <Search className="w-4 h-4" />
                 <span className="hidden sm:inline">통합 검색</span>
@@ -215,7 +216,7 @@ export default function GenreMoviesPage() {
             {user ? (
               <>
                 <Button asChild className="hidden sm:inline-flex text-white font-medium"
-                  style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
                   <Link href="/workspaces">영화 클럽</Link>
                 </Button>
                 <UserMenu />
@@ -224,12 +225,12 @@ export default function GenreMoviesPage() {
               <>
                 <Button onClick={() => router.push('/login')} variant="outline"
                   className="font-medium"
-                  style={{ borderColor: 'rgba(245,158,11,0.4)', background: 'transparent', color: 'rgba(245,158,11,0.9)' }}>
+                  style={{ borderColor: 'rgba(255,255,255,0.28)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.92)' }}>
                   로그인
                 </Button>
                 <Button onClick={() => router.push('/register')}
                   className="hidden sm:inline-flex font-bold text-white"
-                  style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}>
+                  style={{ background: `linear-gradient(135deg, ${BLUE}, ${BLUE_DARK})` }}>
                   회원가입
                 </Button>
               </>
@@ -241,11 +242,11 @@ export default function GenreMoviesPage() {
       <main className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         <section
           className="rounded-2xl border p-5 md:p-6"
-          style={{ borderColor: 'rgba(245,158,11,0.18)', background: PANEL }}
+          style={{ borderColor: 'rgba(85,168,255,0.18)', background: PANEL }}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(245,158,11,0.8)' }}>
+              <p className="text-xs uppercase tracking-wide mb-2" style={{ color: 'rgba(85,168,255,0.82)' }}>
                 Genre Movies
               </p>
               <h2 className="text-2xl md:text-3xl font-black text-white">{genreName}</h2>
@@ -263,8 +264,8 @@ export default function GenreMoviesPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-2xl border p-4" style={{ borderColor: 'rgba(245,158,11,0.16)', background: 'rgba(13,16,32,0.68)' }}>
-          <p className="text-xs mb-3 uppercase tracking-wide" style={{ color: 'rgba(245,158,11,0.82)' }}>
+        <section className="mt-5 rounded-2xl border p-4" style={{ borderColor: 'rgba(85,168,255,0.16)', background: 'rgba(13,16,32,0.68)' }}>
+          <p className="text-xs mb-3 uppercase tracking-wide" style={{ color: 'rgba(85,168,255,0.82)' }}>
             Multi Genre Filter
           </p>
           <div className="flex flex-wrap gap-2">
@@ -277,9 +278,9 @@ export default function GenreMoviesPage() {
                   onClick={() => toggleGenre(genre.id)}
                   className="px-3 py-1.5 rounded-full text-xs border"
                   style={{
-                    borderColor: isActive ? 'rgba(245,158,11,0.48)' : 'rgba(255,255,255,0.2)',
-                    background: isActive ? 'rgba(245,158,11,0.14)' : 'rgba(255,255,255,0.04)',
-                    color: isActive ? 'rgba(245,158,11,0.95)' : 'rgba(255,255,255,0.78)',
+                    borderColor: isActive ? 'rgba(85,168,255,0.48)' : 'rgba(255,255,255,0.2)',
+                    background: isActive ? 'rgba(85,168,255,0.14)' : 'rgba(255,255,255,0.04)',
+                    color: isActive ? 'rgba(207,231,255,0.96)' : 'rgba(255,255,255,0.78)',
                   }}
                 >
                   {genre.name}
@@ -312,7 +313,7 @@ export default function GenreMoviesPage() {
                 <Link key={movie.id} href={`/movies/${movie.id}`} className="group block">
                   <div
                     className="relative aspect-[2/3] rounded-xl overflow-hidden border"
-                    style={{ borderColor: 'rgba(245,158,11,0.18)', background: 'rgba(255,255,255,0.03)' }}
+                    style={{ borderColor: 'rgba(85,168,255,0.16)', background: 'rgba(255,255,255,0.03)' }}
                   >
                     {movie.poster_path ? (
                       <Image
@@ -330,7 +331,7 @@ export default function GenreMoviesPage() {
                   </div>
                   <h3 className="mt-2 text-sm font-semibold text-white line-clamp-2">{movie.title}</h3>
                   <p className="text-xs mt-1 inline-flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                    <Star className="w-3.5 h-3.5" style={{ fill: AMBER, color: AMBER }} />
+                    <Star className="w-3.5 h-3.5" style={{ fill: RATING, color: RATING }} />
                     {movie.vote_average.toFixed(1)} · {toYear(movie.release_date)}
                   </p>
                   <p className="text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.52)' }}>
@@ -348,7 +349,7 @@ export default function GenreMoviesPage() {
                 variant="outline"
                 disabled={isLoading}
                 onClick={onLoadMore}
-                style={{ borderColor: 'rgba(245,158,11,0.35)', color: 'rgba(245,158,11,0.95)', background: 'rgba(245,158,11,0.08)' }}
+                style={{ borderColor: 'rgba(85,168,255,0.35)', color: 'rgba(207,231,255,0.95)', background: 'rgba(85,168,255,0.08)' }}
               >
                 {isLoading ? '불러오는 중...' : '더보기'}
               </Button>

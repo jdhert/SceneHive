@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-09 17:40:11 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 장르 페이지 헤더/포인트 컬러 홈 톤 통일
+- Scope (In/Out): In: frontend-next/src/app/(public)/genres/[genreId]/page.tsx, AGENTS.md / Out: People 목록 등 다른 페이지 색상 정리, 애플리케이션 빌드, 배포 서버 반영
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M README.md,  M frontend-next/src/app/(public)/genres/[genreId]/page.tsx, ?? docs/assets/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "장르 페이지 헤더/포인트 컬러 홈 톤 통일" -ScopeIn "frontend-next/src/app/(public)/genres/[genreId]/page.tsx, AGENTS.md" -ScopeOut "People 목록 등 다른 페이지 색상 정리, 애플리케이션 빌드, 배포 서버 반영" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npx next lint --file src/app/(public)/genres/[genreId]/page.tsx 성공" -OpenRisks "현재 미커밋 README 대표 이미지 변경분이 함께 남아 있음; 실제 브라우저 시각 검증은 배포 또는 로컬 dev 서버 안정화 후 확인 필요" -Blockers "None" -NextAction1 "원하면 README 대표 이미지 변경분과 함께 커밋/push" -NextAction2 "배포 후 /genres/28 화면에서 헤더 색상 확인" -NextAction3 "People 목록 페이지도 같은 Amber 잔여 톤이면 추가 정리"
+- Tests Run + Result: git diff --check 성공; npx next lint --file src/app/(public)/genres/[genreId]/page.tsx 성공
+- Open Risks: 현재 미커밋 README 대표 이미지 변경분이 함께 남아 있음; 실제 브라우저 시각 검증은 배포 또는 로컬 dev 서버 안정화 후 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 원하면 README 대표 이미지 변경분과 함께 커밋/push, 2) 배포 후 /genres/28 화면에서 헤더 색상 확인, 3) People 목록 페이지도 같은 Amber 잔여 톤이면 추가 정리
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-09 17:33:22 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 대표 이미지 갱신
+- Scope (In/Out): In: README.md, docs/assets/scenehive-home-preview.png, AGENTS.md / Out: 애플리케이션 코드 변경, GitHub 첨부 이미지 업로드, 배포 서버 코드 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M README.md, ?? docs/assets/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 대표 이미지 갱신" -ScopeIn "README.md, docs/assets/scenehive-home-preview.png, AGENTS.md" -ScopeOut "애플리케이션 코드 변경, GitHub 첨부 이미지 업로드, 배포 서버 코드 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; Chrome headless로 배포 /home 대표 화면 캡처 생성; view_image로 캡처 확인; README 상대경로 확인" -OpenRisks "대표 이미지는 현재 배포 화면 기준이라 TMDB 트렌딩 데이터가 바뀌면 실제 홈과 일부 콘텐츠가 달라질 수 있음; PNG 바이너리 약 1.3MB 추가" -Blockers "None" -NextAction1 "사용자 확인 후 변경분 커밋 및 push" -NextAction2 "README에서 이미지 렌더링 확인" -NextAction3 "사이트명 리브랜딩 확정 시 README 제목과 이미지 alt 텍스트도 함께 변경"
+- Tests Run + Result: git diff --check 성공; Chrome headless로 배포 /home 대표 화면 캡처 생성; view_image로 캡처 확인; README 상대경로 확인
+- Open Risks: 대표 이미지는 현재 배포 화면 기준이라 TMDB 트렌딩 데이터가 바뀌면 실제 홈과 일부 콘텐츠가 달라질 수 있음; PNG 바이너리 약 1.3MB 추가
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 변경분 커밋 및 push, 2) README에서 이미지 렌더링 확인, 3) 사이트명 리브랜딩 확정 시 README 제목과 이미지 alt 텍스트도 함께 변경
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-09 16:52:48 +09:00
 - Agent Name: Codex
 - Branch: main

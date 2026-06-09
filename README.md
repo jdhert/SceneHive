@@ -5,7 +5,7 @@
 
 http://158.180.74.119/
 
-<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/67943a8c-1c24-4f59-a0b8-178055575bc5" />
+<img width="1024" alt="SceneHive 홈 화면 미리보기" src="./docs/assets/scenehive-home-preview.png" />
 
 ## 한눈에 보는 프로젝트
 
