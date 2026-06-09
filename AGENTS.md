@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-09 15:22:35 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 관심 장르 온보딩 기반 홈 추천
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/lib/genre-preferences.ts, AGENTS.md / Out: 백엔드 사용자 설정 저장, 계정 간 관심 장르 동기화, 추천 전용 서버 API 신규 설계, 브라우저 스크린샷 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/home-client.tsx, ?? frontend-next/src/lib/genre-preferences.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "관심 장르 온보딩 기반 홈 추천" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/lib/genre-preferences.ts, AGENTS.md" -ScopeOut "백엔드 사용자 설정 저장, 계정 간 관심 장르 동기화, 추천 전용 서버 API 신규 설계, 브라우저 스크린샷 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); 로컬 Next dev 서버 /home 200 응답 확인" -OpenRisks "관심 장르는 localStorage 기반이라 브라우저/기기별로만 유지됨; 로그인 사용자에게만 온보딩 UI를 노출함; 브라우저 자동화 도구 미노출로 실제 클릭/스크린샷 검증은 못함" -Blockers "None" -NextAction1 "로그인 상태에서 /home 접속 후 관심 장르 선택/저장 UX 확인" -NextAction2 "변경분 커밋 및 push" -NextAction3 "후속으로 관심 장르를 백엔드 user settings에 저장할지 검토"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); 로컬 Next dev 서버 /home 200 응답 확인
+- Open Risks: 관심 장르는 localStorage 기반이라 브라우저/기기별로만 유지됨; 로그인 사용자에게만 온보딩 UI를 노출함; 브라우저 자동화 도구 미노출로 실제 클릭/스크린샷 검증은 못함
+- Blockers: None
+- Next 3 Actions: 1) 로그인 상태에서 /home 접속 후 관심 장르 선택/저장 UX 확인, 2) 변경분 커밋 및 push, 3) 후속으로 관심 장르를 백엔드 user settings에 저장할지 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-09 11:05:45 +09:00
 - Agent Name: Codex
 - Branch: main

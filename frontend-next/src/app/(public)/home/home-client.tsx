@@ -4,13 +4,14 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Info, Play, Search, Star } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Info, Play, Search, Sparkles, Star } from 'lucide-react';
 import { useUser } from '@/providers/user-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import { useFavorites } from '@/queries/favorites';
+import { getPreferredGenreIds, PREFERRED_GENRE_LIMIT, savePreferredGenreIds } from '@/lib/genre-preferences';
 import { getRecentlyViewed, type RecentlyViewedItem } from '@/lib/recently-viewed';
 import type { FavoriteItem, FavoriteTargetType } from '@/types';
 import type { Genre, HomePayload, Movie, Person, Tv } from '@/types/home';
@@ -133,8 +134,10 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const [movieError, setMovieError] = useState<string | null>(initialError);
   const [heroTrailerUrl, setHeroTrailerUrl] = useState<string | null>(null);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
+  const [preferredGenreIds, setPreferredGenreIds] = useState<number[]>([]);
+  const [isGenreOnboardingOpen, setIsGenreOnboardingOpen] = useState(false);
   const [tasteRecommendations, setTasteRecommendations] = useState<Movie[]>([]);
-  const { data: favorites = [], isLoading: isFavoritesLoading } = useFavorites(undefined, Boolean(user));
+  const { data: favorites = [] } = useFavorites(undefined, Boolean(user));
   const handleBrandReload = () => {
     window.location.reload();
   };
@@ -156,7 +159,31 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const recentMovies = useMemo(() => recentlyViewed.map(recentToMovie), [recentlyViewed]);
   const favoriteMovies = useMemo(() => (user ? favorites.slice(0, 12).map(favoriteToMovie) : []), [favorites, user]);
   const topRecentGenre = useMemo(() => getTopGenre(recentlyViewed, genres), [recentlyViewed, genres]);
-  const shouldShowPersonalizationPrompt = Boolean(user) && !isFavoritesLoading && !recentMovies.length && !favoriteMovies.length;
+  const preferredGenres = useMemo(() => {
+    const genreMap = new Map(genres.map((genre) => [genre.id, genre]));
+    return preferredGenreIds
+      .map((genreId) => genreMap.get(genreId))
+      .filter((genre): genre is Genre => Boolean(genre));
+  }, [genres, preferredGenreIds]);
+  const activePreferredGenres = useMemo(() => (user ? preferredGenres : []), [preferredGenres, user]);
+  const recommendationGenres = useMemo(() => {
+    if (activePreferredGenres.length) return activePreferredGenres;
+    return topRecentGenre ? [topRecentGenre] : [];
+  }, [activePreferredGenres, topRecentGenre]);
+  const recommendationGenreIds = useMemo(
+    () => recommendationGenres.map((genre) => genre.id),
+    [recommendationGenres]
+  );
+  const recommendationSubtitle = useMemo(() => {
+    if (!recommendationGenres.length) return '';
+    if (activePreferredGenres.length) {
+      return `${recommendationGenres.map((genre) => genre.name).join(', ')} 취향에서 고른 영화`;
+    }
+
+    return `최근 본 ${recommendationGenres[0].name} 장르와 어울리는 영화`;
+  }, [activePreferredGenres.length, recommendationGenres]);
+  const shouldShowGenreOnboarding = Boolean(user) && genres.length > 0 && isGenreOnboardingOpen;
+  const shouldShowGenreSummary = Boolean(user) && preferredGenres.length > 0 && !isGenreOnboardingOpen;
   const trendingTvAsMovies = useMemo(
     () =>
       trendingTv.map((show) => ({
@@ -187,6 +214,13 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     [trendingPeople]
   );
 
+  const handleGenrePreferencesSave = (genreIds: number[]) => {
+    const normalizedGenreIds = Array.from(new Set(genreIds)).slice(0, PREFERRED_GENRE_LIMIT);
+    savePreferredGenreIds(normalizedGenreIds);
+    setPreferredGenreIds(normalizedGenreIds);
+    setIsGenreOnboardingOpen(false);
+  };
+
   useEffect(() => {
     const syncRecentlyViewed = () => {
       setRecentlyViewed(getRecentlyViewed(12));
@@ -199,6 +233,23 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     return () => {
       window.removeEventListener('focus', syncRecentlyViewed);
       window.removeEventListener('storage', syncRecentlyViewed);
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncPreferredGenres = () => {
+      const storedGenreIds = getPreferredGenreIds();
+      setPreferredGenreIds(storedGenreIds);
+      setIsGenreOnboardingOpen(storedGenreIds.length === 0);
+    };
+
+    syncPreferredGenres();
+    window.addEventListener('focus', syncPreferredGenres);
+    window.addEventListener('storage', syncPreferredGenres);
+
+    return () => {
+      window.removeEventListener('focus', syncPreferredGenres);
+      window.removeEventListener('storage', syncPreferredGenres);
     };
   }, []);
 
@@ -284,12 +335,12 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   }, [heroMovie?.id, heroMovie?.title]);
 
   useEffect(() => {
-    if (!topRecentGenre) {
+    if (!recommendationGenreIds.length) {
       setTasteRecommendations([]);
       return;
     }
 
-    const genre = topRecentGenre;
+    const genreIds = recommendationGenreIds;
     setTasteRecommendations([]);
     const recentMovieIds = new Set(
       recentlyViewed
@@ -300,14 +351,24 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
 
     async function loadTasteRecommendations() {
       try {
-        const response = await fetch(`/api/movies/genre/${genre.id}?page=1`);
-        if (!response.ok) throw new Error('failed');
-        const data = (await response.json()) as GenreRecommendationPayload;
+        const genrePayloads = await Promise.all(
+          genreIds.map(async (genreId) => {
+            const response = await fetch(`/api/movies/genre/${genreId}?page=1`);
+            if (!response.ok) throw new Error('failed');
+            return (await response.json()) as GenreRecommendationPayload;
+          })
+        );
 
         if (!isMounted) return;
 
-        const recommendations = (data.results ?? [])
-          .filter((movie) => !recentMovieIds.has(movie.id))
+        const seenMovieIds = new Set<number>();
+        const recommendations = genrePayloads
+          .flatMap((payload) => payload.results ?? [])
+          .filter((movie) => {
+            if (recentMovieIds.has(movie.id) || seenMovieIds.has(movie.id)) return false;
+            seenMovieIds.add(movie.id);
+            return true;
+          })
           .slice(0, 12);
         setTasteRecommendations(recommendations);
       } catch {
@@ -322,7 +383,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     return () => {
       isMounted = false;
     };
-  }, [recentlyViewed, topRecentGenre]);
+  }, [recentlyViewed, recommendationGenreIds]);
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
@@ -506,7 +567,19 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           </Card>
         )}
 
-        {shouldShowPersonalizationPrompt && <PersonalizationPromptCard />}
+        {shouldShowGenreOnboarding && (
+          <GenreOnboardingCard
+            genres={genres}
+            initialSelectedIds={preferredGenreIds}
+            onSave={handleGenrePreferencesSave}
+          />
+        )}
+        {shouldShowGenreSummary && (
+          <GenrePreferenceSummary
+            genres={preferredGenres}
+            onEdit={() => setIsGenreOnboardingOpen(true)}
+          />
+        )}
 
         <MovieCarouselSection
           id="recently-viewed"
@@ -514,11 +587,11 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           subtitle="방금 둘러본 영화, TV, 인물"
           movies={recentMovies}
         />
-        {topRecentGenre && (
+        {recommendationGenres.length > 0 && (
           <MovieCarouselSection
             id="taste-recommendations"
-            title="최근 취향 기반 추천"
-            subtitle={`최근 본 ${topRecentGenre.name} 장르와 어울리는 영화`}
+            title={activePreferredGenres.length ? '내 관심 장르 추천' : '최근 취향 기반 추천'}
+            subtitle={recommendationSubtitle}
             movies={tasteRecommendations}
           />
         )}
@@ -621,7 +694,38 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   );
 }
 
-function PersonalizationPromptCard() {
+function GenreOnboardingCard({
+  genres,
+  initialSelectedIds,
+  onSave,
+}: {
+  genres: Genre[];
+  initialSelectedIds: number[];
+  onSave: (genreIds: number[]) => void;
+}) {
+  const [selectedIds, setSelectedIds] = useState<number[]>(() =>
+    initialSelectedIds.slice(0, PREFERRED_GENRE_LIMIT)
+  );
+  const selectedCount = selectedIds.length;
+
+  useEffect(() => {
+    setSelectedIds(initialSelectedIds.slice(0, PREFERRED_GENRE_LIMIT));
+  }, [initialSelectedIds]);
+
+  const toggleGenre = (genreId: number) => {
+    setSelectedIds((current) => {
+      if (current.includes(genreId)) {
+        return current.filter((selectedId) => selectedId !== genreId);
+      }
+
+      if (current.length >= PREFERRED_GENRE_LIMIT) {
+        return current;
+      }
+
+      return [...current, genreId];
+    });
+  };
+
   return (
     <Card
       className="border-0 mb-12 overflow-hidden"
@@ -630,25 +734,104 @@ function PersonalizationPromptCard() {
         border: '1px solid rgba(85,168,255,0.20)',
       }}
     >
-      <CardContent className="py-6 px-5 sm:px-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-        <div>
-          <p className="text-sm font-semibold mb-2" style={{ color: '#CFE7FF' }}>
-            취향을 알려주세요
-          </p>
-          <h3 className="text-xl font-black text-white">좋아하는 작품을 찜하면 홈이 더 개인화됩니다</h3>
-          <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.58)' }}>
-            처음에는 인기작을 보여주고, 찜과 방문 기록이 쌓이면 내 취향 섹션이 먼저 나타납니다.
-          </p>
+      <CardContent className="py-6 px-5 sm:px-7">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="inline-flex items-center gap-2 text-sm font-semibold mb-2" style={{ color: '#CFE7FF' }}>
+              <Sparkles className="w-4 h-4" />
+              관심 장르 온보딩
+            </p>
+            <h3 className="text-xl font-black text-white">좋아하는 장르를 고르면 홈 추천이 바로 바뀝니다</h3>
+            <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.58)' }}>
+              처음 로그인한 사용자도 취향 데이터 없이 시작하지 않도록 최대 {PREFERRED_GENRE_LIMIT}개 장르를 먼저 반영합니다.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.58)' }}>
+              {selectedCount}/{PREFERRED_GENRE_LIMIT}
+            </span>
+            <Button
+              type="button"
+              disabled={!selectedCount}
+              onClick={() => onSave(selectedIds)}
+              className="text-white font-semibold"
+              style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}
+            >
+              관심 장르 저장
+            </Button>
+          </div>
         </div>
-        <Button
-          asChild
-          className="text-white font-semibold shrink-0"
-          style={{ background: `linear-gradient(135deg, ${AMBER}, ${AMBER_DARK})` }}
-        >
-          <Link href="/search">작품 찾아보기</Link>
-        </Button>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {genres.map((genre) => {
+            const isSelected = selectedIds.includes(genre.id);
+            const isLimitReached = selectedCount >= PREFERRED_GENRE_LIMIT && !isSelected;
+
+            return (
+              <button
+                key={genre.id}
+                type="button"
+                onClick={() => toggleGenre(genre.id)}
+                className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+                style={{
+                  background: isSelected ? 'rgba(85,168,255,0.26)' : 'rgba(255,255,255,0.08)',
+                  border: isSelected ? '1px solid rgba(85,168,255,0.52)' : '1px solid rgba(255,255,255,0.14)',
+                  color: isSelected ? '#E6F3FF' : 'rgba(255,255,255,0.78)',
+                  opacity: isLimitReached ? 0.45 : 1,
+                }}
+              >
+                {isSelected && <Check className="w-3.5 h-3.5" />}
+                {genre.name}
+              </button>
+            );
+          })}
+        </div>
       </CardContent>
     </Card>
+  );
+}
+
+function GenrePreferenceSummary({
+  genres,
+  onEdit,
+}: {
+  genres: Genre[];
+  onEdit: () => void;
+}) {
+  return (
+    <div
+      className="mb-8 flex flex-col gap-4 rounded-2xl px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+      style={{
+        background: 'rgba(255,255,255,0.055)',
+        border: '1px solid rgba(255,255,255,0.12)',
+      }}
+    >
+      <div>
+        <p className="text-sm font-semibold mb-2" style={{ color: '#CFE7FF' }}>
+          선택한 관심 장르
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {genres.map((genre) => (
+            <span
+              key={genre.id}
+              className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold"
+              style={{ background: 'rgba(85,168,255,0.18)', color: 'rgba(255,255,255,0.88)' }}
+            >
+              {genre.name}
+            </span>
+          ))}
+        </div>
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onEdit}
+        className="font-semibold shrink-0"
+        style={{ borderColor: 'rgba(255,255,255,0.22)', background: 'rgba(255,255,255,0.06)', color: 'white' }}
+      >
+        관심 장르 수정
+      </Button>
+    </div>
   );
 }
 
