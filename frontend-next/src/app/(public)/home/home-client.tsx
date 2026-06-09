@@ -36,6 +36,10 @@ type MovieTrailerPayload = {
   }>;
 };
 
+type GenreRecommendationPayload = {
+  results?: Movie[];
+};
+
 function movieImage(path: string | null, size: 'w500' | 'w780' | 'w1280' | 'original' = 'w500') {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
@@ -93,6 +97,23 @@ function favoriteToMovie(item: FavoriteItem): Movie {
   };
 }
 
+function getTopGenre(recentItems: RecentlyViewedItem[], genres: Genre[]) {
+  const validGenreIds = new Set(genres.map((genre) => genre.id));
+  const counts = new Map<number, number>();
+
+  recentItems.forEach((item) => {
+    item.genreIds?.forEach((genreId) => {
+      if (!validGenreIds.has(genreId)) return;
+      counts.set(genreId, (counts.get(genreId) ?? 0) + 1);
+    });
+  });
+
+  const [topGenreId] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? [];
+  if (!topGenreId) return null;
+
+  return genres.find((genre) => genre.id === topGenreId) ?? null;
+}
+
 type HomeClientProps = {
   initialData: HomePayload | null;
   initialError?: string | null;
@@ -112,6 +133,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const [movieError, setMovieError] = useState<string | null>(initialError);
   const [heroTrailerUrl, setHeroTrailerUrl] = useState<string | null>(null);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
+  const [tasteRecommendations, setTasteRecommendations] = useState<Movie[]>([]);
   const { data: favorites = [], isLoading: isFavoritesLoading } = useFavorites(undefined, Boolean(user));
   const handleBrandReload = () => {
     window.location.reload();
@@ -133,6 +155,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const trendingWithoutHero = useMemo(() => (trending.length > 1 ? trending.slice(1) : trending), [trending]);
   const recentMovies = useMemo(() => recentlyViewed.map(recentToMovie), [recentlyViewed]);
   const favoriteMovies = useMemo(() => (user ? favorites.slice(0, 12).map(favoriteToMovie) : []), [favorites, user]);
+  const topRecentGenre = useMemo(() => getTopGenre(recentlyViewed, genres), [recentlyViewed, genres]);
   const shouldShowPersonalizationPrompt = Boolean(user) && !isFavoritesLoading && !recentMovies.length && !favoriteMovies.length;
   const trendingTvAsMovies = useMemo(
     () =>
@@ -259,6 +282,47 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       isMounted = false;
     };
   }, [heroMovie?.id, heroMovie?.title]);
+
+  useEffect(() => {
+    if (!topRecentGenre) {
+      setTasteRecommendations([]);
+      return;
+    }
+
+    const genre = topRecentGenre;
+    setTasteRecommendations([]);
+    const recentMovieIds = new Set(
+      recentlyViewed
+        .filter((item) => item.targetType === 'MOVIE')
+        .map((item) => item.targetId)
+    );
+    let isMounted = true;
+
+    async function loadTasteRecommendations() {
+      try {
+        const response = await fetch(`/api/movies/genre/${genre.id}?page=1`);
+        if (!response.ok) throw new Error('failed');
+        const data = (await response.json()) as GenreRecommendationPayload;
+
+        if (!isMounted) return;
+
+        const recommendations = (data.results ?? [])
+          .filter((movie) => !recentMovieIds.has(movie.id))
+          .slice(0, 12);
+        setTasteRecommendations(recommendations);
+      } catch {
+        if (isMounted) {
+          setTasteRecommendations([]);
+        }
+      }
+    }
+
+    loadTasteRecommendations();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [recentlyViewed, topRecentGenre]);
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
@@ -450,6 +514,14 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           subtitle="방금 둘러본 영화, TV, 인물"
           movies={recentMovies}
         />
+        {topRecentGenre && (
+          <MovieCarouselSection
+            id="taste-recommendations"
+            title="최근 취향 기반 추천"
+            subtitle={`최근 본 ${topRecentGenre.name} 장르와 어울리는 영화`}
+            movies={tasteRecommendations}
+          />
+        )}
         {user && (
           <MovieCarouselSection
             id="my-favorites"

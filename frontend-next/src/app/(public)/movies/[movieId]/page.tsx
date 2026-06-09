@@ -377,6 +377,7 @@ export default function MovieDetailPage() {
           targetId: data.id,
           title: data.title,
           imagePath: data.poster_path,
+          genreIds: data.genres.map((genre) => genre.id),
           subtitle: `${toYear(data.release_date)} · 영화`,
           href: `/movies/${data.id}`,
         });

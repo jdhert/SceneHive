@@ -300,6 +300,7 @@ export default function TvDetailPage() {
           targetId: data.id,
           title: data.name,
           imagePath: data.poster_path,
+          genreIds: data.genres.map((genre) => genre.id),
           subtitle: `${toYear(data.first_air_date)} · TV`,
           href: `/tv/${data.id}`,
         });

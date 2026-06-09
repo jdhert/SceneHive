@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-09 11:05:45 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 개인화 홈 2차 최근 본 장르 기반 추천
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/lib/recently-viewed.ts, AGENTS.md / Out: 백엔드 추천 API, 서버 저장형 시청 기록, 즐겨찾기 장르 기반 추천, 관심 장르 온보딩
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/recently-viewed.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "개인화 홈 2차 최근 본 장르 기반 추천" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/lib/recently-viewed.ts, AGENTS.md" -ScopeOut "백엔드 추천 API, 서버 저장형 시청 기록, 즐겨찾기 장르 기반 추천, 관심 장르 온보딩" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재)" -OpenRisks "기존 localStorage 최근 본 기록에는 genreIds가 없어 상세 페이지를 다시 방문한 이후부터 추천 섹션이 나타남; TV 전용 장르는 영화 장르 목록에 없는 경우 추천 기준에서 제외됨" -Blockers "None" -NextAction1 "브라우저에서 영화/TV 상세 방문 후 홈의 최근 취향 기반 추천 섹션 확인" -NextAction2 "변경분 커밋 및 push" -NextAction3 "다음 단계로 즐겨찾기 기반 추천 또는 관심 장르 온보딩 검토"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재)
+- Open Risks: 기존 localStorage 최근 본 기록에는 genreIds가 없어 상세 페이지를 다시 방문한 이후부터 추천 섹션이 나타남; TV 전용 장르는 영화 장르 목록에 없는 경우 추천 기준에서 제외됨
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 영화/TV 상세 방문 후 홈의 최근 취향 기반 추천 섹션 확인, 2) 변경분 커밋 및 push, 3) 다음 단계로 즐겨찾기 기반 추천 또는 관심 장르 온보딩 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-08 13:36:37 +09:00
 - Agent Name: Codex
 - Branch: main

@@ -8,6 +8,7 @@ export type RecentlyViewedItem = {
   targetId: number;
   title: string;
   imagePath?: string | null;
+  genreIds?: number[];
   subtitle?: string;
   href: string;
   viewedAt: string;
@@ -20,12 +21,16 @@ function canUseStorage() {
 function isRecentItem(value: unknown): value is RecentlyViewedItem {
   if (!value || typeof value !== 'object') return false;
   const item = value as Partial<RecentlyViewedItem>;
+  const hasValidGenreIds =
+    item.genreIds === undefined ||
+    (Array.isArray(item.genreIds) && item.genreIds.every((genreId) => typeof genreId === 'number'));
   return (
     (item.targetType === 'MOVIE' || item.targetType === 'TV' || item.targetType === 'PERSON') &&
     typeof item.targetId === 'number' &&
     typeof item.title === 'string' &&
     typeof item.href === 'string' &&
-    typeof item.viewedAt === 'string'
+    typeof item.viewedAt === 'string' &&
+    hasValidGenreIds
   );
 }
 
