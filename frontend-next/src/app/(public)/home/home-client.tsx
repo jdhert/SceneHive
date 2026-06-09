@@ -98,6 +98,38 @@ function favoriteToMovie(item: FavoriteItem): Movie {
   };
 }
 
+function tvToMovie(show: Tv, label = 'TV'): Movie {
+  return {
+    id: show.id,
+    title: show.name,
+    overview: show.overview,
+    poster_path: show.poster_path,
+    backdrop_path: show.backdrop_path ?? null,
+    vote_average: show.vote_average,
+    vote_count: show.vote_count,
+    release_date: show.first_air_date,
+    genre_ids: show.genre_ids,
+    href: `/tv/${show.id}`,
+    display_meta: `${label} · ${yearFromDate(show.first_air_date)} · 평점 ${show.vote_average.toFixed(1)}`,
+    media_type: 'tv',
+  };
+}
+
+function personToMovie(person: Person): Movie {
+  return {
+    id: person.id,
+    title: person.name,
+    overview: `인기도 ${person.popularity.toFixed(1)}`,
+    poster_path: person.profile_path,
+    backdrop_path: null,
+    vote_average: 0,
+    release_date: '',
+    href: `/people/${person.id}`,
+    display_meta: `인물 · ${person.known_for_department || '분야 미정'}`,
+    media_type: 'person',
+  };
+}
+
 function getTopGenre(recentItems: RecentlyViewedItem[], genres: Genre[]) {
   const validGenreIds = new Set(genres.map((genre) => genre.id));
   const counts = new Map<number, number>();
@@ -120,15 +152,26 @@ type HomeClientProps = {
   initialError?: string | null;
 };
 
+type MovieTab = {
+  id: string;
+  title: string;
+  subtitle: string;
+  movies: Movie[];
+  numbered?: boolean;
+};
+
 export default function HomeClient({ initialData, initialError = null }: HomeClientProps) {
   const router = useRouter();
   const { user } = useUser();
+  const [trendingNow, setTrendingNow] = useState<Movie[]>(() => initialData?.trendingNow.results ?? []);
   const [trending, setTrending] = useState<Movie[]>(() => initialData?.trending.results ?? []);
   const [trendingTv, setTrendingTv] = useState<Tv[]>(() => initialData?.trendingTv.results ?? []);
   const [trendingPeople, setTrendingPeople] = useState<Person[]>(() => initialData?.trendingPeople.results ?? []);
   const [nowPlaying, setNowPlaying] = useState<Movie[]>(() => initialData?.nowPlaying.results ?? []);
   const [upcoming, setUpcoming] = useState<Movie[]>(() => initialData?.upcoming.results ?? []);
-  const [topRated, setTopRated] = useState<Movie[]>(() => initialData?.topRated.results ?? []);
+  const [popularMovies, setPopularMovies] = useState<Movie[]>(() => initialData?.popularMovies.results ?? []);
+  const [popularTv, setPopularTv] = useState<Tv[]>(() => initialData?.popularTv.results ?? []);
+  const [airingTodayTv, setAiringTodayTv] = useState<Tv[]>(() => initialData?.airingTodayTv.results ?? []);
   const [genres, setGenres] = useState<Genre[]>(() => initialData?.genres.genres ?? []);
   const [isMovieLoading, setIsMovieLoading] = useState(!initialData && !initialError);
   const [movieError, setMovieError] = useState<string | null>(initialError);
@@ -142,7 +185,11 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     window.location.reload();
   };
 
-  const heroMovie = useMemo(() => trending[0] ?? null, [trending]);
+  const heroMovie = useMemo(
+    () => trendingNow.find((item) => item.media_type !== 'person') ?? trending[0] ?? null,
+    [trendingNow, trending]
+  );
+  const heroMediaLabel = heroMovie?.media_type === 'tv' ? 'TV Series' : 'Movie';
   const heroGenreNames = useMemo(() => {
     if (!heroMovie?.genre_ids?.length || !genres.length) return [] as string[];
     const genreMap = new Map(genres.map((genre) => [genre.id, genre.name]));
@@ -155,7 +202,10 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     () => shortText(heroMovie?.overview ?? '줄거리 정보가 아직 등록되지 않았습니다.', 170),
     [heroMovie?.overview]
   );
-  const trendingWithoutHero = useMemo(() => (trending.length > 1 ? trending.slice(1) : trending), [trending]);
+  const trendingNowWithoutHero = useMemo(() => {
+    if (!heroMovie) return trendingNow;
+    return trendingNow.filter((item) => item.href !== heroMovie.href).slice(0, 12);
+  }, [heroMovie, trendingNow]);
   const recentMovies = useMemo(() => recentlyViewed.map(recentToMovie), [recentlyViewed]);
   const favoriteMovies = useMemo(() => (user ? favorites.slice(0, 12).map(favoriteToMovie) : []), [favorites, user]);
   const topRecentGenre = useMemo(() => getTopGenre(recentlyViewed, genres), [recentlyViewed, genres]);
@@ -185,33 +235,96 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const shouldShowGenreOnboarding = Boolean(user) && genres.length > 0 && isGenreOnboardingOpen;
   const shouldShowGenreSummary = Boolean(user) && preferredGenres.length > 0 && !isGenreOnboardingOpen;
   const trendingTvAsMovies = useMemo(
-    () =>
-      trendingTv.map((show) => ({
-        id: show.id,
-        title: show.name,
-        overview: show.overview,
-        poster_path: show.poster_path,
-        backdrop_path: null,
-        vote_average: show.vote_average,
-        release_date: show.first_air_date,
-        href: `/tv/${show.id}`,
-      })),
+    () => trendingTv.map((show) => tvToMovie(show, '트렌딩 TV')),
     [trendingTv]
   );
+  const popularTvAsMovies = useMemo(
+    () => popularTv.map((show) => tvToMovie(show, '인기 TV')),
+    [popularTv]
+  );
+  const airingTodayTvAsMovies = useMemo(
+    () => airingTodayTv.map((show) => tvToMovie(show, '오늘 방영')),
+    [airingTodayTv]
+  );
   const trendingPeopleAsMovies = useMemo(
-    () =>
-      trendingPeople.map((person) => ({
-        id: person.id,
-        title: person.name,
-        overview: `인기도 ${person.popularity.toFixed(1)}`,
-        poster_path: person.profile_path,
-        backdrop_path: null,
-        vote_average: 0,
-        release_date: '',
-        href: `/people/${person.id}`,
-        display_meta: `인물 · ${person.known_for_department || '분야 미정'}`,
-      })),
+    () => trendingPeople.map(personToMovie),
     [trendingPeople]
+  );
+  const forYouTabs = useMemo<MovieTab[]>(() => {
+    const tabs: MovieTab[] = [];
+
+    if (tasteRecommendations.length) {
+      tabs.push({
+        id: 'recommendations',
+        title: activePreferredGenres.length ? '내 관심 장르 추천' : '최근 취향 기반 추천',
+        subtitle: recommendationSubtitle,
+        movies: tasteRecommendations,
+      });
+    }
+    if (recentMovies.length) {
+      tabs.push({
+        id: 'recently-viewed',
+        title: '최근 본 콘텐츠',
+        subtitle: '방금 둘러본 영화, TV, 인물',
+        movies: recentMovies,
+      });
+    }
+    if (favoriteMovies.length) {
+      tabs.push({
+        id: 'favorites',
+        title: '내가 찜한 콘텐츠',
+        subtitle: '다시 보고 싶은 작품과 인물',
+        movies: favoriteMovies,
+      });
+    }
+
+    return tabs;
+  }, [activePreferredGenres.length, favoriteMovies, recentMovies, recommendationSubtitle, tasteRecommendations]);
+  const movieTabs = useMemo<MovieTab[]>(
+    () => [
+      {
+        id: 'now-playing',
+        title: '현재 상영작',
+        subtitle: '극장에서 바로 만날 수 있는 영화',
+        movies: nowPlaying,
+      },
+      {
+        id: 'upcoming',
+        title: '개봉 예정작',
+        subtitle: '곧 공개될 기대작',
+        movies: upcoming,
+      },
+      {
+        id: 'popular',
+        title: '인기 영화',
+        subtitle: '요즘 많이 찾는 영화',
+        movies: popularMovies,
+      },
+    ].filter((tab) => tab.movies.length),
+    [nowPlaying, popularMovies, upcoming]
+  );
+  const tvTabs = useMemo<MovieTab[]>(
+    () => [
+      {
+        id: 'trending-tv',
+        title: '트렌딩 TV',
+        subtitle: '지금 화제인 TV 시리즈',
+        movies: trendingTvAsMovies,
+      },
+      {
+        id: 'popular-tv',
+        title: '인기 TV',
+        subtitle: '많이 찾는 시리즈',
+        movies: popularTvAsMovies,
+      },
+      {
+        id: 'airing-today',
+        title: '오늘 방영',
+        subtitle: '오늘 새 에피소드가 방영되는 시리즈',
+        movies: airingTodayTvAsMovies,
+      },
+    ].filter((tab) => tab.movies.length),
+    [airingTodayTvAsMovies, popularTvAsMovies, trendingTvAsMovies]
   );
 
   const handleGenrePreferencesSave = (genreIds: number[]) => {
@@ -274,12 +387,15 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
 
         if (!isMounted) return;
 
+        setTrendingNow(data.trendingNow.results ?? []);
         setTrending(data.trending.results ?? []);
         setTrendingTv(data.trendingTv.results ?? []);
         setTrendingPeople(data.trendingPeople.results ?? []);
         setNowPlaying(data.nowPlaying.results ?? []);
         setUpcoming(data.upcoming.results ?? []);
-        setTopRated(data.topRated.results ?? []);
+        setPopularMovies(data.popularMovies.results ?? []);
+        setPopularTv(data.popularTv.results ?? []);
+        setAiringTodayTv(data.airingTodayTv.results ?? []);
         setGenres(data.genres.genres ?? []);
       } catch (error) {
         if (!isMounted) return;
@@ -308,6 +424,13 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
         return;
       }
 
+      const fallbackTrailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${heroMovie.title} trailer`)}`;
+
+      if (heroMovie.media_type && heroMovie.media_type !== 'movie') {
+        if (isMounted) setHeroTrailerUrl(fallbackTrailerUrl);
+        return;
+      }
+
       try {
         const res = await fetch(`/api/movies/${heroMovie.id}/videos`);
         if (!res.ok) throw new Error('failed');
@@ -319,11 +442,11 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
         if (trailer?.key) {
           setHeroTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
         } else {
-          setHeroTrailerUrl(`https://www.youtube.com/results?search_query=${encodeURIComponent(`${heroMovie.title} trailer`)}`);
+          setHeroTrailerUrl(fallbackTrailerUrl);
         }
       } catch {
         if (!isMounted) return;
-        setHeroTrailerUrl(`https://www.youtube.com/results?search_query=${encodeURIComponent(`${heroMovie.title} trailer`)}`);
+        setHeroTrailerUrl(fallbackTrailerUrl);
       }
     }
 
@@ -332,7 +455,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     return () => {
       isMounted = false;
     };
-  }, [heroMovie?.id, heroMovie?.title]);
+  }, [heroMovie?.id, heroMovie?.media_type, heroMovie?.title]);
 
   useEffect(() => {
     if (!recommendationGenreIds.length) {
@@ -394,10 +517,11 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
             <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
           </button>
           <nav className="hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.64)' }}>
+            <a href="#for-you" className="hover:text-white transition-colors">For You</a>
             <a href="#trending" className="hover:text-white transition-colors">Trending</a>
-            <a href="#now-playing" className="hover:text-white transition-colors">Now Playing</a>
-            <a href="#upcoming" className="hover:text-white transition-colors">Upcoming</a>
-            <a href="#top-rated" className="hover:text-white transition-colors">Top Rated</a>
+            <a href="#movies" className="hover:text-white transition-colors">Movies</a>
+            <a href="#tv-series" className="hover:text-white transition-colors">TV Series</a>
+            <a href="#people" className="hover:text-white transition-colors">People</a>
           </nav>
           <div className="flex items-center gap-4">
             <Button asChild variant="outline"
@@ -473,9 +597,9 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
                     className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
                     style={{ background: 'rgba(85,168,255,0.28)', color: '#CFE7FF' }}
                   >
-                    Trending
+                    Trending Now
                   </span>
-                  {(heroGenreNames.length ? heroGenreNames : ['Movie']).map((genre) => (
+                  {(heroGenreNames.length ? heroGenreNames : [heroMediaLabel]).map((genre) => (
                     <span
                       key={genre}
                       className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
@@ -532,7 +656,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
                     className="font-semibold px-7 py-6 text-base rounded-2xl"
                     style={{ borderColor: 'rgba(255,255,255,0.24)', background: 'rgba(255,255,255,0.08)', color: 'white' }}
                   >
-                    <Link href={`/movies/${heroMovie.id}`} className="inline-flex items-center gap-2">
+                    <Link href={heroMovie.href ?? `/movies/${heroMovie.id}`} className="inline-flex items-center gap-2">
                       <Info className="w-4 h-4" />
                       More Info
                     </Link>
@@ -542,10 +666,10 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
             ) : (
               <>
                 <h2 className="text-5xl md:text-7xl font-black text-white leading-[1.06] tracking-tight">
-                  SceneHive Movie Feed
+                  SceneHive Feed
                 </h2>
                 <p className="mt-7 text-xl leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}>
-                  지금 상영작과 트렌딩 영화를 홈에서 바로 확인하세요.
+                  영화, TV 시리즈, 인물을 홈에서 바로 탐색하세요.
                 </p>
               </>
             )}
@@ -581,67 +705,39 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           />
         )}
 
-        <MovieCarouselSection
-          id="recently-viewed"
-          title="최근 본 콘텐츠"
-          subtitle="방금 둘러본 영화, TV, 인물"
-          movies={recentMovies}
+        <TabbedMovieSection
+          id="for-you"
+          title="For You"
+          subtitle="추천, 최근 본 콘텐츠, 찜한 콘텐츠를 한 곳에서 확인하세요"
+          tabs={forYouTabs}
         />
-        {recommendationGenres.length > 0 && (
-          <MovieCarouselSection
-            id="taste-recommendations"
-            title={activePreferredGenres.length ? '내 관심 장르 추천' : '최근 취향 기반 추천'}
-            subtitle={recommendationSubtitle}
-            movies={tasteRecommendations}
-          />
-        )}
-        {user && (
-          <MovieCarouselSection
-            id="my-favorites"
-            title="내가 찜한 콘텐츠"
-            subtitle="다시 보고 싶은 작품과 인물"
-            movies={favoriteMovies}
-          />
-        )}
         <MovieCarouselSection
           id="trending"
-          title="Trending"
-          subtitle="지금 가장 인기 있는 영화"
-          movies={trendingWithoutHero}
+          title="Trending Now"
+          subtitle="영화, TV, 인물을 한 번에 훑어보는 지금의 화제작"
+          movies={trendingNowWithoutHero}
           numbered
         />
-        <MovieCarouselSection
-          id="now-playing"
-          title="Now Playing"
-          subtitle="현재 상영작"
-          movies={nowPlaying}
+        <TabbedMovieSection
+          id="movies"
+          title="Movies"
+          subtitle="상영작, 개봉 예정작, 인기 영화를 탭으로 빠르게 전환하세요"
+          tabs={movieTabs}
+        />
+        <TabbedMovieSection
+          id="tv-series"
+          title="TV Series"
+          subtitle="트렌딩, 인기, 오늘 방영되는 시리즈를 한 곳에 모았습니다"
+          tabs={tvTabs}
         />
         <MovieCarouselSection
-          id="upcoming"
-          title="Upcoming"
-          subtitle="개봉 예정작"
-          movies={upcoming}
-        />
-        <MovieCarouselSection
-          id="top-rated"
-          title="Top Rated"
-          subtitle="평점 상위작"
-          movies={topRated}
-        />
-        <MovieCarouselSection
-          id="trending-tv"
-          title="Trending TV"
-          subtitle="지금 인기 있는 TV 시리즈"
-          movies={trendingTvAsMovies}
-        />
-        <MovieCarouselSection
-          id="trending-people"
-          title="Trending People"
-          subtitle="지금 주목받는 인물"
+          id="people"
+          title="People"
+          subtitle="지금 주목받는 배우와 제작진"
           movies={trendingPeopleAsMovies}
         />
 
-        <div className="mt-10">
+        <div id="genres" className="mt-10">
           <h3 className="text-lg font-bold mb-4" style={{ color: 'rgba(255,255,255,0.9)' }}>
             Genres
           </h3>
@@ -835,18 +931,96 @@ function GenrePreferenceSummary({
   );
 }
 
+function TabbedMovieSection({
+  id,
+  title,
+  subtitle,
+  tabs,
+}: {
+  id: string;
+  title: string;
+  subtitle: string;
+  tabs: MovieTab[];
+}) {
+  const [activeTabId, setActiveTabId] = useState(() => tabs[0]?.id ?? '');
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
+
+  useEffect(() => {
+    if (!tabs.length) {
+      setActiveTabId('');
+      return;
+    }
+
+    if (!tabs.some((tab) => tab.id === activeTabId)) {
+      setActiveTabId(tabs[0].id);
+    }
+  }, [activeTabId, tabs]);
+
+  if (!tabs.length || !activeTab) return null;
+
+  return (
+    <section id={id} className="mb-12">
+      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h3 className="text-2xl font-black tracking-tight" style={{ color: 'rgba(255,255,255,0.94)' }}>
+            {title}
+          </h3>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.58)' }}>
+            {subtitle}
+          </p>
+        </div>
+        <div
+          className="flex w-full gap-2 overflow-x-auto pb-1 hide-scrollbar md:w-auto"
+          aria-label={`${title} tabs`}
+        >
+          {tabs.map((tab) => {
+            const isActive = tab.id === activeTab.id;
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTabId(tab.id)}
+                className="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200"
+                style={{
+                  background: isActive ? 'rgba(85,168,255,0.24)' : 'rgba(255,255,255,0.07)',
+                  border: isActive ? '1px solid rgba(85,168,255,0.48)' : '1px solid rgba(255,255,255,0.12)',
+                  color: isActive ? '#E6F3FF' : 'rgba(255,255,255,0.68)',
+                }}
+              >
+                {tab.title}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <MovieCarouselSection
+        key={activeTab.id}
+        id={`${id}-${activeTab.id}`}
+        title={activeTab.title}
+        subtitle={activeTab.subtitle}
+        movies={activeTab.movies}
+        numbered={activeTab.numbered}
+        compact
+      />
+    </section>
+  );
+}
+
 function MovieCarouselSection({
   id,
   title,
   subtitle,
   movies,
   numbered = false,
+  compact = false,
 }: {
   id: string;
   title: string;
   subtitle: string;
   movies: Movie[];
   numbered?: boolean;
+  compact?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [isAtStart, setIsAtStart] = useState(true);
@@ -1006,7 +1180,7 @@ function MovieCarouselSection({
   };
 
   return (
-    <section id={id} className="mb-12">
+    <section id={id} className={compact ? 'mb-0' : 'mb-12'}>
       <div className="flex items-end justify-between mb-4">
         <div>
           <h3 className="text-2xl font-black tracking-tight" style={{ color: 'rgba(255,255,255,0.94)' }}>

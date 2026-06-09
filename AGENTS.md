@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-09 16:52:48 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 도메인별 탭 구조 개편
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/lib/home-data.ts, frontend-next/src/lib/tmdb.ts, frontend-next/src/types/home.ts, AGENTS.md / Out: 백엔드 API/DB 변경, TV 전용 탐색 페이지 신규 추가, 관심 장르 서버 저장, 브라우저 스크린샷 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/lib/home-data.ts,  M frontend-next/src/lib/tmdb.ts,  M frontend-next/src/types/home.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 도메인별 탭 구조 개편" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/lib/home-data.ts, frontend-next/src/lib/tmdb.ts, frontend-next/src/types/home.ts, AGENTS.md" -ScopeOut "백엔드 API/DB 변경, TV 전용 탐색 페이지 신규 추가, 관심 장르 서버 저장, 브라우저 스크린샷 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); standalone 서버 /home 200 및 /api/home 200 확인" -OpenRisks "홈 초기 payload의 TMDB 호출 수가 늘어났지만 10분 서버 캐시로 완화됨; Browser 도구 미노출로 실제 탭 클릭 스크린샷 검증은 못함; TV 장르명은 아직 영화 장르 목록 기반이라 히어로 TV 장르 라벨 일부가 제한될 수 있음" -Blockers "None" -NextAction1 "로컬 http://127.0.0.1:3000/home 에서 탭 UX 수동 확인" -NextAction2 "변경분 커밋 및 push" -NextAction3 "후속으로 /tv 탐색 페이지 또는 관심 장르 서버 저장 검토"
+- Tests Run + Result: git diff --check 성공; docker compose -f docker-compose.prod.yml config --quiet 성공; frontend-next npm run build 성공(기존 img/themeColor/hook 경고만 존재); standalone 서버 /home 200 및 /api/home 200 확인
+- Open Risks: 홈 초기 payload의 TMDB 호출 수가 늘어났지만 10분 서버 캐시로 완화됨; Browser 도구 미노출로 실제 탭 클릭 스크린샷 검증은 못함; TV 장르명은 아직 영화 장르 목록 기반이라 히어로 TV 장르 라벨 일부가 제한될 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 로컬 http://127.0.0.1:3000/home 에서 탭 UX 수동 확인, 2) 변경분 커밋 및 push, 3) 후속으로 /tv 탐색 페이지 또는 관심 장르 서버 저장 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-09 15:22:35 +09:00
 - Agent Name: Codex
 - Branch: main

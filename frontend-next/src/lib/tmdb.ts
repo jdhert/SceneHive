@@ -218,6 +218,11 @@ export type TmdbSearchMultiItem = {
   known_for_department?: string;
 };
 
+export type TmdbTrendingAllItem =
+  | (TmdbMovie & { media_type: 'movie' })
+  | (TmdbTv & { media_type: 'tv' })
+  | (TmdbPerson & { media_type: 'person' });
+
 type TmdbMovieListResponse = {
   page: number;
   results: TmdbMovie[];
@@ -235,6 +240,13 @@ type TmdbTvListResponse = {
 type TmdbPersonListResponse = {
   page: number;
   results: TmdbPerson[];
+  total_pages: number;
+  total_results: number;
+};
+
+type TmdbTrendingAllResponse = {
+  page: number;
+  results: TmdbTrendingAllItem[];
   total_pages: number;
   total_results: number;
 };
@@ -400,6 +412,10 @@ export async function fetchTrendingMovies() {
   return fillMissingMovieOverviews('/trending/movie/day', {}, response);
 }
 
+export async function fetchTrendingAll() {
+  return tmdbFetch<TmdbTrendingAllResponse>('/trending/all/day');
+}
+
 export async function fetchTrendingTv() {
   return tmdbFetch<TmdbTvListResponse>('/trending/tv/day');
 }
@@ -432,6 +448,27 @@ export async function fetchTopRatedMovies() {
   };
   const response = await tmdbFetch<TmdbMovieListResponse>('/movie/top_rated', params);
   return fillMissingMovieOverviews('/movie/top_rated', params, response);
+}
+
+export async function fetchPopularMovies() {
+  const params = {
+    page: 1,
+  };
+  const response = await tmdbFetch<TmdbMovieListResponse>('/movie/popular', params);
+  return fillMissingMovieOverviews('/movie/popular', params, response);
+}
+
+export async function fetchPopularTv() {
+  return tmdbFetch<TmdbTvListResponse>('/tv/popular', {
+    page: 1,
+  });
+}
+
+export async function fetchAiringTodayTv() {
+  return tmdbFetch<TmdbTvListResponse>('/tv/airing_today', {
+    timezone: 'Asia/Seoul',
+    page: 1,
+  });
 }
 
 export async function fetchMoviesByGenres(genreIds: number[], page = 1) {
@@ -642,7 +679,7 @@ async function fetchDiscoverMoviesByGenres(genreIds: number[]) {
   });
 }
 
-async function fetchPopularMovies() {
+async function fetchPopularMoviesFallback() {
   return tmdbFetch<TmdbMovieListResponse>('/movie/popular', {
     page: 1,
   });
@@ -713,7 +750,7 @@ export async function fetchMovieDetails(movieId: number) {
 
   if (!recommendationCandidates.length) {
     try {
-      const popular = await fetchPopularMovies();
+      const popular = await fetchPopularMoviesFallback();
       recommendationCandidates = popular.results ?? [];
     } catch {
       // no more fallback

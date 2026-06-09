@@ -10,6 +10,7 @@ export type Movie = {
   genre_ids?: number[];
   href?: string;
   display_meta?: string;
+  media_type?: 'movie' | 'tv' | 'person';
 };
 
 export type Genre = {
@@ -22,8 +23,11 @@ export type Tv = {
   name: string;
   overview: string;
   poster_path: string | null;
+  backdrop_path?: string | null;
   vote_average: number;
+  vote_count?: number;
   first_air_date: string;
+  genre_ids?: number[];
 };
 
 export type Person = {
@@ -51,11 +55,14 @@ export type GenrePayload = {
 };
 
 export type HomePayload = {
+  trendingNow: MovieListPayload;
   trending: MovieListPayload;
   trendingTv: TvListPayload;
   trendingPeople: PersonListPayload;
   nowPlaying: MovieListPayload;
   upcoming: MovieListPayload;
-  topRated: MovieListPayload;
+  popularMovies: MovieListPayload;
+  popularTv: TvListPayload;
+  airingTodayTv: TvListPayload;
   genres: GenrePayload;
 };
