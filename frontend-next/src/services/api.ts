@@ -10,6 +10,7 @@ import type {
   DashboardResponse,
   FavoriteItem,
   FavoriteTargetType,
+  UpdateGenrePreferencesRequest,
   LoginRequest,
   Memo,
   Notification,
@@ -24,6 +25,7 @@ import type {
   UpdateSnippetRequest,
   UpdateWorkspaceRequest,
   User,
+  UserGenrePreferencesResponse,
   UserSettings,
   Workspace,
   WorkspaceMember,
@@ -110,6 +112,12 @@ export const userService = {
 export const settingsService = {
   getSettings: () => api.get<UserSettings>('/users/me/settings'),
   updateSettings: (data: UpdateSettingsRequest) => api.put<UserSettings>('/users/me/settings', data),
+};
+
+export const genrePreferenceService = {
+  getAll: () => api.get<UserGenrePreferencesResponse>('/users/me/genre-preferences'),
+  replace: (data: UpdateGenrePreferencesRequest) =>
+    api.put<UserGenrePreferencesResponse>('/users/me/genre-preferences', data),
 };
 
 export const searchService = {

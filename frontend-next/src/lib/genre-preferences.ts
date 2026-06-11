@@ -5,7 +5,7 @@ function canUseStorage() {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 }
 
-function normalizeGenreIds(value: unknown): number[] {
+export function normalizePreferredGenreIds(value: unknown): number[] {
   if (!Array.isArray(value)) return [];
 
   return Array.from(
@@ -22,7 +22,7 @@ export function getPreferredGenreIds(): number[] {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
 
-    return normalizeGenreIds(JSON.parse(raw));
+    return normalizePreferredGenreIds(JSON.parse(raw));
   } catch {
     return [];
   }
@@ -31,7 +31,7 @@ export function getPreferredGenreIds(): number[] {
 export function savePreferredGenreIds(genreIds: number[]) {
   if (!canUseStorage()) return;
 
-  const normalized = normalizeGenreIds(genreIds);
+  const normalized = normalizePreferredGenreIds(genreIds);
 
   try {
     if (!normalized.length) {
@@ -43,4 +43,8 @@ export function savePreferredGenreIds(genreIds: number[]) {
   } catch {
     // Genre preferences only personalize the home page; storage failures should not block browsing.
   }
+}
+
+export function mergePreferredGenreIds(primaryGenreIds: number[], secondaryGenreIds: number[]) {
+  return normalizePreferredGenreIds([...primaryGenreIds, ...secondaryGenreIds]);
 }

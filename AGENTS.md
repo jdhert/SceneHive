@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-11 11:58:47 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 관심 장르 서버 저장 및 로그인 병합 동기화
+- Scope (In/Out): In: src/main/java/com/example/auth/controller/UserGenrePreferenceController.java, src/main/java/com/example/auth/dto/genre/*, src/main/java/com/example/auth/entity/GenrePreferenceMediaType.java, src/main/java/com/example/auth/entity/UserGenrePreference.java, src/main/java/com/example/auth/repository/UserGenrePreferenceRepository.java, src/main/java/com/example/auth/service/UserGenrePreferenceService.java, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/lib/genre-preferences.ts, frontend-next/src/services/api.ts, frontend-next/src/types/index.ts, src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, AGENTS.md / Out: TV 장르 온보딩 UI, 서버 저장형 최근 본 기록, 수동 DB migration SQL, 배포/원격 서버 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/lib/genre-preferences.ts,  M frontend-next/src/services/api.ts,  M frontend-next/src/types/index.ts,  M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, ?? src/main/java/com/example/auth/controller/UserGenrePreferenceController.java, ?? src/main/java/com/example/auth/dto/genre/, ?? src/main/java/com/example/auth/entity/GenrePreferenceMediaType.java, ?? src/main/java/com/example/auth/entity/UserGenrePreference.java, ?? src/main/java/com/example/auth/repository/UserGenrePreferenceRepository.java, ?? src/main/java/com/example/auth/service/UserGenrePreferenceService.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "관심 장르 서버 저장 및 로그인 병합 동기화" -ScopeIn "src/main/java/com/example/auth/controller/UserGenrePreferenceController.java, src/main/java/com/example/auth/dto/genre/*, src/main/java/com/example/auth/entity/GenrePreferenceMediaType.java, src/main/java/com/example/auth/entity/UserGenrePreference.java, src/main/java/com/example/auth/repository/UserGenrePreferenceRepository.java, src/main/java/com/example/auth/service/UserGenrePreferenceService.java, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/lib/genre-preferences.ts, frontend-next/src/services/api.ts, frontend-next/src/types/index.ts, src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, AGENTS.md" -ScopeOut "TV 장르 온보딩 UI, 서버 저장형 최근 본 기록, 수동 DB migration SQL, 배포/원격 서버 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npx next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); gradlew compileJava test --tests ModularMonolithBoundaryTest 성공; docker compose -f docker-compose.prod.yml config --quiet 성공" -OpenRisks "JPA ddl-auto update에 의존해 user_genre_preferences 테이블이 생성됨; 현재 UI는 MOVIE 관심 장르 최대 3개만 저장/동기화함; 이전 검증용 standalone 서버는 Next build를 위해 종료함" -Blockers "None" -NextAction1 "브라우저에서 미로그인 관심 장르 선택 후 로그인 시 서버 병합 동작 확인" -NextAction2 "필요 시 커밋 및 push" -NextAction3 "후속으로 TV 장르 preference UI 또는 설정 페이지 내 관심 장르 관리 화면 검토"
+- Tests Run + Result: git diff --check 성공; npx next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); gradlew compileJava test --tests ModularMonolithBoundaryTest 성공; docker compose -f docker-compose.prod.yml config --quiet 성공
+- Open Risks: JPA ddl-auto update에 의존해 user_genre_preferences 테이블이 생성됨; 현재 UI는 MOVIE 관심 장르 최대 3개만 저장/동기화함; 이전 검증용 standalone 서버는 Next build를 위해 종료함
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 미로그인 관심 장르 선택 후 로그인 시 서버 병합 동작 확인, 2) 필요 시 커밋 및 push, 3) 후속으로 TV 장르 preference UI 또는 설정 페이지 내 관심 장르 관리 화면 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-09 17:40:11 +09:00
 - Agent Name: Codex
 - Branch: main

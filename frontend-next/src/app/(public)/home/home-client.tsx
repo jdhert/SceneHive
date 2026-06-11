@@ -11,9 +11,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import { useFavorites } from '@/queries/favorites';
-import { getPreferredGenreIds, PREFERRED_GENRE_LIMIT, savePreferredGenreIds } from '@/lib/genre-preferences';
+import { genrePreferenceService } from '@/services/api';
+import {
+  getPreferredGenreIds,
+  mergePreferredGenreIds,
+  normalizePreferredGenreIds,
+  PREFERRED_GENRE_LIMIT,
+  savePreferredGenreIds,
+} from '@/lib/genre-preferences';
 import { getRecentlyViewed, type RecentlyViewedItem } from '@/lib/recently-viewed';
-import type { FavoriteItem, FavoriteTargetType } from '@/types';
+import type { FavoriteItem, FavoriteTargetType, GenrePreferenceItem } from '@/types';
 import type { Genre, HomePayload, Movie, Person, Tv } from '@/types/home';
 
 const BG = '#04060C';
@@ -147,6 +154,30 @@ function getTopGenre(recentItems: RecentlyViewedItem[], genres: Genre[]) {
   return genres.find((genre) => genre.id === topGenreId) ?? null;
 }
 
+function getMoviePreferenceGenreIds(preferences: GenrePreferenceItem[]) {
+  return preferences
+    .filter((preference) => preference.mediaType === 'MOVIE')
+    .sort((a, b) => a.priority - b.priority)
+    .map((preference) => preference.genreId);
+}
+
+function sameGenreIds(left: number[], right: number[]) {
+  if (left.length !== right.length) return false;
+  return left.every((genreId, index) => genreId === right[index]);
+}
+
+function toMoviePreferencePayload(genreIds: number[], genres: Genre[]) {
+  const genreMap = new Map(genres.map((genre) => [genre.id, genre.name]));
+
+  return {
+    mediaType: 'MOVIE' as const,
+    genres: genreIds.map((genreId) => ({
+      genreId,
+      genreName: genreMap.get(genreId) ?? null,
+    })),
+  };
+}
+
 type HomeClientProps = {
   initialData: HomePayload | null;
   initialError?: string | null;
@@ -179,8 +210,10 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
   const [preferredGenreIds, setPreferredGenreIds] = useState<number[]>([]);
   const [isGenreOnboardingOpen, setIsGenreOnboardingOpen] = useState(false);
+  const [syncedGenrePreferenceUserId, setSyncedGenrePreferenceUserId] = useState<number | null>(null);
   const [tasteRecommendations, setTasteRecommendations] = useState<Movie[]>([]);
   const { data: favorites = [] } = useFavorites(undefined, Boolean(user));
+  const userId = user?.id ?? null;
   const handleBrandReload = () => {
     window.location.reload();
   };
@@ -232,7 +265,8 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
 
     return `최근 본 ${recommendationGenres[0].name} 장르와 어울리는 영화`;
   }, [activePreferredGenres.length, recommendationGenres]);
-  const shouldShowGenreOnboarding = Boolean(user) && genres.length > 0 && isGenreOnboardingOpen;
+  const isGenrePreferenceSyncPending = userId !== null && syncedGenrePreferenceUserId !== userId;
+  const shouldShowGenreOnboarding = Boolean(user) && !isGenrePreferenceSyncPending && genres.length > 0 && isGenreOnboardingOpen;
   const shouldShowGenreSummary = Boolean(user) && preferredGenres.length > 0 && !isGenreOnboardingOpen;
   const trendingTvAsMovies = useMemo(
     () => trendingTv.map((show) => tvToMovie(show, '트렌딩 TV')),
@@ -328,10 +362,16 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   );
 
   const handleGenrePreferencesSave = (genreIds: number[]) => {
-    const normalizedGenreIds = Array.from(new Set(genreIds)).slice(0, PREFERRED_GENRE_LIMIT);
+    const normalizedGenreIds = normalizePreferredGenreIds(genreIds);
     savePreferredGenreIds(normalizedGenreIds);
     setPreferredGenreIds(normalizedGenreIds);
     setIsGenreOnboardingOpen(false);
+
+    if (user) {
+      genrePreferenceService
+        .replace(toMoviePreferencePayload(normalizedGenreIds, genres))
+        .catch((error) => console.error('Failed to save genre preferences:', error));
+    }
   };
 
   useEffect(() => {
@@ -365,6 +405,52 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       window.removeEventListener('storage', syncPreferredGenres);
     };
   }, []);
+
+  useEffect(() => {
+    if (userId === null) {
+      setSyncedGenrePreferenceUserId(null);
+      return;
+    }
+    if (!genres.length || syncedGenrePreferenceUserId === userId) {
+      return;
+    }
+
+    let isMounted = true;
+    const currentUserId = userId;
+
+    async function syncServerGenrePreferences() {
+      const localGenreIds = getPreferredGenreIds();
+
+      try {
+        const response = await genrePreferenceService.getAll();
+        if (!isMounted) return;
+
+        const serverGenreIds = normalizePreferredGenreIds(getMoviePreferenceGenreIds(response.data.preferences ?? []));
+        const mergedGenreIds = mergePreferredGenreIds(serverGenreIds, localGenreIds);
+
+        savePreferredGenreIds(mergedGenreIds);
+        setPreferredGenreIds(mergedGenreIds);
+        setIsGenreOnboardingOpen(mergedGenreIds.length === 0);
+        setSyncedGenrePreferenceUserId(currentUserId);
+
+        if (!sameGenreIds(serverGenreIds, mergedGenreIds)) {
+          await genrePreferenceService.replace(toMoviePreferencePayload(mergedGenreIds, genres));
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('Failed to sync genre preferences:', error);
+        setPreferredGenreIds(localGenreIds);
+        setIsGenreOnboardingOpen(localGenreIds.length === 0);
+        setSyncedGenrePreferenceUserId(currentUserId);
+      }
+    }
+
+    syncServerGenrePreferences();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [genres, syncedGenrePreferenceUserId, userId]);
 
   useEffect(() => {
     if (initialData) {

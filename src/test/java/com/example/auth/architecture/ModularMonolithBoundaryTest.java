@@ -22,14 +22,15 @@ class ModularMonolithBoundaryTest {
 
     static {
         MODULE_OWNERS.put("identity", Pattern.compile(String.join("|",
-                "^controller/(AuthController|UserController)\\.java$",
+                "^controller/(AuthController|UserController|UserGenrePreferenceController)\\.java$",
                 "^dto/(AuthResponse|LoginRequest|PasswordResetRequest|RefreshTokenRequest|RegisterRequest|ResetPasswordRequest|UserResponse|VerifyEmailRequest)\\.java$",
-                "^dto/(profile|settings)/.*\\.java$",
-                "^entity/(AuthProvider|Role|Theme|User|UserSettings|UserStatus)\\.java$",
+                "^dto/(genre|profile|settings)/.*\\.java$",
+                "^entity/(AuthProvider|GenrePreferenceMediaType|Role|Theme|User|UserGenrePreference|UserSettings|UserStatus)\\.java$",
+                "^event/VerificationEmail(Listener|RequestedEvent)\\.java$",
                 "^identity/.*\\.java$",
-                "^repository/(UserRepository|UserSettingsRepository)\\.java$",
+                "^repository/(UserGenrePreferenceRepository|UserRepository|UserSettingsRepository)\\.java$",
                 "^security/.*\\.java$",
-                "^service/(AuthService|EmailService|JwtService|UserService|UserSettingsService)\\.java$"
+                "^service/(AuthService|EmailService|JwtService|UserGenrePreferenceService|UserService|UserSettingsService)\\.java$"
         )));
         MODULE_OWNERS.put("workspace", Pattern.compile(String.join("|",
                 "^controller/WorkspaceController\\.java$",
@@ -73,7 +74,7 @@ class ModularMonolithBoundaryTest {
         )));
         MODULE_OWNERS.put("platform", Pattern.compile(String.join("|",
                 "^AuthApplication\\.java$",
-                "^config/(AsyncConfig|FileStorageConfig|JwtConfig|MailAsyncProperties|NotificationKafkaConfig|SecurityConfig)\\.java$",
+                "^config/(ApplicationWarmup|AsyncConfig|FileStorageConfig|JwtConfig|MailAsyncProperties|NotificationKafkaConfig|SecurityConfig)\\.java$",
                 "^exception/.*\\.java$",
                 "^service/FileStorageService\\.java$",
                 "^service/RedisService\\.java$",

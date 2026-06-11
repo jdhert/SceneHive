@@ -14,6 +14,7 @@ export type NotificationType =
   | 'SNIPPET_CREATED'
   | 'MEMO_CREATED';
 export type FavoriteTargetType = 'MOVIE' | 'TV' | 'PERSON';
+export type GenrePreferenceMediaType = 'MOVIE' | 'TV';
 
 // === Entities ===
 export interface User {
@@ -115,6 +116,16 @@ export interface UserSettings {
   mentionNotifications: boolean;
 }
 
+export interface GenrePreferenceItem {
+  id: number;
+  mediaType: GenrePreferenceMediaType;
+  genreId: number;
+  genreName?: string | null;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // === API Request Types ===
 export interface LoginRequest {
   email: string;
@@ -193,6 +204,18 @@ export interface UpdateSettingsRequest {
   emailNotifications?: boolean;
   pushNotifications?: boolean;
   mentionNotifications?: boolean;
+}
+
+export interface UpdateGenrePreferencesRequest {
+  mediaType: GenrePreferenceMediaType;
+  genres: Array<{
+    genreId: number;
+    genreName?: string | null;
+  }>;
+}
+
+export interface UserGenrePreferencesResponse {
+  preferences: GenrePreferenceItem[];
 }
 
 export interface CreateFavoriteRequest {
