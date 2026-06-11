@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-11 15:26:20 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 최근 본 콘텐츠 서버 저장 및 로그인 병합
+- Scope (In/Out): In: src/main/java/com/example/auth/controller/RecentlyViewedContentController.java, src/main/java/com/example/auth/dto/recent/*, src/main/java/com/example/auth/entity/RecentlyViewedContent.java, src/main/java/com/example/auth/repository/RecentlyViewedContentRepository.java, src/main/java/com/example/auth/service/RecentlyViewedContentService.java, frontend-next/src/lib/recently-viewed.ts, frontend-next/src/services/api.ts, frontend-next/src/types/index.ts, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, AGENTS.md / Out: 추천 점수화, 대시보드 활동 타임라인, 수동 DB migration SQL, 배포/원격 서버 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/recently-viewed.ts,  M frontend-next/src/services/api.ts,  M frontend-next/src/types/index.ts,  M src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, ?? src/main/java/com/example/auth/controller/RecentlyViewedContentController.java, ?? src/main/java/com/example/auth/dto/recent/, ?? src/main/java/com/example/auth/entity/RecentlyViewedContent.java, ?? src/main/java/com/example/auth/repository/RecentlyViewedContentRepository.java, ?? src/main/java/com/example/auth/service/RecentlyViewedContentService.java
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "최근 본 콘텐츠 서버 저장 및 로그인 병합" -ScopeIn "src/main/java/com/example/auth/controller/RecentlyViewedContentController.java, src/main/java/com/example/auth/dto/recent/*, src/main/java/com/example/auth/entity/RecentlyViewedContent.java, src/main/java/com/example/auth/repository/RecentlyViewedContentRepository.java, src/main/java/com/example/auth/service/RecentlyViewedContentService.java, frontend-next/src/lib/recently-viewed.ts, frontend-next/src/services/api.ts, frontend-next/src/types/index.ts, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, src/test/java/com/example/auth/architecture/ModularMonolithBoundaryTest.java, AGENTS.md" -ScopeOut "추천 점수화, 대시보드 활동 타임라인, 수동 DB migration SQL, 배포/원격 서버 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npx next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); gradlew compileJava test --tests ModularMonolithBoundaryTest 성공; docker compose -f docker-compose.prod.yml config --quiet 성공" -OpenRisks "JPA ddl-auto update에 의존해 recently_viewed_contents/recently_viewed_content_genres 테이블이 생성됨; 실제 로그인 병합/기기 간 동기화는 배포 후 수동 확인 필요" -Blockers "None" -NextAction1 "배포 후 로그인 상태에서 상세 페이지 방문 시 /api/users/me/recently-viewed POST 확인" -NextAction2 "미로그인 localStorage 기록을 가진 상태로 로그인 후 홈에서 서버 병합 확인" -NextAction3 "후속으로 최근 본 콘텐츠를 대시보드/추천 점수화에 활용 검토"
+- Tests Run + Result: git diff --check 성공; npx next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); gradlew compileJava test --tests ModularMonolithBoundaryTest 성공; docker compose -f docker-compose.prod.yml config --quiet 성공
+- Open Risks: JPA ddl-auto update에 의존해 recently_viewed_contents/recently_viewed_content_genres 테이블이 생성됨; 실제 로그인 병합/기기 간 동기화는 배포 후 수동 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 배포 후 로그인 상태에서 상세 페이지 방문 시 /api/users/me/recently-viewed POST 확인, 2) 미로그인 localStorage 기록을 가진 상태로 로그인 후 홈에서 서버 병합 확인, 3) 후속으로 최근 본 콘텐츠를 대시보드/추천 점수화에 활용 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-11 15:15:19 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 최근 본 콘텐츠 서버 저장 및 로그인 병합
+- Scope (In/Out): In: src/main/java/com/example/auth/** 최근 본 API/엔티티, frontend-next/src/lib/recently-viewed.ts, frontend-next/src/services/api.ts, frontend-next/src/types/index.ts, 상세 페이지 기록 호출, 홈 최근 본 로딩, AGENTS.md / Out: 추천 점수화, 대시보드 활동 타임라인, 수동 DB migration SQL, 배포/원격 서버 검증
+- Current Status: in progress
+- Percent Complete: 15
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "최근 본 콘텐츠 서버 저장 및 로그인 병합" -ScopeIn "src/main/java/com/example/auth/** 최근 본 API/엔티티, frontend-next/src/lib/recently-viewed.ts, frontend-next/src/services/api.ts, frontend-next/src/types/index.ts, 상세 페이지 기록 호출, 홈 최근 본 로딩, AGENTS.md" -ScopeOut "추천 점수화, 대시보드 활동 타임라인, 수동 DB migration SQL, 배포/원격 서버 검증" -Status "in progress" -PercentComplete "15" -TestsResult "Not run yet" -OpenRisks "JPA ddl-auto update에 의존해 최근 본 테이블이 생성될 예정; 브라우저 병합 동작은 로컬/배포에서 수동 확인 필요" -Blockers "None" -NextAction1 "백엔드 최근 본 콘텐츠 엔티티/API 추가" -NextAction2 "프론트 localStorage와 서버 병합 로직 연결" -NextAction3 "lint/type/backend compile 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: JPA ddl-auto update에 의존해 최근 본 테이블이 생성될 예정; 브라우저 병합 동작은 로컬/배포에서 수동 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 백엔드 최근 본 콘텐츠 엔티티/API 추가, 2) 프론트 localStorage와 서버 병합 로직 연결, 3) lint/type/backend compile 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-11 14:00:17 +09:00
 - Agent Name: Codex
 - Branch: main

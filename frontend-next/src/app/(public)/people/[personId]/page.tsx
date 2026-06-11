@@ -10,7 +10,8 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
-import { recordRecentlyViewed } from '@/lib/recently-viewed';
+import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
+import { recentlyViewedService } from '@/services/api';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.58)';
@@ -164,6 +165,7 @@ export default function PersonDetailPage() {
   });
 
   const personId = useMemo(() => Number(params.personId), [params.personId]);
+  const userId = user?.id ?? null;
   const categorizedWorks = useMemo(() => {
     const cast = person?.movie_credits?.cast ?? [];
     const crew = person?.movie_credits?.crew ?? [];
@@ -309,6 +311,24 @@ export default function PersonDetailPage() {
       isMounted = false;
     };
   }, [personId]);
+
+  useEffect(() => {
+    if (!userId || !person) return;
+
+    const item = {
+      targetType: 'PERSON' as const,
+      targetId: person.id,
+      title: person.name,
+      imagePath: person.profile_path,
+      subtitle: `인물 · ${person.known_for_department || '분야 미정'}`,
+      href: `/people/${person.id}`,
+      viewedAt: new Date().toISOString(),
+    };
+
+    recentlyViewedService
+      .record(toRecentlyViewedRequest(item))
+      .catch((error) => console.error('Failed to record recently viewed person:', error));
+  }, [person, userId]);
 
   if (isUserLoading) {
     return (

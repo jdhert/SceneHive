@@ -10,7 +10,8 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
-import { recordRecentlyViewed } from '@/lib/recently-viewed';
+import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
+import { recentlyViewedService } from '@/services/api';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.58)';
@@ -124,6 +125,7 @@ export default function TvDetailPage() {
   const edgeAutoFrameRef = useRef<number | null>(null);
 
   const tvId = useMemo(() => Number(params.tvId), [params.tvId]);
+  const userId = user?.id ?? null;
   const topCast = useMemo(() => tv?.credits?.cast?.slice(0, 8) ?? [], [tv]);
   const trailer = useMemo(
     () =>
@@ -358,6 +360,25 @@ export default function TvDetailPage() {
       isMounted = false;
     };
   }, [tvId]);
+
+  useEffect(() => {
+    if (!userId || !tv) return;
+
+    const item = {
+      targetType: 'TV' as const,
+      targetId: tv.id,
+      title: tv.name,
+      imagePath: tv.poster_path,
+      genreIds: tv.genres.map((genre) => genre.id),
+      subtitle: `${toYear(tv.first_air_date)} · TV`,
+      href: `/tv/${tv.id}`,
+      viewedAt: new Date().toISOString(),
+    };
+
+    recentlyViewedService
+      .record(toRecentlyViewedRequest(item))
+      .catch((error) => console.error('Failed to record recently viewed TV:', error));
+  }, [tv, userId]);
 
   useEffect(() => {
     updateRecommendationsMaskState();

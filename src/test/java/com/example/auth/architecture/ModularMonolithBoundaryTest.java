@@ -41,12 +41,12 @@ class ModularMonolithBoundaryTest {
                 "^workspace/.*\\.java$"
         )));
         MODULE_OWNERS.put("content", Pattern.compile(String.join("|",
-                "^controller/(FavoriteController|MemoController|SnippetController)\\.java$",
+                "^controller/(FavoriteController|MemoController|RecentlyViewedContentController|SnippetController)\\.java$",
                 "^content/.*\\.java$",
-                "^dto/(favorite|memo|snippet)/.*\\.java$",
-                "^entity/(CodeSnippet|Favorite|FavoriteType|Memo)\\.java$",
-                "^repository/(CodeSnippetRepository|FavoriteRepository|MemoRepository)\\.java$",
-                "^service/(FavoriteService|MemoService|SnippetService)\\.java$"
+                "^dto/(favorite|memo|recent|snippet)/.*\\.java$",
+                "^entity/(CodeSnippet|Favorite|FavoriteType|Memo|RecentlyViewedContent)\\.java$",
+                "^repository/(CodeSnippetRepository|FavoriteRepository|MemoRepository|RecentlyViewedContentRepository)\\.java$",
+                "^service/(FavoriteService|MemoService|RecentlyViewedContentService|SnippetService)\\.java$"
         )));
         MODULE_OWNERS.put("chat", Pattern.compile(String.join("|",
                 "^config/WebSocket.*\\.java$",

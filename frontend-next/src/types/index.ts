@@ -218,6 +218,35 @@ export interface UserGenrePreferencesResponse {
   preferences: GenrePreferenceItem[];
 }
 
+export interface RecentlyViewedItemRequest {
+  targetType: FavoriteTargetType;
+  targetId: number;
+  displayName: string;
+  imagePath?: string | null;
+  genreIds?: number[];
+  subtitle?: string | null;
+  href: string;
+  viewedAt?: string;
+}
+
+export interface RecentlyViewedItemResponse {
+  id: number;
+  targetType: FavoriteTargetType;
+  targetId: number;
+  displayName: string;
+  imagePath?: string | null;
+  genreIds: number[];
+  subtitle?: string | null;
+  href: string;
+  viewedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SyncRecentlyViewedRequest {
+  items: RecentlyViewedItemRequest[];
+}
+
 export interface CreateFavoriteRequest {
   targetType: FavoriteTargetType;
   targetId: number;

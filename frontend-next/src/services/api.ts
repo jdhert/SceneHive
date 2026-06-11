@@ -10,6 +10,8 @@ import type {
   DashboardResponse,
   FavoriteItem,
   FavoriteTargetType,
+  RecentlyViewedItemRequest,
+  RecentlyViewedItemResponse,
   UpdateGenrePreferencesRequest,
   LoginRequest,
   Memo,
@@ -19,6 +21,7 @@ import type {
   SearchResponse,
   SearchType,
   SendMessageRequest,
+  SyncRecentlyViewedRequest,
   UpdateMemoRequest,
   UpdateProfileRequest,
   UpdateSettingsRequest,
@@ -118,6 +121,15 @@ export const genrePreferenceService = {
   getAll: () => api.get<UserGenrePreferencesResponse>('/users/me/genre-preferences'),
   replace: (data: UpdateGenrePreferencesRequest) =>
     api.put<UserGenrePreferencesResponse>('/users/me/genre-preferences', data),
+};
+
+export const recentlyViewedService = {
+  getAll: (limit = 12) =>
+    api.get<RecentlyViewedItemResponse[]>('/users/me/recently-viewed', { params: { limit } }),
+  record: (data: RecentlyViewedItemRequest) =>
+    api.post<RecentlyViewedItemResponse>('/users/me/recently-viewed', data),
+  sync: (data: SyncRecentlyViewedRequest) =>
+    api.put<RecentlyViewedItemResponse[]>('/users/me/recently-viewed', data),
 };
 
 export const searchService = {

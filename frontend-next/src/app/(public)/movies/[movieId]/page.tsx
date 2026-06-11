@@ -10,7 +10,8 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
-import { recordRecentlyViewed } from '@/lib/recently-viewed';
+import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
+import { recentlyViewedService } from '@/services/api';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.58)';
@@ -155,6 +156,7 @@ export default function MovieDetailPage() {
   const edgeAutoFrameRef = useRef<number | null>(null);
 
   const movieId = useMemo(() => Number(params.movieId), [params.movieId]);
+  const userId = user?.id ?? null;
   const castList = useMemo(() => movie?.credits?.cast ?? [], [movie]);
   const crewList = useMemo(() => {
     const crew = movie?.credits?.crew ?? [];
@@ -437,6 +439,25 @@ export default function MovieDetailPage() {
       isMounted = false;
     };
   }, [movieId]);
+
+  useEffect(() => {
+    if (!userId || !movie) return;
+
+    const item = {
+      targetType: 'MOVIE' as const,
+      targetId: movie.id,
+      title: movie.title,
+      imagePath: movie.poster_path,
+      genreIds: movie.genres.map((genre) => genre.id),
+      subtitle: `${toYear(movie.release_date)} · 영화`,
+      href: `/movies/${movie.id}`,
+      viewedAt: new Date().toISOString(),
+    };
+
+    recentlyViewedService
+      .record(toRecentlyViewedRequest(item))
+      .catch((error) => console.error('Failed to record recently viewed movie:', error));
+  }, [movie, userId]);
 
   useEffect(() => {
     updateRecommendationsMaskState();

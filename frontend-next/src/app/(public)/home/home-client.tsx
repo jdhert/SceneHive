@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import { useFavorites } from '@/queries/favorites';
-import { genrePreferenceService } from '@/services/api';
+import { genrePreferenceService, recentlyViewedService } from '@/services/api';
 import {
   getPreferredGenreIds,
   mergePreferredGenreIds,
@@ -19,7 +19,15 @@ import {
   PREFERRED_GENRE_LIMIT,
   savePreferredGenreIds,
 } from '@/lib/genre-preferences';
-import { getRecentlyViewed, type RecentlyViewedItem } from '@/lib/recently-viewed';
+import {
+  fromRecentlyViewedResponse,
+  getRecentlyViewed,
+  MAX_RECENT_ITEMS,
+  mergeRecentlyViewedItems,
+  saveRecentlyViewed,
+  toRecentlyViewedRequest,
+  type RecentlyViewedItem,
+} from '@/lib/recently-viewed';
 import type { FavoriteItem, FavoriteTargetType, GenrePreferenceItem } from '@/types';
 import type { Genre, HomePayload, Movie, Person, Tv } from '@/types/home';
 
@@ -210,6 +218,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
   const [preferredGenreIds, setPreferredGenreIds] = useState<number[]>([]);
   const [isGenreOnboardingOpen, setIsGenreOnboardingOpen] = useState(false);
+  const [syncedRecentlyViewedUserId, setSyncedRecentlyViewedUserId] = useState<number | null>(null);
   const [syncedGenrePreferenceUserId, setSyncedGenrePreferenceUserId] = useState<number | null>(null);
   const [tasteRecommendations, setTasteRecommendations] = useState<Movie[]>([]);
   const { data: favorites = [] } = useFavorites(undefined, Boolean(user));
@@ -388,6 +397,47 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       window.removeEventListener('storage', syncRecentlyViewed);
     };
   }, []);
+
+  useEffect(() => {
+    if (userId === null) {
+      setSyncedRecentlyViewedUserId(null);
+      return;
+    }
+    if (syncedRecentlyViewedUserId === userId) {
+      return;
+    }
+
+    let isMounted = true;
+    const currentUserId = userId;
+
+    async function syncServerRecentlyViewed() {
+      const localItems = getRecentlyViewed(MAX_RECENT_ITEMS);
+
+      try {
+        const response = await recentlyViewedService.sync({
+          items: localItems.map(toRecentlyViewedRequest),
+        });
+        if (!isMounted) return;
+
+        const serverItems = response.data.map(fromRecentlyViewedResponse);
+        const mergedItems = mergeRecentlyViewedItems(serverItems, localItems);
+        saveRecentlyViewed(mergedItems);
+        setRecentlyViewed(mergedItems.slice(0, 12));
+        setSyncedRecentlyViewedUserId(currentUserId);
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('Failed to sync recently viewed contents:', error);
+        setRecentlyViewed(localItems.slice(0, 12));
+        setSyncedRecentlyViewedUserId(currentUserId);
+      }
+    }
+
+    syncServerRecentlyViewed();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [syncedRecentlyViewedUserId, userId]);
 
   useEffect(() => {
     const syncPreferredGenres = () => {
