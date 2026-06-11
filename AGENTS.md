@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-11 14:00:17 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 추천 캐러셀 끝단 페이드 개선
+- Scope (In/Out): In: frontend-next/src/app/globals.css, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md / Out: 홈 캐러셀 전체 리팩터링, 배포/원격 서버 검증, 추천 데이터 API 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/globals.css
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 추천 캐러셀 끝단 페이드 개선" -ScopeIn "frontend-next/src/app/globals.css, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md" -ScopeOut "홈 캐러셀 전체 리팩터링, 배포/원격 서버 검증, 추천 데이터 API 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npx next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)" -OpenRisks "브라우저 자동화 도구 미노출로 실제 스크린샷 검증은 수행하지 못함; 배포 후 영화/TV 상세 추천 캐러셀 끝단 상태 수동 확인 필요" -Blockers "None" -NextAction1 "배포 후 /movies/[movieId] 추천 캐러셀 끝단 페이드 확인" -NextAction2 "TV 상세 /tv/[tvId] 추천 캐러셀도 동일 확인" -NextAction3 "필요하면 홈 캐러셀도 같은 상태 기반 마스크로 확장"
+- Tests Run + Result: git diff --check 성공; npx next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)
+- Open Risks: 브라우저 자동화 도구 미노출로 실제 스크린샷 검증은 수행하지 못함; 배포 후 영화/TV 상세 추천 캐러셀 끝단 상태 수동 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 배포 후 /movies/[movieId] 추천 캐러셀 끝단 페이드 확인, 2) TV 상세 /tv/[tvId] 추천 캐러셀도 동일 확인, 3) 필요하면 홈 캐러셀도 같은 상태 기반 마스크로 확장
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-11 13:55:09 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 추천 캐러셀 끝단 페이드 개선
+- Scope (In/Out): In: frontend-next/src/app/globals.css, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md / Out: 홈 캐러셀 전체 리팩터링, 배포/원격 서버 검증, 추천 데이터 API 변경
+- Current Status: in progress
+- Percent Complete: 20
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 추천 캐러셀 끝단 페이드 개선" -ScopeIn "frontend-next/src/app/globals.css, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md" -ScopeOut "홈 캐러셀 전체 리팩터링, 배포/원격 서버 검증, 추천 데이터 API 변경" -Status "in progress" -PercentComplete "20" -TestsResult "Not run yet" -OpenRisks "스크롤 위치 감지는 브라우저 런타임 동작이라 정적 검증 후 가능하면 로컬 화면 확인 필요" -Blockers "None" -NextAction1 "스크롤 마스크 상태 클래스 추가" -NextAction2 "영화/TV 상세 추천 캐러셀에 위치 감지 적용" -NextAction3 "lint/type/build 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 스크롤 위치 감지는 브라우저 런타임 동작이라 정적 검증 후 가능하면 로컬 화면 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 스크롤 마스크 상태 클래스 추가, 2) 영화/TV 상세 추천 캐러셀에 위치 감지 적용, 3) lint/type/build 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-11 11:58:47 +09:00
 - Agent Name: Codex
 - Branch: main

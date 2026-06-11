@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -29,6 +29,8 @@ type Genre = {
   id: number;
   name: string;
 };
+
+type ScrollMaskState = 'none' | 'start' | 'middle' | 'end';
 
 type Cast = {
   id: number;
@@ -108,6 +110,7 @@ export default function TvDetailPage() {
   const [tv, setTv] = useState<TvDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [recommendationsMaskState, setRecommendationsMaskState] = useState<ScrollMaskState>('none');
   const recommendationsRef = useRef<HTMLDivElement | null>(null);
   const isPointerDownRef = useRef(false);
   const hasDraggedRef = useRef(false);
@@ -137,6 +140,41 @@ export default function TvDetailPage() {
     [trailer]
   );
   const recommendations = useMemo(() => (tv?.recommendations?.results ?? []).slice(0, 12), [tv]);
+  const updateRecommendationsMaskState = useCallback(() => {
+    const element = recommendationsRef.current;
+    if (!element) {
+      setRecommendationsMaskState('none');
+      return;
+    }
+
+    const maxScrollLeft = element.scrollWidth - element.clientWidth;
+    if (maxScrollLeft <= 1) {
+      setRecommendationsMaskState('none');
+      return;
+    }
+
+    if (element.scrollLeft <= 1) {
+      setRecommendationsMaskState('start');
+      return;
+    }
+
+    if (element.scrollLeft >= maxScrollLeft - 1) {
+      setRecommendationsMaskState('end');
+      return;
+    }
+
+    setRecommendationsMaskState('middle');
+  }, []);
+  const recommendationsMaskClass =
+    recommendationsMaskState === 'start'
+      ? 'scroll-mask-start-soft'
+      : recommendationsMaskState === 'middle'
+        ? 'scroll-mask'
+        : recommendationsMaskState === 'end'
+          ? 'scroll-mask-end-soft'
+          : '';
+  const canScrollRecommendationsLeft = recommendationsMaskState === 'middle' || recommendationsMaskState === 'end';
+  const canScrollRecommendationsRight = recommendationsMaskState === 'start' || recommendationsMaskState === 'middle';
 
   const scrollRecommendations = (direction: 'left' | 'right') => {
     if (!recommendationsRef.current) return;
@@ -320,6 +358,17 @@ export default function TvDetailPage() {
       isMounted = false;
     };
   }, [tvId]);
+
+  useEffect(() => {
+    updateRecommendationsMaskState();
+    const frameId = requestAnimationFrame(updateRecommendationsMaskState);
+    window.addEventListener('resize', updateRecommendationsMaskState);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', updateRecommendationsMaskState);
+    };
+  }, [recommendations, updateRecommendationsMaskState]);
 
   useEffect(() => {
     return () => {
@@ -605,8 +654,9 @@ export default function TvDetailPage() {
                     <button
                       type="button"
                       aria-label="tv recommendations left"
+                      disabled={!canScrollRecommendationsLeft}
                       onClick={() => scrollRecommendations('left')}
-                      className="h-9 w-9 rounded-full border flex items-center justify-center"
+                      className="h-9 w-9 rounded-full border flex items-center justify-center disabled:cursor-default disabled:opacity-35"
                       style={{ borderColor: 'rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.08)' }}
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -614,8 +664,9 @@ export default function TvDetailPage() {
                     <button
                       type="button"
                       aria-label="tv recommendations right"
+                      disabled={!canScrollRecommendationsRight}
                       onClick={() => scrollRecommendations('right')}
-                      className="h-9 w-9 rounded-full border flex items-center justify-center"
+                      className="h-9 w-9 rounded-full border flex items-center justify-center disabled:cursor-default disabled:opacity-35"
                       style={{ borderColor: 'rgba(255,255,255,0.20)', color: 'rgba(255,255,255,0.84)', background: 'rgba(255,255,255,0.08)' }}
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -628,8 +679,9 @@ export default function TvDetailPage() {
                   onPointerMove={handleRecommendationsPointerMove}
                   onPointerUp={handleRecommendationsPointerEnd}
                   onPointerCancel={handleRecommendationsPointerEnd}
+                  onScroll={updateRecommendationsMaskState}
                   onDragStart={(event) => event.preventDefault()}
-                  className="flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar scroll-mask cursor-grab select-none touch-auto"
+                  className={`flex gap-3 overflow-x-auto overflow-y-hidden pb-2 hide-scrollbar cursor-grab select-none touch-auto ${recommendationsMaskClass}`}
                 >
                   {recommendations.map((item) => (
                     <Link
