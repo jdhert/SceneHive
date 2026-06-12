@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 17:23:59 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): CI/CD SSH 배포 안정성 보강 및 재배포 트리거
+- Scope (In/Out): In: deploy.sh, .github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, AGENTS.md / Out: OCI 보안목록/NSG 직접 변경, GitHub Secrets 변경, 애플리케이션 기능 코드 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .github/workflows/cd-prod.yml,  M .github/workflows/cd-staging.yml,  M .github/workflows/ci.yml,  M AGENTS.md,  M deploy.sh
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "CI/CD SSH 배포 안정성 보강 및 재배포 트리거" -ScopeIn "deploy.sh, .github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, AGENTS.md" -ScopeOut "OCI 보안목록/NSG 직접 변경, GitHub Secrets 변경, 애플리케이션 기능 코드 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; Git Bash로 bash -n deploy.sh 성공; workflow 변경 구간 수동 확인(actionlint 미설치)" -OpenRisks "GitHub Actions 러너에서 OCI SSH timeout이 계속되면 OCI 보안목록/NSG/sshd/네트워크 로그 확인 필요; 이번 커밋은 deploy-contract 변경이라 backend/frontend 모두 재빌드/재배포됨" -Blockers "None" -NextAction1 "push 후 GitHub Actions CI/CD 재실행 확인" -NextAction2 "SSH preflight 단계 실패 여부와 deploy.sh retry 로그 확인" -NextAction3 "계속 timeout이면 OCI SSH 인바운드/sshd 로그 점검"
+- Tests Run + Result: git diff --check 성공; Git Bash로 bash -n deploy.sh 성공; workflow 변경 구간 수동 확인(actionlint 미설치)
+- Open Risks: GitHub Actions 러너에서 OCI SSH timeout이 계속되면 OCI 보안목록/NSG/sshd/네트워크 로그 확인 필요; 이번 커밋은 deploy-contract 변경이라 backend/frontend 모두 재빌드/재배포됨
+- Blockers: None
+- Next 3 Actions: 1) push 후 GitHub Actions CI/CD 재실행 확인, 2) SSH preflight 단계 실패 여부와 deploy.sh retry 로그 확인, 3) 계속 timeout이면 OCI SSH 인바운드/sshd 로그 점검
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 17:19:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): CI/CD SSH 배포 안정성 보강 및 재배포 트리거
+- Scope (In/Out): In: deploy.sh, .github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, AGENTS.md / Out: OCI 보안목록/NSG 직접 변경, GitHub Secrets 변경, 애플리케이션 기능 코드 변경
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "CI/CD SSH 배포 안정성 보강 및 재배포 트리거" -ScopeIn "deploy.sh, .github/workflows/ci.yml, .github/workflows/cd-staging.yml, .github/workflows/cd-prod.yml, AGENTS.md" -ScopeOut "OCI 보안목록/NSG 직접 변경, GitHub Secrets 변경, 애플리케이션 기능 코드 변경" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "GitHub Actions 러너에서 OCI SSH timeout이 간헐적으로 발생 중이라 스크립트 retry로 완화하되 네트워크/방화벽 원인 자체는 별도 확인 필요" -Blockers "None" -NextAction1 "deploy.sh SSH retry/timeout 보강" -NextAction2 "Actions known_hosts/preflight SSH 체크 추가" -NextAction3 "syntax 검증 후 커밋/push로 재배포 트리거"
+- Tests Run + Result: Not run yet
+- Open Risks: GitHub Actions 러너에서 OCI SSH timeout이 간헐적으로 발생 중이라 스크립트 retry로 완화하되 네트워크/방화벽 원인 자체는 별도 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) deploy.sh SSH retry/timeout 보강, 2) Actions known_hosts/preflight SSH 체크 추가, 3) syntax 검증 후 커밋/push로 재배포 트리거
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-12 16:22:49 +09:00
 - Agent Name: Codex
 - Branch: main

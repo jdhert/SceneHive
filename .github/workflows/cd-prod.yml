@@ -97,9 +97,49 @@ jobs:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
 
       - name: Add server to known hosts
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_PORT: ${{ secrets.PRODUCTION_PORT || '22' }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+          for attempt in 1 2 3 4 5; do
+            if ssh-keyscan -T 15 -p "${PRODUCTION_PORT}" -H "${PRODUCTION_HOST}" >> ~/.ssh/known_hosts; then
+              exit 0
+            fi
+
+            echo "ssh-keyscan failed on attempt ${attempt}/5. Retrying in 5s..."
+            sleep 5
+          done
+
+          echo "Failed to scan SSH host key after 5 attempts." >&2
+          exit 1
+
+      - name: Verify SSH connectivity
+        env:
+          HOST: ${{ secrets.PRODUCTION_HOST }}
+          USER: ${{ secrets.PRODUCTION_USER }}
+          PORT: ${{ secrets.PRODUCTION_PORT || '22' }}
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if ssh \
+              -o BatchMode=yes \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=20 \
+              -o ConnectionAttempts=1 \
+              -o ServerAliveInterval=15 \
+              -o ServerAliveCountMax=2 \
+              -p "${PORT}" \
+              "${USER}@${HOST}" \
+              "echo ssh-ok"; then
+              exit 0
+            fi
+
+            echo "SSH preflight failed on attempt ${attempt}/5. Retrying in 5s..."
+            sleep 5
+          done
+
+          echo "SSH preflight failed after 5 attempts." >&2
+          exit 1
 
       - name: Deploy to production server
         env:

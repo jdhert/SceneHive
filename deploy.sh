@@ -30,6 +30,9 @@ FRONTEND_WARMUP_SLEEP_SECONDS="${FRONTEND_WARMUP_SLEEP_SECONDS:-2}"
 FRONTEND_WARMUP_TIMEOUT_SECONDS="${FRONTEND_WARMUP_TIMEOUT_SECONDS:-8}"
 STATEFUL_SERVICES="${STATEFUL_SERVICES:-db redis}"
 APP_SERVICES="${APP_SERVICES:-backend frontend}"
+SSH_CONNECT_TIMEOUT_SECONDS="${SSH_CONNECT_TIMEOUT_SECONDS:-20}"
+SSH_RETRY_ATTEMPTS="${SSH_RETRY_ATTEMPTS:-3}"
+SSH_RETRY_SLEEP_SECONDS="${SSH_RETRY_SLEEP_SECONDS:-5}"
 
 # Full image paths
 BACKEND_IMAGE="${REGISTRY}/${IMAGE_NAME}-backend"
@@ -95,14 +98,50 @@ check_env() {
     fi
 }
 
+retry_transport() {
+    local label="$1"
+    local attempt=1
+    local exit_code=0
+
+    shift
+
+    while true; do
+        if "$@"; then
+            return 0
+        fi
+
+        exit_code=$?
+
+        if [ "${exit_code}" -ne 255 ] || [ "${attempt}" -ge "${SSH_RETRY_ATTEMPTS}" ]; then
+            return "${exit_code}"
+        fi
+
+        log_warn "${label} connection failed (attempt ${attempt}/${SSH_RETRY_ATTEMPTS}, exit ${exit_code}). Retrying in ${SSH_RETRY_SLEEP_SECONDS}s..."
+        sleep "${SSH_RETRY_SLEEP_SECONDS}"
+        attempt=$((attempt + 1))
+    done
+}
+
 # SSH command helper
 ssh_cmd() {
-    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -p "${PORT:-22}" "${USER}@${HOST}" "$@"
+    retry_transport "SSH" ssh \
+        -o StrictHostKeyChecking=no \
+        -o ConnectTimeout="${SSH_CONNECT_TIMEOUT_SECONDS}" \
+        -o ConnectionAttempts=1 \
+        -o ServerAliveInterval=15 \
+        -o ServerAliveCountMax=2 \
+        -p "${PORT:-22}" \
+        "${USER}@${HOST}" "$@"
 }
 
 # Copy files to server
 scp_copy() {
-    scp -o StrictHostKeyChecking=no -P "${PORT:-22}" "$@"
+    retry_transport "SCP" scp \
+        -o StrictHostKeyChecking=no \
+        -o ConnectTimeout="${SSH_CONNECT_TIMEOUT_SECONDS}" \
+        -o ConnectionAttempts=1 \
+        -P "${PORT:-22}" \
+        "$@"
 }
 
 ensure_project_dir() {
@@ -213,10 +252,11 @@ write_app_env() {
 backup_deployment() {
     log_info "Creating backup..."
     TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-    ssh_cmd "mkdir -p ${BACKUP_DIR}/${TIMESTAMP}"
-    ssh_cmd "[ -f ${PROJECT_DIR}/docker-compose.yml ] && cp ${PROJECT_DIR}/docker-compose.yml ${BACKUP_DIR}/${TIMESTAMP}/docker-compose.yml || true"
-    ssh_cmd "[ -f ${PROJECT_DIR}/.env ] && cp ${PROJECT_DIR}/.env ${BACKUP_DIR}/${TIMESTAMP}/.env || true"
-    ssh_cmd "[ -f ${PROJECT_DIR}/${DEPLOY_ENV_FILE} ] && cp ${PROJECT_DIR}/${DEPLOY_ENV_FILE} ${BACKUP_DIR}/${TIMESTAMP}/${DEPLOY_ENV_FILE} || true"
+    ssh_cmd "set -e
+mkdir -p '${BACKUP_DIR}/${TIMESTAMP}'
+if [ -f '${PROJECT_DIR}/docker-compose.yml' ]; then cp '${PROJECT_DIR}/docker-compose.yml' '${BACKUP_DIR}/${TIMESTAMP}/docker-compose.yml'; fi
+if [ -f '${PROJECT_DIR}/.env' ]; then cp '${PROJECT_DIR}/.env' '${BACKUP_DIR}/${TIMESTAMP}/.env'; fi
+if [ -f '${PROJECT_DIR}/${DEPLOY_ENV_FILE}' ]; then cp '${PROJECT_DIR}/${DEPLOY_ENV_FILE}' '${BACKUP_DIR}/${TIMESTAMP}/${DEPLOY_ENV_FILE}'; fi"
     log_info "Backup created: ${BACKUP_DIR}/${TIMESTAMP}"
 }
 
