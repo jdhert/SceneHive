@@ -10,6 +10,7 @@ export type Movie = {
   genre_ids?: number[];
   href?: string;
   display_meta?: string;
+  recommendation_reason?: string;
   media_type?: 'movie' | 'tv' | 'person';
 };
 

@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 14:35:16 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 For You 매체 선호 기반 추천 점수화
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/types/home.ts, AGENTS.md / Out: 백엔드 추천 API, 협업 필터링/ML 추천, 운영 A/B 테스트, 배포/원격 서버 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/types/home.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 For You 매체 선호 기반 추천 점수화" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/types/home.ts, AGENTS.md" -ScopeOut "백엔드 추천 API, 협업 필터링/ML 추천, 운영 A/B 테스트, 배포/원격 서버 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint -- --file src/app/(public)/home/home-client.tsx --file src/types/home.ts 성공; npx tsc --noEmit --pretty false 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)" -OpenRisks "추천 점수 가중치는 규칙 기반이라 실제 사용자 행동 로그가 쌓이면 조정 필요; 브라우저 시각 검증은 수행하지 못해 배포 후 For You 섹션 노출 비율/라벨 확인 필요" -Blockers "None" -NextAction1 "로컬 또는 배포 /home에서 영화 중심/TV 중심 최근 기록별 For You 노출 비율 확인" -NextAction2 "필요 시 점수 가중치와 영화/TV 최소 노출 쿼터 조정" -NextAction3 "사용자 확인 후 커밋 및 원격 push"
+- Tests Run + Result: git diff --check 성공; npm run lint -- --file src/app/(public)/home/home-client.tsx --file src/types/home.ts 성공; npx tsc --noEmit --pretty false 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)
+- Open Risks: 추천 점수 가중치는 규칙 기반이라 실제 사용자 행동 로그가 쌓이면 조정 필요; 브라우저 시각 검증은 수행하지 못해 배포 후 For You 섹션 노출 비율/라벨 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 로컬 또는 배포 /home에서 영화 중심/TV 중심 최근 기록별 For You 노출 비율 확인, 2) 필요 시 점수 가중치와 영화/TV 최소 노출 쿼터 조정, 3) 사용자 확인 후 커밋 및 원격 push
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 14:27:18 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 For You 매체 선호 기반 추천 점수화
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/types/home.ts, AGENTS.md / Out: 백엔드 추천 API 분리, TV 장르 별도 온보딩, 인물 추천 점수화, 배포/원격 서버 검증
+- Current Status: in progress
+- Percent Complete: 15
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 For You 매체 선호 기반 추천 점수화" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/types/home.ts, AGENTS.md" -ScopeOut "백엔드 추천 API 분리, TV 장르 별도 온보딩, 인물 추천 점수화, 배포/원격 서버 검증" -Status "in progress" -PercentComplete "15" -TestsResult "Not run yet" -OpenRisks "추천 점수는 프론트 규칙 기반 1차 구현이라 실제 사용자 반응에 따라 가중치 보정 필요" -Blockers "None" -NextAction1 "매체 선호도 계산 로직 추가" -NextAction2 "For You 추천 후보 점수화 및 이유 라벨 생성" -NextAction3 "lint/type/build 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 추천 점수는 프론트 규칙 기반 1차 구현이라 실제 사용자 반응에 따라 가중치 보정 필요
+- Blockers: None
+- Next 3 Actions: 1) 매체 선호도 계산 로직 추가, 2) For You 추천 후보 점수화 및 이유 라벨 생성, 3) lint/type/build 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-11 15:26:20 +09:00
 - Agent Name: Codex
 - Branch: main

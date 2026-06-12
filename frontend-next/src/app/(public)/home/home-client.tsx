@@ -52,10 +52,6 @@ type MovieTrailerPayload = {
   }>;
 };
 
-type GenreRecommendationPayload = {
-  results?: Movie[];
-};
-
 function movieImage(path: string | null, size: 'w500' | 'w780' | 'w1280' | 'original' = 'w500') {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
@@ -145,23 +141,6 @@ function personToMovie(person: Person): Movie {
   };
 }
 
-function getTopGenre(recentItems: RecentlyViewedItem[], genres: Genre[]) {
-  const validGenreIds = new Set(genres.map((genre) => genre.id));
-  const counts = new Map<number, number>();
-
-  recentItems.forEach((item) => {
-    item.genreIds?.forEach((genreId) => {
-      if (!validGenreIds.has(genreId)) return;
-      counts.set(genreId, (counts.get(genreId) ?? 0) + 1);
-    });
-  });
-
-  const [topGenreId] = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0] ?? [];
-  if (!topGenreId) return null;
-
-  return genres.find((genre) => genre.id === topGenreId) ?? null;
-}
-
 function getMoviePreferenceGenreIds(preferences: GenrePreferenceItem[]) {
   return preferences
     .filter((preference) => preference.mediaType === 'MOVIE')
@@ -184,6 +163,334 @@ function toMoviePreferencePayload(genreIds: number[], genres: Genre[]) {
       genreName: genreMap.get(genreId) ?? null,
     })),
   };
+}
+
+type RecommendationMedia = 'movie' | 'tv';
+
+type RecommendationCandidate = {
+  movie: Movie;
+  sourceScore: number;
+};
+
+type MediaPreference = {
+  movieShare: number;
+  tvShare: number;
+  dominant: RecommendationMedia | 'balanced';
+  hasSignals: boolean;
+};
+
+type RecommendationCopy = {
+  title: string;
+  subtitle: string;
+};
+
+function mediaFromMovie(movie: Movie): RecommendationMedia | null {
+  if (movie.media_type === 'tv') return 'tv';
+  if (movie.media_type === 'person') return null;
+  return 'movie';
+}
+
+function targetTypeToMedia(type: FavoriteTargetType): RecommendationMedia | null {
+  if (type === 'MOVIE') return 'movie';
+  if (type === 'TV') return 'tv';
+  return null;
+}
+
+function mediaLabel(media: RecommendationMedia) {
+  return media === 'movie' ? '영화' : 'TV';
+}
+
+function recommendationKey(movie: Movie) {
+  const media = mediaFromMovie(movie) ?? 'movie';
+  return `${media}:${movie.id}`;
+}
+
+function targetKey(type: FavoriteTargetType, id: number) {
+  const media = targetTypeToMedia(type);
+  return media ? `${media}:${id}` : null;
+}
+
+function getMediaPreference(recentItems: RecentlyViewedItem[], favorites: FavoriteItem[]): MediaPreference {
+  let movieScore = 0;
+  let tvScore = 0;
+
+  recentItems.forEach((item, index) => {
+    const media = targetTypeToMedia(item.targetType);
+    if (!media) return;
+
+    const weight = Math.max(1, 8 - index);
+    if (media === 'movie') {
+      movieScore += weight;
+    } else {
+      tvScore += weight;
+    }
+  });
+
+  favorites.forEach((favorite) => {
+    const media = targetTypeToMedia(favorite.targetType);
+    if (media === 'movie') {
+      movieScore += 2;
+    } else if (media === 'tv') {
+      tvScore += 2;
+    }
+  });
+
+  const total = movieScore + tvScore;
+  if (total <= 0) {
+    return {
+      movieShare: 0.65,
+      tvShare: 0.35,
+      dominant: 'balanced',
+      hasSignals: false,
+    };
+  }
+
+  const movieShare = movieScore / total;
+  const tvShare = tvScore / total;
+
+  return {
+    movieShare,
+    tvShare,
+    dominant: movieShare >= 0.72 ? 'movie' : tvShare >= 0.72 ? 'tv' : 'balanced',
+    hasSignals: true,
+  };
+}
+
+function getRecommendationCopy({
+  mediaPreference,
+  hasPersonalSignals,
+  hasPreferredGenres,
+  isLoggedIn,
+}: {
+  mediaPreference: MediaPreference;
+  hasPersonalSignals: boolean;
+  hasPreferredGenres: boolean;
+  isLoggedIn: boolean;
+}): RecommendationCopy {
+  if (!hasPersonalSignals) {
+    return {
+      title: '지금 많이 보는 추천',
+      subtitle: isLoggedIn
+        ? '취향 데이터가 쌓이면 영화와 TV 추천이 더 정교해집니다'
+        : '로그인하면 최근 본 콘텐츠와 관심 장르를 이어서 반영할 수 있어요',
+    };
+  }
+
+  const preferenceText = hasPreferredGenres ? '관심 장르와 ' : '';
+
+  if (mediaPreference.dominant === 'movie') {
+    return {
+      title: '내 영화 취향 기반 추천',
+      subtitle: `${preferenceText}최근 본 영화 흐름을 우선 반영했어요`,
+    };
+  }
+
+  if (mediaPreference.dominant === 'tv') {
+    return {
+      title: '내 TV 취향 기반 추천',
+      subtitle: `${preferenceText}최근 본 TV 시리즈 흐름을 우선 반영했어요`,
+    };
+  }
+
+  return {
+    title: '내 취향 기반 추천',
+    subtitle: `${preferenceText}영화와 TV 시리즈를 시청 비율에 맞춰 골랐어요`,
+  };
+}
+
+function buildRecommendationReason({
+  media,
+  movie,
+  preferredGenreIds,
+  recentGenreWeights,
+  genreMap,
+  mediaPreference,
+  sameMediaFavoriteCount,
+  hasPersonalSignals,
+}: {
+  media: RecommendationMedia;
+  movie: Movie;
+  preferredGenreIds: Set<number>;
+  recentGenreWeights: Map<number, number>;
+  genreMap: Map<number, string>;
+  mediaPreference: MediaPreference;
+  sameMediaFavoriteCount: number;
+  hasPersonalSignals: boolean;
+}) {
+  const genreIds = movie.genre_ids ?? [];
+  const preferredMatch = genreIds.find((genreId) => preferredGenreIds.has(genreId));
+  if (preferredMatch) {
+    return `관심 장르 ${genreMap.get(preferredMatch) ?? '취향'} 기반`;
+  }
+
+  const recentMatch = genreIds
+    .filter((genreId) => recentGenreWeights.has(genreId))
+    .sort((left, right) => (recentGenreWeights.get(right) ?? 0) - (recentGenreWeights.get(left) ?? 0))[0];
+  if (recentMatch) {
+    return `최근 본 ${genreMap.get(recentMatch) ?? '장르'} 흐름 기반`;
+  }
+
+  if (hasPersonalSignals && mediaPreference.dominant === media) {
+    return `${mediaLabel(media)} 중심 시청 흐름 기반`;
+  }
+
+  if (sameMediaFavoriteCount > 0) {
+    return `찜한 ${mediaLabel(media)} 흐름 기반`;
+  }
+
+  return `지금 반응이 좋은 ${mediaLabel(media)}`;
+}
+
+function buildPersonalizedRecommendations({
+  candidates,
+  recentItems,
+  favorites,
+  preferredGenreIds,
+  genres,
+  mediaPreference,
+  limit = 12,
+}: {
+  candidates: RecommendationCandidate[];
+  recentItems: RecentlyViewedItem[];
+  favorites: FavoriteItem[];
+  preferredGenreIds: number[];
+  genres: Genre[];
+  mediaPreference: MediaPreference;
+  limit?: number;
+}) {
+  const genreMap = new Map(genres.map((genre) => [genre.id, genre.name]));
+  const preferredGenreSet = new Set(preferredGenreIds);
+  const recentGenreWeights = new Map<number, number>();
+  const recentKeys = new Set<string>();
+  const favoriteKeys = new Set<string>();
+  let movieFavoriteCount = 0;
+  let tvFavoriteCount = 0;
+
+  recentItems.forEach((item, index) => {
+    const key = targetKey(item.targetType, item.targetId);
+    if (key) recentKeys.add(key);
+
+    const weight = Math.max(1, 7 - index);
+    item.genreIds?.forEach((genreId) => {
+      recentGenreWeights.set(genreId, (recentGenreWeights.get(genreId) ?? 0) + weight);
+    });
+  });
+
+  favorites.forEach((favorite) => {
+    const key = targetKey(favorite.targetType, favorite.targetId);
+    if (key) favoriteKeys.add(key);
+
+    const media = targetTypeToMedia(favorite.targetType);
+    if (media === 'movie') movieFavoriteCount += 1;
+    if (media === 'tv') tvFavoriteCount += 1;
+  });
+
+  const candidateMap = new Map<string, RecommendationCandidate>();
+  candidates.forEach((candidate) => {
+    const media = mediaFromMovie(candidate.movie);
+    if (!media) return;
+
+    const key = recommendationKey(candidate.movie);
+    const existing = candidateMap.get(key);
+    if (!existing) {
+      candidateMap.set(key, { ...candidate });
+      return;
+    }
+
+    existing.sourceScore += Math.min(6, candidate.sourceScore * 0.35);
+  });
+
+  const hasPersonalSignals = preferredGenreSet.size > 0 || recentKeys.size > 0 || favoriteKeys.size > 0;
+
+  const scored = Array.from(candidateMap.values())
+    .map((candidate) => {
+      const media = mediaFromMovie(candidate.movie);
+      if (!media) return null;
+
+      const mediaShare = media === 'movie' ? mediaPreference.movieShare : mediaPreference.tvShare;
+      const genreIds = candidate.movie.genre_ids ?? [];
+      const preferredMatches = genreIds.filter((genreId) => preferredGenreSet.has(genreId)).length;
+      const recentGenreScore = genreIds.reduce(
+        (score, genreId) => score + (recentGenreWeights.get(genreId) ?? 0),
+        0
+      );
+      const sameMediaFavoriteCount = media === 'movie' ? movieFavoriteCount : tvFavoriteCount;
+      const key = recommendationKey(candidate.movie);
+
+      let score = candidate.sourceScore;
+      score += mediaShare * 34;
+      score += preferredMatches * 26;
+      score += Math.min(30, recentGenreScore * 3.5);
+      score += Math.min(12, sameMediaFavoriteCount * 3);
+      score += Math.min(10, candidate.movie.vote_average);
+      score += Math.min(8, (candidate.movie.vote_count ?? 0) / 600);
+
+      if (recentKeys.has(key)) score -= 60;
+      if (favoriteKeys.has(key)) score -= 28;
+
+      return {
+        ...candidate,
+        media,
+        score,
+        reason: buildRecommendationReason({
+          media,
+          movie: candidate.movie,
+          preferredGenreIds: preferredGenreSet,
+          recentGenreWeights,
+          genreMap,
+          mediaPreference,
+          sameMediaFavoriteCount,
+          hasPersonalSignals,
+        }),
+      };
+    })
+    .filter((item): item is RecommendationCandidate & { media: RecommendationMedia; score: number; reason: string } =>
+      Boolean(item)
+    )
+    .sort((left, right) => right.score - left.score);
+
+  if (!scored.length) return [];
+
+  if (!mediaPreference.hasSignals) {
+    return scored.slice(0, limit).map((item) => ({
+      ...item.movie,
+      recommendation_reason: item.reason,
+    }));
+  }
+
+  const movieTarget = Math.round(limit * mediaPreference.movieShare);
+  const tvTarget = limit - movieTarget;
+  const selected: typeof scored = [];
+  const selectedKeys = new Set<string>();
+  let movieCount = 0;
+  let tvCount = 0;
+
+  scored.forEach((item) => {
+    if (selected.length >= limit) return;
+    const key = recommendationKey(item.movie);
+    if (selectedKeys.has(key)) return;
+
+    if (item.media === 'movie' && movieCount >= movieTarget) return;
+    if (item.media === 'tv' && tvCount >= tvTarget) return;
+
+    selected.push(item);
+    selectedKeys.add(key);
+    if (item.media === 'movie') movieCount += 1;
+    if (item.media === 'tv') tvCount += 1;
+  });
+
+  scored.forEach((item) => {
+    if (selected.length >= limit) return;
+    const key = recommendationKey(item.movie);
+    if (selectedKeys.has(key)) return;
+    selected.push(item);
+    selectedKeys.add(key);
+  });
+
+  return selected.map((item) => ({
+    ...item.movie,
+    recommendation_reason: item.reason,
+  }));
 }
 
 type HomeClientProps = {
@@ -220,7 +527,6 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   const [isGenreOnboardingOpen, setIsGenreOnboardingOpen] = useState(false);
   const [syncedRecentlyViewedUserId, setSyncedRecentlyViewedUserId] = useState<number | null>(null);
   const [syncedGenrePreferenceUserId, setSyncedGenrePreferenceUserId] = useState<number | null>(null);
-  const [tasteRecommendations, setTasteRecommendations] = useState<Movie[]>([]);
   const { data: favorites = [] } = useFavorites(undefined, Boolean(user));
   const userId = user?.id ?? null;
   const handleBrandReload = () => {
@@ -250,30 +556,12 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
   }, [heroMovie, trendingNow]);
   const recentMovies = useMemo(() => recentlyViewed.map(recentToMovie), [recentlyViewed]);
   const favoriteMovies = useMemo(() => (user ? favorites.slice(0, 12).map(favoriteToMovie) : []), [favorites, user]);
-  const topRecentGenre = useMemo(() => getTopGenre(recentlyViewed, genres), [recentlyViewed, genres]);
   const preferredGenres = useMemo(() => {
     const genreMap = new Map(genres.map((genre) => [genre.id, genre]));
     return preferredGenreIds
       .map((genreId) => genreMap.get(genreId))
       .filter((genre): genre is Genre => Boolean(genre));
   }, [genres, preferredGenreIds]);
-  const activePreferredGenres = useMemo(() => (user ? preferredGenres : []), [preferredGenres, user]);
-  const recommendationGenres = useMemo(() => {
-    if (activePreferredGenres.length) return activePreferredGenres;
-    return topRecentGenre ? [topRecentGenre] : [];
-  }, [activePreferredGenres, topRecentGenre]);
-  const recommendationGenreIds = useMemo(
-    () => recommendationGenres.map((genre) => genre.id),
-    [recommendationGenres]
-  );
-  const recommendationSubtitle = useMemo(() => {
-    if (!recommendationGenres.length) return '';
-    if (activePreferredGenres.length) {
-      return `${recommendationGenres.map((genre) => genre.name).join(', ')} 취향에서 고른 영화`;
-    }
-
-    return `최근 본 ${recommendationGenres[0].name} 장르와 어울리는 영화`;
-  }, [activePreferredGenres.length, recommendationGenres]);
   const isGenrePreferenceSyncPending = userId !== null && syncedGenrePreferenceUserId !== userId;
   const shouldShowGenreOnboarding = Boolean(user) && !isGenrePreferenceSyncPending && genres.length > 0 && isGenreOnboardingOpen;
   const shouldShowGenreSummary = Boolean(user) && preferredGenres.length > 0 && !isGenreOnboardingOpen;
@@ -293,15 +581,70 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     () => trendingPeople.map(personToMovie),
     [trendingPeople]
   );
+  const mediaPreference = useMemo(
+    () => getMediaPreference(recentlyViewed, user ? favorites : []),
+    [favorites, recentlyViewed, user]
+  );
+  const hasRecommendationSignals = useMemo(
+    () =>
+      preferredGenreIds.length > 0 ||
+      recentlyViewed.some((item) => item.targetType === 'MOVIE' || item.targetType === 'TV') ||
+      (user ? favorites.some((item) => item.targetType === 'MOVIE' || item.targetType === 'TV') : false),
+    [favorites, preferredGenreIds.length, recentlyViewed, user]
+  );
+  const recommendationCandidates = useMemo<RecommendationCandidate[]>(
+    () => [
+      ...trendingNowWithoutHero.map((movie) => ({ movie, sourceScore: 18 })),
+      ...trending.map((movie) => ({ movie, sourceScore: 14 })),
+      ...nowPlaying.map((movie) => ({ movie, sourceScore: 12 })),
+      ...popularMovies.map((movie) => ({ movie, sourceScore: 11 })),
+      ...upcoming.map((movie) => ({ movie, sourceScore: 8 })),
+      ...trendingTvAsMovies.map((movie) => ({ movie, sourceScore: 14 })),
+      ...popularTvAsMovies.map((movie) => ({ movie, sourceScore: 11 })),
+      ...airingTodayTvAsMovies.map((movie) => ({ movie, sourceScore: 8 })),
+    ],
+    [
+      airingTodayTvAsMovies,
+      nowPlaying,
+      popularMovies,
+      popularTvAsMovies,
+      trending,
+      trendingNowWithoutHero,
+      trendingTvAsMovies,
+      upcoming,
+    ]
+  );
+  const personalizedRecommendations = useMemo(
+    () =>
+      buildPersonalizedRecommendations({
+        candidates: recommendationCandidates,
+        recentItems: recentlyViewed,
+        favorites: user ? favorites : [],
+        preferredGenreIds,
+        genres,
+        mediaPreference,
+      }),
+    [favorites, genres, mediaPreference, preferredGenreIds, recentlyViewed, recommendationCandidates, user]
+  );
+  const recommendationCopy = useMemo(
+    () =>
+      getRecommendationCopy({
+        mediaPreference,
+        hasPersonalSignals: hasRecommendationSignals,
+        hasPreferredGenres: preferredGenreIds.length > 0,
+        isLoggedIn: Boolean(user),
+      }),
+    [hasRecommendationSignals, mediaPreference, preferredGenreIds.length, user]
+  );
   const forYouTabs = useMemo<MovieTab[]>(() => {
     const tabs: MovieTab[] = [];
 
-    if (tasteRecommendations.length) {
+    if (personalizedRecommendations.length) {
       tabs.push({
         id: 'recommendations',
-        title: activePreferredGenres.length ? '내 관심 장르 추천' : '최근 취향 기반 추천',
-        subtitle: recommendationSubtitle,
-        movies: tasteRecommendations,
+        title: recommendationCopy.title,
+        subtitle: recommendationCopy.subtitle,
+        movies: personalizedRecommendations,
       });
     }
     if (recentMovies.length) {
@@ -322,7 +665,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
     }
 
     return tabs;
-  }, [activePreferredGenres.length, favoriteMovies, recentMovies, recommendationSubtitle, tasteRecommendations]);
+  }, [favoriteMovies, personalizedRecommendations, recentMovies, recommendationCopy]);
   const movieTabs = useMemo<MovieTab[]>(
     () => [
       {
@@ -592,57 +935,6 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       isMounted = false;
     };
   }, [heroMovie?.id, heroMovie?.media_type, heroMovie?.title]);
-
-  useEffect(() => {
-    if (!recommendationGenreIds.length) {
-      setTasteRecommendations([]);
-      return;
-    }
-
-    const genreIds = recommendationGenreIds;
-    setTasteRecommendations([]);
-    const recentMovieIds = new Set(
-      recentlyViewed
-        .filter((item) => item.targetType === 'MOVIE')
-        .map((item) => item.targetId)
-    );
-    let isMounted = true;
-
-    async function loadTasteRecommendations() {
-      try {
-        const genrePayloads = await Promise.all(
-          genreIds.map(async (genreId) => {
-            const response = await fetch(`/api/movies/genre/${genreId}?page=1`);
-            if (!response.ok) throw new Error('failed');
-            return (await response.json()) as GenreRecommendationPayload;
-          })
-        );
-
-        if (!isMounted) return;
-
-        const seenMovieIds = new Set<number>();
-        const recommendations = genrePayloads
-          .flatMap((payload) => payload.results ?? [])
-          .filter((movie) => {
-            if (recentMovieIds.has(movie.id) || seenMovieIds.has(movie.id)) return false;
-            seenMovieIds.add(movie.id);
-            return true;
-          })
-          .slice(0, 12);
-        setTasteRecommendations(recommendations);
-      } catch {
-        if (isMounted) {
-          setTasteRecommendations([]);
-        }
-      }
-    }
-
-    loadTasteRecommendations();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [recentlyViewed, recommendationGenreIds]);
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
@@ -1420,6 +1712,14 @@ function MoviePosterCard({
         <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.62)' }}>
           {movie.display_meta ?? `${yearFromDate(movie.release_date)} · 평점 ${movie.vote_average.toFixed(1)}`}
         </p>
+        {movie.recommendation_reason ? (
+          <p
+            className="mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-semibold"
+            style={{ background: 'rgba(85,168,255,0.14)', color: '#CFE7FF' }}
+          >
+            {movie.recommendation_reason}
+          </p>
+        ) : null}
         <p className="text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.5)' }}>
           {shortText(movie.overview, 78)}
         </p>
