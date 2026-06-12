@@ -162,6 +162,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 16:22:49 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 장르 페이지 Discover 통합
+- Scope (In/Out): In: frontend-next/src/app/(public)/genres/[genreId]/page.tsx, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md / Out: API route 삭제, Discover 인물 필터, 배포/원격 서버 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/genres/[genreId]/page.tsx,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "장르 페이지 Discover 통합" -ScopeIn "frontend-next/src/app/(public)/genres/[genreId]/page.tsx, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md" -ScopeOut "API route 삭제, Discover 인물 필터, 배포/원격 서버 검증" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); /genres/28?selected=28,12 307 -> /discover?type=movie&genres=28,12 확인; /discover?type=movie&genres=28 200 확인" -OpenRisks "기존 /api/movies/genre/[genreId], /api/movies/genres 라우트는 하위 호환을 위해 남겨둠; 배포 후 기존 장르 URL 리다이렉트 수동 확인 필요" -Blockers "None" -NextAction1 "변경분 커밋 및 push" -NextAction2 "배포 후 홈/영화상세/TV상세 장르 배지 클릭 확인" -NextAction3 "필요 시 unused genre API route 정리 여부 검토"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); /genres/28?selected=28,12 307 -> /discover?type=movie&genres=28,12 확인; /discover?type=movie&genres=28 200 확인
+- Open Risks: 기존 /api/movies/genre/[genreId], /api/movies/genres 라우트는 하위 호환을 위해 남겨둠; 배포 후 기존 장르 URL 리다이렉트 수동 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 push, 2) 배포 후 홈/영화상세/TV상세 장르 배지 클릭 확인, 3) 필요 시 unused genre API route 정리 여부 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-12 16:10:51 +09:00
 - Agent Name: Codex
 - Branch: main

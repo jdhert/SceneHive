@@ -618,7 +618,7 @@ export default function MovieDetailPage() {
                     {movie.genres.map((genre) => (
                       <Link
                         key={genre.id}
-                        href={`/genres/${genre.id}`}
+                        href={`/discover?type=movie&genres=${genre.id}`}
                         className="px-2.5 py-1 rounded-full text-xs cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
                         title={`${genre.name} 장르 보기`}
                         style={{ background: 'rgba(85,168,255,0.14)', border: '1px solid rgba(85,168,255,0.30)', color: 'rgba(191,224,255,0.96)' }}

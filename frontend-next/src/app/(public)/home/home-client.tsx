@@ -1174,7 +1174,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
             {genres.slice(0, 12).map((genre) => (
               <Link
                 key={genre.id}
-                href={`/genres/${genre.id}?name=${encodeURIComponent(genre.name)}`}
+                href={`/discover?type=movie&genres=${genre.id}`}
                 className="px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110"
                 style={{
                   background: 'rgba(255,255,255,0.10)',
