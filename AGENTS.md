@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 16:10:51 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Discover 조건 탐색 페이지 1차 구현
+- Scope (In/Out): In: frontend-next/src/app/(public)/discover/page.tsx, frontend-next/src/app/api/discover/route.ts, frontend-next/src/app/api/discover/genres/route.ts, frontend-next/src/lib/tmdb.ts, frontend-next/src/app/(public)/home/home-client.tsx, AGENTS.md / Out: Spring 백엔드 API, DB 저장, 인물 고급 필터, 배포/원격 서버 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/app/(public)/discover/, ?? frontend-next/src/app/api/discover/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Discover 조건 탐색 페이지 1차 구현" -ScopeIn "frontend-next/src/app/(public)/discover/page.tsx, frontend-next/src/app/api/discover/route.ts, frontend-next/src/app/api/discover/genres/route.ts, frontend-next/src/lib/tmdb.ts, frontend-next/src/app/(public)/home/home-client.tsx, AGENTS.md" -ScopeOut "Spring 백엔드 API, DB 저장, 인물 고급 필터, 배포/원격 서버 검증" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); /discover 200 응답 확인; /api/discover 24건 응답 확인; CDP 모바일 viewport 390px 기준 scrollWidth=390 및 overflow 요소 0개 확인" -OpenRisks "현재 Discover는 TMDB 기반 Next API 라우트이며 백엔드/DB 저장은 없음; 인물은 아직 고급 조건 탐색 대상에서 제외됨; 배포 후 실제 TMDB 응답/환경변수는 원격에서 추가 확인 필요" -Blockers "None" -NextAction1 "로컬 http://127.0.0.1:3000/discover 에서 조건 필터 UX 수동 확인" -NextAction2 "원하면 변경분 커밋 및 push" -NextAction3 "후속으로 인물 탐색 또는 Discover 조건을 검색 페이지와 연결 검토"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); /discover 200 응답 확인; /api/discover 24건 응답 확인; CDP 모바일 viewport 390px 기준 scrollWidth=390 및 overflow 요소 0개 확인
+- Open Risks: 현재 Discover는 TMDB 기반 Next API 라우트이며 백엔드/DB 저장은 없음; 인물은 아직 고급 조건 탐색 대상에서 제외됨; 배포 후 실제 TMDB 응답/환경변수는 원격에서 추가 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 로컬 http://127.0.0.1:3000/discover 에서 조건 필터 UX 수동 확인, 2) 원하면 변경분 커밋 및 push, 3) 후속으로 인물 탐색 또는 Discover 조건을 검색 페이지와 연결 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 15:45:39 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Discover 조건 탐색 페이지 1차 구현
+- Scope (In/Out): In: frontend-next/src/app/(public)/discover/**, frontend-next/src/app/api/discover/**, frontend-next/src/app/(public)/home/home-client.tsx, AGENTS.md / Out: Spring 백엔드 API, DB 저장, 인물 고급 필터, 배포/원격 서버 검증
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Discover 조건 탐색 페이지 1차 구현" -ScopeIn "frontend-next/src/app/(public)/discover/**, frontend-next/src/app/api/discover/**, frontend-next/src/app/(public)/home/home-client.tsx, AGENTS.md" -ScopeOut "Spring 백엔드 API, DB 저장, 인물 고급 필터, 배포/원격 서버 검증" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "TMDB discover API 기반 1차 구현이라 인물 조건 탐색은 제외하고 영화/TV 중심으로 시작" -Blockers "None" -NextAction1 "기존 TMDB helper/API 구조 확인" -NextAction2 "Discover API route와 클라이언트 페이지 추가" -NextAction3 "lint/type/build 및 로컬 화면 확인"
+- Tests Run + Result: Not run yet
+- Open Risks: TMDB discover API 기반 1차 구현이라 인물 조건 탐색은 제외하고 영화/TV 중심으로 시작
+- Blockers: None
+- Next 3 Actions: 1) 기존 TMDB helper/API 구조 확인, 2) Discover API route와 클라이언트 페이지 추가, 3) lint/type/build 및 로컬 화면 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-12 15:10:56 +09:00
 - Agent Name: Codex
 - Branch: main

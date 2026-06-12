@@ -79,6 +79,20 @@ export type TmdbGenre = {
   name: string;
 };
 
+export type TmdbDiscoverMediaType = 'movie' | 'tv';
+
+export type TmdbDiscoverSort = 'popular' | 'rating' | 'recent' | 'votes';
+
+export type TmdbDiscoverParams = {
+  mediaType: TmdbDiscoverMediaType;
+  genreIds?: number[];
+  sort?: TmdbDiscoverSort;
+  yearFrom?: number;
+  yearTo?: number;
+  minRating?: number;
+  page?: number;
+};
+
 export type TmdbMovieDetail = {
   id: number;
   title: string;
@@ -412,6 +426,45 @@ export async function fetchTrendingMovies() {
   return fillMissingMovieOverviews('/trending/movie/day', {}, response);
 }
 
+async function fillMissingTvOverviews(
+  path: string,
+  params: Record<string, string | number | undefined>,
+  source: TmdbTvListResponse
+) {
+  const needsFallback = source.results.some((show) => !hasOverview(show.overview));
+  if (!needsFallback) {
+    return source;
+  }
+
+  try {
+    const fallbackEn = await tmdbFetch<TmdbTvListResponse>(path, params, { language: 'en-US' });
+    const fallbackMap = new Map(
+      (fallbackEn.results ?? []).map((show) => [show.id, show.overview])
+    );
+
+    return {
+      ...source,
+      results: source.results.map((show) => {
+        if (hasOverview(show.overview)) {
+          return show;
+        }
+
+        const overviewEn = fallbackMap.get(show.id);
+        if (!hasOverview(overviewEn)) {
+          return show;
+        }
+
+        return {
+          ...show,
+          overview: overviewEn,
+        };
+      }),
+    };
+  } catch {
+    return source;
+  }
+}
+
 export async function fetchTrendingAll() {
   return tmdbFetch<TmdbTrendingAllResponse>('/trending/all/day');
 }
@@ -494,6 +547,78 @@ export async function fetchMoviesByGenres(genreIds: number[], page = 1) {
 
 export async function fetchGenres() {
   return tmdbFetch<TmdbGenreListResponse>('/genre/movie/list');
+}
+
+export async function fetchTvGenres() {
+  return tmdbFetch<TmdbGenreListResponse>('/genre/tv/list');
+}
+
+function mapMovieDiscoverSort(sort: TmdbDiscoverSort) {
+  if (sort === 'rating') return 'vote_average.desc';
+  if (sort === 'recent') return 'primary_release_date.desc';
+  if (sort === 'votes') return 'vote_count.desc';
+  return 'popularity.desc';
+}
+
+function mapTvDiscoverSort(sort: TmdbDiscoverSort) {
+  if (sort === 'rating') return 'vote_average.desc';
+  if (sort === 'recent') return 'first_air_date.desc';
+  if (sort === 'votes') return 'vote_count.desc';
+  return 'popularity.desc';
+}
+
+function yearStart(year: number | undefined) {
+  return year ? `${year}-01-01` : undefined;
+}
+
+function yearEnd(year: number | undefined) {
+  return year ? `${year}-12-31` : undefined;
+}
+
+export async function fetchDiscoverMovies({
+  genreIds = [],
+  sort = 'popular',
+  yearFrom,
+  yearTo,
+  minRating,
+  page = 1,
+}: Omit<TmdbDiscoverParams, 'mediaType'>) {
+  const params = {
+    include_adult: 'false',
+    region: DEFAULT_REGION,
+    sort_by: mapMovieDiscoverSort(sort),
+    with_genres: genreIds.length ? genreIds.join(',') : undefined,
+    'primary_release_date.gte': yearStart(yearFrom),
+    'primary_release_date.lte': yearEnd(yearTo),
+    'vote_average.gte': minRating && minRating > 0 ? minRating : undefined,
+    'vote_count.gte': minRating && minRating >= 7 ? 80 : 20,
+    page,
+  };
+  const response = await tmdbFetch<TmdbMovieListResponse>('/discover/movie', params);
+  return fillMissingMovieOverviews('/discover/movie', params, response);
+}
+
+export async function fetchDiscoverTv({
+  genreIds = [],
+  sort = 'popular',
+  yearFrom,
+  yearTo,
+  minRating,
+  page = 1,
+}: Omit<TmdbDiscoverParams, 'mediaType'>) {
+  const params = {
+    include_adult: 'false',
+    include_null_first_air_dates: 'false',
+    sort_by: mapTvDiscoverSort(sort),
+    with_genres: genreIds.length ? genreIds.join(',') : undefined,
+    'first_air_date.gte': yearStart(yearFrom),
+    'first_air_date.lte': yearEnd(yearTo),
+    'vote_average.gte': minRating && minRating > 0 ? minRating : undefined,
+    'vote_count.gte': minRating && minRating >= 7 ? 80 : 20,
+    page,
+  };
+  const response = await tmdbFetch<TmdbTvListResponse>('/discover/tv', params);
+  return fillMissingTvOverviews('/discover/tv', params, response);
 }
 
 export async function fetchMovieVideos(movieId: number) {

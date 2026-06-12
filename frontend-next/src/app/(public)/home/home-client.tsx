@@ -946,6 +946,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           </button>
           <nav className="hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.64)' }}>
             <a href="#for-you" className="hover:text-white transition-colors">For You</a>
+            <Link href="/discover" className="hover:text-white transition-colors">Discover</Link>
             <a href="#trending" className="hover:text-white transition-colors">Trending</a>
             <a href="#movies" className="hover:text-white transition-colors">Movies</a>
             <a href="#tv-series" className="hover:text-white transition-colors">TV Series</a>
