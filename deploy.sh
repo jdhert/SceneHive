@@ -48,6 +48,45 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+normalize_app_services() {
+    local normalized=""
+
+    for service in ${APP_SERVICES}; do
+        case "${service}" in
+            backend|frontend)
+                if [ -n "${normalized}" ]; then
+                    normalized="${normalized} ${service}"
+                else
+                    normalized="${service}"
+                fi
+                ;;
+            *)
+                log_error "Unsupported APP_SERVICES entry: ${service}"
+                exit 1
+                ;;
+        esac
+    done
+
+    if [ -z "${normalized}" ]; then
+        log_error "APP_SERVICES must include at least one service: backend or frontend"
+        exit 1
+    fi
+
+    APP_SERVICES="${normalized}"
+}
+
+service_selected() {
+    local target="$1"
+    case " ${APP_SERVICES} " in
+        *" ${target} "*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 # Check required environment variables
 check_env() {
     if [ -z "$HOST" ] || [ -z "$USER" ]; then
@@ -81,14 +120,77 @@ write_remote_file() {
 }
 
 write_runtime_env() {
-    local backend_tag="$1"
-    local frontend_tag="$2"
+    local new_backend_tag="$1"
+    local new_frontend_tag="$2"
+    local backend_tag
+    local frontend_tag
+
+    if service_selected backend; then
+        backend_tag="${new_backend_tag}"
+    else
+        backend_tag="$(read_existing_service_tag BACKEND_IMAGE_TAG scenehive-backend "${BACKEND_IMAGE}" "${new_backend_tag}")"
+    fi
+
+    if service_selected frontend; then
+        frontend_tag="${new_frontend_tag}"
+    else
+        frontend_tag="$(read_existing_service_tag FRONTEND_IMAGE_TAG scenehive-frontend "${FRONTEND_IMAGE}" "${new_frontend_tag}")"
+    fi
 
     cat <<EOF | ssh_cmd "cat > ${PROJECT_DIR}/${DEPLOY_ENV_FILE}"
 IMAGE_NAME=${IMAGE_NAME}
 BACKEND_IMAGE_TAG=${backend_tag}
 FRONTEND_IMAGE_TAG=${frontend_tag}
 EOF
+}
+
+read_runtime_tag() {
+    local key="$1"
+    local fallback="$2"
+    local value
+
+    value="$(ssh_cmd "cd ${PROJECT_DIR} && if [ -f ${DEPLOY_ENV_FILE} ]; then sed -n 's/^${key}=//p' ${DEPLOY_ENV_FILE} | tail -1; fi" || true)"
+
+    if [ -n "${value}" ]; then
+        printf '%s' "${value}"
+        return
+    fi
+
+    printf '%s' "${fallback}"
+}
+
+read_running_image_tag() {
+    local container="$1"
+    local image="$2"
+    local fallback="$3"
+    local image_ref
+
+    image_ref="$(ssh_cmd "docker inspect -f '{{.Config.Image}}' ${container} 2>/dev/null || true" || true)"
+
+    case "${image_ref}" in
+        "${image}:"*)
+            printf '%s' "${image_ref#"${image}:"}"
+            return
+            ;;
+    esac
+
+    printf '%s' "${fallback}"
+}
+
+read_existing_service_tag() {
+    local key="$1"
+    local container="$2"
+    local image="$3"
+    local fallback="$4"
+    local value
+
+    value="$(read_runtime_tag "${key}" "")"
+    if [ -n "${value}" ]; then
+        printf '%s' "${value}"
+        return
+    fi
+
+    read_running_image_tag "${container}" "${image}" "${fallback}"
 }
 
 write_app_env() {
@@ -137,6 +239,11 @@ compose_cmd() {
 }
 
 ensure_stateful_services() {
+    if ! service_selected backend; then
+        log_info "Skipping stateful service check because backend is not being deployed."
+        return
+    fi
+
     log_info "Ensuring stateful services are running: ${STATEFUL_SERVICES}"
     compose_cmd "up -d ${STATEFUL_SERVICES}"
 }
@@ -144,6 +251,11 @@ ensure_stateful_services() {
 recreate_app_services() {
     log_info "Recreating application services: ${APP_SERVICES}"
     compose_cmd "up -d --no-deps --force-recreate ${APP_SERVICES}"
+}
+
+pull_app_services() {
+    log_info "Pulling application images: ${APP_SERVICES}"
+    compose_cmd "pull ${APP_SERVICES}"
 }
 
 wait_for_health() {
@@ -181,6 +293,11 @@ wait_for_health() {
 }
 
 warmup_frontend() {
+    if ! service_selected frontend; then
+        log_info "Skipping frontend warm-up because frontend is not being deployed."
+        return
+    fi
+
     if [ "${FRONTEND_WARMUP_ENABLED}" != "true" ]; then
         log_info "Frontend warm-up disabled."
         return
@@ -212,15 +329,18 @@ deploy_staging() {
     ghcr_login
 
     # Pull images
-    log_info "Pulling images..."
-    compose_cmd "pull backend frontend"
+    pull_app_services
 
     # Keep stateful services warm and recreate only application containers.
     ensure_stateful_services
     recreate_app_services
 
     # Health check
-    if wait_for_health; then
+    if ! service_selected backend; then
+        log_info "Skipping backend health check because backend is not being deployed."
+        warmup_frontend
+        log_info "✅ Staging deployment completed successfully!"
+    elif wait_for_health; then
         warmup_frontend
         log_info "✅ Staging deployment completed successfully!"
     else
@@ -252,15 +372,18 @@ deploy_production() {
     ghcr_login
     
     # Pull images with specific tag
-    log_info "Pulling images..."
-    compose_cmd "pull backend frontend"
+    pull_app_services
     
     # Keep stateful services warm and recreate only application containers.
     ensure_stateful_services
     recreate_app_services
     
     # Health check
-    if wait_for_health; then
+    if ! service_selected backend; then
+        log_info "Skipping backend health check because backend is not being deployed."
+        warmup_frontend
+        log_info "✅ Production deployment completed successfully!"
+    elif wait_for_health; then
         warmup_frontend
         log_info "✅ Production deployment completed successfully!"
     else
@@ -300,6 +423,8 @@ main() {
     log_info "Starting deployment: ${DEPLOYMENT_TYPE}"
     
     check_env
+    normalize_app_services
+    log_info "Deployment application services: ${APP_SERVICES}"
     
     case $DEPLOYMENT_TYPE in
         staging)

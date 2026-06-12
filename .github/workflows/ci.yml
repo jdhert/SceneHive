@@ -14,7 +14,104 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      deploy_needed: ${{ steps.detect.outputs.deploy_needed }}
+      backend_changed: ${{ steps.detect.outputs.backend_changed }}
+      frontend_changed: ${{ steps.detect.outputs.frontend_changed }}
+      app_services: ${{ steps.detect.outputs.app_services }}
+      reason: ${{ steps.detect.outputs.reason }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed deployment targets
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          backend_changed=false
+          frontend_changed=false
+          reason="path-filter"
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            backend_changed=true
+            frontend_changed=true
+            reason="tag"
+          else
+            base="${{ github.event.before }}"
+            if [[ -z "${base}" || "${base}" == "0000000000000000000000000000000000000000" ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+              base="$(git rev-parse HEAD^ 2>/dev/null || true)"
+            fi
+
+            if [[ -n "${base}" ]]; then
+              changed_files="$(git diff --name-only "${base}" "${GITHUB_SHA}")"
+            else
+              changed_files="$(git show --name-only --format= "${GITHUB_SHA}")"
+            fi
+
+            echo "Changed files:"
+            printf '%s\n' "${changed_files}"
+
+            while IFS= read -r file; do
+              [[ -z "${file}" ]] && continue
+
+              case "${file}" in
+                frontend-next/*)
+                  frontend_changed=true
+                  ;;
+                src/*|build.gradle*|settings.gradle*|gradle/*|gradlew|gradlew.bat|Dockerfile)
+                  backend_changed=true
+                  ;;
+                docker-compose.prod.yml|deploy.sh|.github/workflows/ci.yml|.github/workflows/cd-staging.yml)
+                  backend_changed=true
+                  frontend_changed=true
+                  reason="deploy-contract"
+                  ;;
+              esac
+            done <<< "${changed_files}"
+          fi
+
+          deploy_needed=false
+          app_services=""
+
+          if ${backend_changed}; then
+            deploy_needed=true
+            app_services="backend"
+          fi
+
+          if ${frontend_changed}; then
+            deploy_needed=true
+            if [[ -n "${app_services}" ]]; then
+              app_services="${app_services} frontend"
+            else
+              app_services="frontend"
+            fi
+          fi
+
+          {
+            echo "deploy_needed=${deploy_needed}"
+            echo "backend_changed=${backend_changed}"
+            echo "frontend_changed=${frontend_changed}"
+            echo "app_services=${app_services}"
+            echo "reason=${reason}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Deploy needed: ${deploy_needed}"
+          echo "Backend changed: ${backend_changed}"
+          echo "Frontend changed: ${frontend_changed}"
+          echo "App services: ${app_services:-none}"
+          echo "Reason: ${reason}"
+
   build-and-push:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.deploy_needed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -63,6 +160,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Build and push backend image
+        if: needs.detect-changes.outputs.backend_changed == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -73,6 +171,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
 
       - name: Build and push frontend image
+        if: needs.detect-changes.outputs.frontend_changed == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./frontend-next
@@ -87,7 +186,8 @@ jobs:
             NEXT_PUBLIC_OAUTH_BASE_URL=
 
   deploy-staging:
-    needs: build-and-push
+    needs: [detect-changes, build-and-push]
+    if: needs.detect-changes.outputs.deploy_needed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: staging
@@ -125,6 +225,7 @@ jobs:
           ENV_FILE_CONTENT: ${{ secrets.STAGING_ENV_FILE }}
           REGISTRY_USERNAME: ${{ github.actor }}
           REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          APP_SERVICES: ${{ needs.detect-changes.outputs.app_services }}
         run: |
           chmod +x deploy.sh
           ./deploy.sh staging

@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 15:10:56 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 프론트/백엔드 선택 CI/CD 배포
+- Scope (In/Out): In: .github/workflows/ci.yml, deploy.sh, AGENTS.md / Out: 프로덕션 cd-prod.yml 전면 개편, PR 전용 테스트 워크플로우, 서버 직접 검증/원격 배포 실행
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M .github/workflows/ci.yml,  M AGENTS.md,  M deploy.sh
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "프론트/백엔드 선택 CI/CD 배포" -ScopeIn ".github/workflows/ci.yml, deploy.sh, AGENTS.md" -ScopeOut "프로덕션 cd-prod.yml 전면 개편, PR 전용 테스트 워크플로우, 서버 직접 검증/원격 배포 실행" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; Git Bash bash -n deploy.sh 성공; npx --yes yaml-lint .github/workflows/ci.yml 성공; docker compose -f docker-compose.prod.yml config --quiet 성공" -OpenRisks "경로 기반 감지라 deploy.sh/docker-compose.prod.yml/ci.yml 변경은 보수적으로 backend+frontend 전체 앱 배포함; 실제 GitHub Actions 실행은 푸시 후 확인 필요" -Blockers "None" -NextAction1 "변경분 커밋 및 원격 push" -NextAction2 "프론트 전용 변경 커밋으로 frontend만 빌드/배포되는지 Actions 로그 확인" -NextAction3 "백엔드 전용 변경 커밋으로 backend health check만 수행되는지 확인"
+- Tests Run + Result: git diff --check 성공; Git Bash bash -n deploy.sh 성공; npx --yes yaml-lint .github/workflows/ci.yml 성공; docker compose -f docker-compose.prod.yml config --quiet 성공
+- Open Risks: 경로 기반 감지라 deploy.sh/docker-compose.prod.yml/ci.yml 변경은 보수적으로 backend+frontend 전체 앱 배포함; 실제 GitHub Actions 실행은 푸시 후 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 변경분 커밋 및 원격 push, 2) 프론트 전용 변경 커밋으로 frontend만 빌드/배포되는지 Actions 로그 확인, 3) 백엔드 전용 변경 커밋으로 backend health check만 수행되는지 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 15:04:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 프론트/백엔드 선택 CI/CD 배포
+- Scope (In/Out): In: .github/workflows/ci.yml, deploy.sh, AGENTS.md / Out: 프로덕션 cd-prod.yml 전면 개편, PR 전용 테스트 워크플로우, 서버 직접 검증/원격 배포 실행
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "프론트/백엔드 선택 CI/CD 배포" -ScopeIn ".github/workflows/ci.yml, deploy.sh, AGENTS.md" -ScopeOut "프로덕션 cd-prod.yml 전면 개편, PR 전용 테스트 워크플로우, 서버 직접 검증/원격 배포 실행" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "경로 기반 선택 배포라 docker-compose/deploy 변경 시 보수적으로 backend+frontend 전체 앱 배포가 필요함" -Blockers "None" -NextAction1 "ci.yml 변경 감지 job 추가" -NextAction2 "deploy.sh APP_SERVICES 기반 선택 pull/recreate/healthcheck 적용" -NextAction3 "workflow/compose/shell 정적 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 경로 기반 선택 배포라 docker-compose/deploy 변경 시 보수적으로 backend+frontend 전체 앱 배포가 필요함
+- Blockers: None
+- Next 3 Actions: 1) ci.yml 변경 감지 job 추가, 2) deploy.sh APP_SERVICES 기반 선택 pull/recreate/healthcheck 적용, 3) workflow/compose/shell 정적 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-12 14:35:16 +09:00
 - Agent Name: Codex
 - Branch: main
