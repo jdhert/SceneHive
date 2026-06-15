@@ -11,6 +11,10 @@ import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
 import { WatchProviderSection, type WatchProvidersPayload } from '@/components/media/watch-provider-section';
+import {
+  ExternalRatingsSection,
+  type ExternalRatingsPayload,
+} from '@/components/media/external-ratings-section';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -93,6 +97,7 @@ type TvDetail = {
     }[];
   };
   watch_providers?: WatchProvidersPayload | null;
+  external_ratings?: ExternalRatingsPayload | null;
 };
 
 function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
@@ -583,6 +588,12 @@ export default function TvDetailPage() {
                 </div>
               </div>
             </section>
+
+            <ExternalRatingsSection
+              ratings={tv.external_ratings}
+              tmdbRating={tv.vote_average}
+              tmdbVotes={tv.vote_count}
+            />
 
             {trailerEmbedUrl ? (
               <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>

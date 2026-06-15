@@ -162,6 +162,118 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 13:25:32 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Metacritic 직접 링크 및 평점 카드 로고 개선
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/public/ratings/metacritic.svg, frontend-next/src/components/media/external-ratings-section.tsx, AGENTS.md / Out: Rotten Tomatoes 연동, Metacritic URL 실시간 검증 크롤링, OMDb API 계약 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/, ?? frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Metacritic 직접 링크 및 평점 카드 로고 개선" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/public/ratings/metacritic.svg, frontend-next/src/components/media/external-ratings-section.tsx, AGENTS.md" -ScopeOut "Rotten Tomatoes 연동, Metacritic URL 실시간 검증 크롤링, OMDb API 계약 변경" -Status "done" -PercentComplete "100" -TestsResult "npm run lint -- --file src/components/media/external-ratings-section.tsx --file src/lib/tmdb.ts 성공; npx tsc --noEmit --pretty false 성공; /api/movies/278 Metascore URL이 https://www.metacritic.com/movie/the-shawshank-redemption/ 로 반환됨; /api/tv/1399 외부 평점 응답 확인(NO_METASCORE); git diff --check 성공; Chrome headless로 metacritic.svg PNG 렌더 확인" -OpenRisks "Metacritic URL은 OMDb가 slug를 제공하지 않아 제목 기반 생성이며 동명이작/부제목/연도 차이 케이스에서 실제 URL과 다를 수 있음" -Blockers "None" -NextAction1 "상세 페이지에서 Metascore 카드 클릭 시 Metacritic 이동 확인" -NextAction2 "메타크리틱 URL 오매칭 사례가 생기면 imdb_id 기반 override map 추가 검토" -NextAction3 "변경분 커밋 및 원격 push 여부 결정"
+- Tests Run + Result: npm run lint -- --file src/components/media/external-ratings-section.tsx --file src/lib/tmdb.ts 성공; npx tsc --noEmit --pretty false 성공; /api/movies/278 Metascore URL이 https://www.metacritic.com/movie/the-shawshank-redemption/ 로 반환됨; /api/tv/1399 외부 평점 응답 확인(NO_METASCORE); git diff --check 성공; Chrome headless로 metacritic.svg PNG 렌더 확인
+- Open Risks: Metacritic URL은 OMDb가 slug를 제공하지 않아 제목 기반 생성이며 동명이작/부제목/연도 차이 케이스에서 실제 URL과 다를 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 상세 페이지에서 Metascore 카드 클릭 시 Metacritic 이동 확인, 2) 메타크리틱 URL 오매칭 사례가 생기면 imdb_id 기반 override map 추가 검토, 3) 변경분 커밋 및 원격 push 여부 결정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 13:19:26 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Metacritic 직접 링크 및 평점 카드 로고 개선
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/public/ratings/metacritic.svg, frontend-next/src/components/media/external-ratings-section.tsx, AGENTS.md / Out: Rotten Tomatoes 연동, Metacritic URL 실시간 검증 크롤링, OMDb API 계약 변경
+- Current Status: in progress
+- Percent Complete: 20
+- Files Changed:  M AGENTS.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/, ?? frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Metacritic 직접 링크 및 평점 카드 로고 개선" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/public/ratings/metacritic.svg, frontend-next/src/components/media/external-ratings-section.tsx, AGENTS.md" -ScopeOut "Rotten Tomatoes 연동, Metacritic URL 실시간 검증 크롤링, OMDb API 계약 변경" -Status "in progress" -PercentComplete "20" -TestsResult "Not run yet" -OpenRisks "Metacritic은 OMDb에서 URL slug를 주지 않아 제목 기반 slug를 생성하므로 일부 동명이작/부제목 케이스에서 링크가 틀릴 수 있음" -Blockers "None" -NextAction1 "tmdb.ts에 Metacritic URL slug 생성 로직 추가" -NextAction2 "Metacritic SVG를 대표 로고 톤으로 교체" -NextAction3 "lint/type 검증 후 필요 시 로컬 화면 확인"
+- Tests Run + Result: Not run yet
+- Open Risks: Metacritic은 OMDb에서 URL slug를 주지 않아 제목 기반 slug를 생성하므로 일부 동명이작/부제목 케이스에서 링크가 틀릴 수 있음
+- Blockers: None
+- Next 3 Actions: 1) tmdb.ts에 Metacritic URL slug 생성 로직 추가, 2) Metacritic SVG를 대표 로고 톤으로 교체, 3) lint/type 검증 후 필요 시 로컬 화면 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 13:11:12 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 풀폭 브랜드 배너 디자인 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/*.svg, AGENTS.md / Out: 공식 브랜드 가이드 검수, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/, ?? frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, Remove-Item -LiteralPath 'D:\project\frontend-next\.tmp-ratings-page.png' -Force -ErrorAction SilentlyContinue; & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 풀폭 브랜드 배너 디자인 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/*.svg, AGENTS.md" -ScopeOut "공식 브랜드 가이드 검수, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "next lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; Chrome headless /movies/278 스크린샷 확인" -OpenRisks "로고는 로컬 SVG 배지로 고정했지만 공개 서비스 전 상표/브랜드 가이드 검수 필요" -Blockers "None" -NextAction1 "사용자 화면에서 풀폭 로고 배너 디자인 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 공식 브랜드 가이드 기준 asset 교체"
+- Tests Run + Result: next lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; Chrome headless /movies/278 스크린샷 확인
+- Open Risks: 로고는 로컬 SVG 배지로 고정했지만 공개 서비스 전 상표/브랜드 가이드 검수 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 화면에서 풀폭 로고 배너 디자인 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 공식 브랜드 가이드 기준 asset 교체
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 11:50:41 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 브랜드 로고/컬러 디자인 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/*.svg, AGENTS.md / Out: 공식 브랜드 가이드 검수, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/, ?? frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, Remove-Item -LiteralPath 'D:\project\frontend-next\.tmp-ratings-page.png' -Force -ErrorAction SilentlyContinue; & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 브랜드 로고/컬러 디자인 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/*.svg, AGENTS.md" -ScopeOut "공식 브랜드 가이드 검수, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "next lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /ratings/*.svg 200 확인; Chrome headless /movies/278 스크린샷 확인" -OpenRisks "로컬 SVG는 대표 로고형 asset으로 고정했지만 상표/브랜드 가이드 검수는 별도 필요" -Blockers "None" -NextAction1 "사용자 화면에서 평점 카드 디자인 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 공식 브랜드 가이드 기준 asset 교체"
+- Tests Run + Result: next lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /ratings/*.svg 200 확인; Chrome headless /movies/278 스크린샷 확인
+- Open Risks: 로컬 SVG는 대표 로고형 asset으로 고정했지만 상표/브랜드 가이드 검수는 별도 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 화면에서 평점 카드 디자인 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 공식 브랜드 가이드 기준 asset 교체
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 11:35:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 플랫폼 로고형 디자인 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/*.svg, AGENTS.md / Out: 공식 브랜드 가이드 검수, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/.tmp-ratings-page.png, ?? frontend-next/public/ratings/, ?? frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 플랫폼 로고형 디자인 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/*.svg, AGENTS.md" -ScopeOut "공식 브랜드 가이드 검수, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "next lint 대상 파일 성공; npx tsc --noEmit 성공; 로컬 /ratings/*.svg 200 확인; Chrome headless /movies/278 스크린샷 확인" -OpenRisks "로고는 로컬 SVG asset으로 고정했지만 상표 사용 정책 검수는 별도 필요" -Blockers "None" -NextAction1 "사용자 화면에서 평점 카드 디자인 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 공식 브랜드 가이드 기준 로고 asset 교체"
+- Tests Run + Result: next lint 대상 파일 성공; npx tsc --noEmit 성공; 로컬 /ratings/*.svg 200 확인; Chrome headless /movies/278 스크린샷 확인
+- Open Risks: 로고는 로컬 SVG asset으로 고정했지만 상표 사용 정책 검수는 별도 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 화면에서 평점 카드 디자인 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 공식 브랜드 가이드 기준 로고 asset 교체
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 11:16:28 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Movie/TV 상세 외부 평점 캐싱 연동
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, docker-compose.yml, docker-compose.prod.yml, AGENTS.md / Out: Rotten Tomatoes 직접 연동, 공식 IMDb/Metacritic 유료 API 계약, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M docker-compose.prod.yml,  M docker-compose.yml,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Movie/TV 상세 외부 평점 캐싱 연동" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, docker-compose.yml, docker-compose.prod.yml, AGENTS.md" -ScopeOut "Rotten Tomatoes 직접 연동, 공식 IMDb/Metacritic 유료 API 계약, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; docker compose prod/local config 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 /api/movies/278 및 /api/tv/1399 200 확인(OMDB_API_KEY 미설정으로 external_ratings null 정상)" -OpenRisks "OMDB_API_KEY가 없으면 외부 평점 섹션은 숨김; OMDb 커버리지에 따라 IMDb/Metascore가 일부 작품에서 누락될 수 있음; 실제 키 적용 후 배포 환경에서 외부 평점 노출 확인 필요" -Blockers "None" -NextAction1 "로컬 frontend-next/.env.local에 OMDB_API_KEY 추가 후 dev 서버 재시작" -NextAction2 "배포용 STAGING_ENV_FILE/root .env에 OMDB_API_KEY 추가" -NextAction3 "키 적용 후 영화/TV 상세에서 IMDb/Metascore 카드 노출 확인"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; docker compose prod/local config 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 /api/movies/278 및 /api/tv/1399 200 확인(OMDB_API_KEY 미설정으로 external_ratings null 정상)
+- Open Risks: OMDB_API_KEY가 없으면 외부 평점 섹션은 숨김; OMDb 커버리지에 따라 IMDb/Metascore가 일부 작품에서 누락될 수 있음; 실제 키 적용 후 배포 환경에서 외부 평점 노출 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 로컬 frontend-next/.env.local에 OMDB_API_KEY 추가 후 dev 서버 재시작, 2) 배포용 STAGING_ENV_FILE/root .env에 OMDB_API_KEY 추가, 3) 키 적용 후 영화/TV 상세에서 IMDb/Metascore 카드 노출 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 11:04:30 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Movie/TV 상세 외부 평점 캐싱 연동
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, docker-compose.yml, docker-compose.prod.yml, AGENTS.md / Out: Rotten Tomatoes 직접 연동, 공식 IMDb/Metacritic 유료 API 계약, 배포/원격 검증
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Movie/TV 상세 외부 평점 캐싱 연동" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, docker-compose.yml, docker-compose.prod.yml, AGENTS.md" -ScopeOut "Rotten Tomatoes 직접 연동, 공식 IMDb/Metacritic 유료 API 계약, 배포/원격 검증" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "OMDB_API_KEY가 없으면 외부 평점은 비활성; OMDb 커버리지에 따라 IMDb/Metascore 누락 가능" -Blockers "None" -NextAction1 "OMDb 조회/캐시 유틸 추가" -NextAction2 "Movie/TV 상세 UI에 평점 섹션 추가" -NextAction3 "lint/type/docker config 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: OMDB_API_KEY가 없으면 외부 평점은 비활성; OMDb 커버리지에 따라 IMDb/Metascore 누락 가능
+- Blockers: None
+- Next 3 Actions: 1) OMDb 조회/캐시 유틸 추가, 2) Movie/TV 상세 UI에 평점 섹션 추가, 3) lint/type/docker config 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-15 10:01:44 +09:00
 - Agent Name: Codex
 - Branch: main

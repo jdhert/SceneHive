@@ -15,6 +15,10 @@ import {
   type TheatricalStatus,
   type WatchProvidersPayload,
 } from '@/components/media/watch-provider-section';
+import {
+  ExternalRatingsSection,
+  type ExternalRatingsPayload,
+} from '@/components/media/external-ratings-section';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -118,6 +122,7 @@ type MovieDetail = {
   };
   watch_providers?: WatchProvidersPayload | null;
   theatrical_status?: TheatricalStatus | null;
+  external_ratings?: ExternalRatingsPayload | null;
 };
 
 function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
@@ -686,6 +691,12 @@ export default function MovieDetailPage() {
                 </div>
               </div>
             </section>
+
+            <ExternalRatingsSection
+              ratings={movie.external_ratings}
+              tmdbRating={movie.vote_average}
+              tmdbVotes={movie.vote_count}
+            />
 
             {trailerEmbedUrl ? (
               <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>

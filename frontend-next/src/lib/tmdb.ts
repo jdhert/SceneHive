@@ -2,11 +2,16 @@ import 'server-only';
 
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3';
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const OMDB_BASE_URL = process.env.OMDB_BASE_URL || 'https://www.omdbapi.com/';
+const OMDB_API_KEY = process.env.OMDB_API_KEY;
 
 const DEFAULT_LANGUAGE = 'ko-KR';
 const DEFAULT_REGION = 'KR';
 const DEFAULT_REVALIDATE_SECONDS = 600;
 const NOW_PLAYING_LOOKUP_PAGE_LIMIT = 5;
+const OMDB_RATINGS_CACHE_TTL_SECONDS = Number(
+  process.env.OMDB_RATINGS_CACHE_TTL_SECONDS ?? 86400
+);
 
 export type TmdbMovie = {
   id: number;
@@ -123,6 +128,23 @@ export type TmdbTheatricalStatus = {
   total_pages: number;
 };
 
+export type ExternalRatingsPayload = {
+  imdb_id: string;
+  source: 'omdb';
+  cached_at: string;
+  imdb?: {
+    value: number;
+    scale: 10;
+    votes: string | null;
+    url: string;
+  } | null;
+  metascore?: {
+    value: number;
+    scale: 100;
+    url: string;
+  } | null;
+};
+
 export type TmdbMovieDetail = {
   id: number;
   title: string;
@@ -194,6 +216,7 @@ export type TmdbMovieDetail = {
   };
   watch_providers?: TmdbWatchProvidersResponse | null;
   theatrical_status?: TmdbTheatricalStatus | null;
+  external_ratings?: ExternalRatingsPayload | null;
 };
 
 export type TmdbVideoListResponse = {
@@ -371,12 +394,177 @@ export type TmdbTvDetail = {
     results: TmdbTv[];
   };
   watch_providers?: TmdbWatchProvidersResponse | null;
+  external_ids?: {
+    imdb_id?: string | null;
+  };
+  external_ratings?: ExternalRatingsPayload | null;
 };
 
 type TmdbFetchOptions = {
   revalidate?: number;
   language?: string;
 };
+
+type OmdbRating = {
+  Source: string;
+  Value: string;
+};
+
+type OmdbResponse = {
+  Response: 'True' | 'False';
+  Error?: string;
+  imdbID?: string;
+  imdbRating?: string;
+  imdbVotes?: string;
+  Metascore?: string;
+  Ratings?: OmdbRating[];
+};
+
+type ExternalRatingsCacheEntry = {
+  expiresAt: number;
+  value: ExternalRatingsPayload | null;
+};
+
+type ExternalRatingsRequestOptions = {
+  mediaType?: 'movie' | 'tv';
+  metacriticTitle?: string | null;
+};
+
+const externalRatingsCache = new Map<string, ExternalRatingsCacheEntry>();
+
+function omdbCacheTtlSeconds() {
+  if (!Number.isFinite(OMDB_RATINGS_CACHE_TTL_SECONDS) || OMDB_RATINGS_CACHE_TTL_SECONDS <= 0) {
+    return 86400;
+  }
+
+  return OMDB_RATINGS_CACHE_TTL_SECONDS;
+}
+
+function parseNumber(value: string | undefined | null) {
+  if (!value || value === 'N/A') {
+    return null;
+  }
+
+  const parsed = Number(value.replace(/,/g, ''));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseRatingValue(ratings: OmdbRating[] | undefined, source: string) {
+  const rating = ratings?.find((item) => item.Source.toLowerCase() === source.toLowerCase());
+  if (!rating) {
+    return null;
+  }
+
+  const [rawValue] = rating.Value.split('/');
+  return parseNumber(rawValue);
+}
+
+function slugifyMetacriticTitle(title: string) {
+  return title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function buildMetacriticUrl(options: ExternalRatingsRequestOptions | undefined) {
+  if (!options?.mediaType || !options.metacriticTitle?.trim()) {
+    return null;
+  }
+
+  const slug = slugifyMetacriticTitle(options.metacriticTitle);
+  if (!slug) {
+    return null;
+  }
+
+  return `https://www.metacritic.com/${options.mediaType}/${slug}/`;
+}
+
+async function fetchExternalRatingsByImdbId(
+  imdbId: string | null | undefined,
+  options?: ExternalRatingsRequestOptions
+) {
+  if (!imdbId || !OMDB_API_KEY) {
+    return null;
+  }
+
+  const ttlSeconds = omdbCacheTtlSeconds();
+  const cached = externalRatingsCache.get(imdbId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.value;
+  }
+
+  const url = new URL(OMDB_BASE_URL);
+  url.searchParams.set('apikey', OMDB_API_KEY);
+  url.searchParams.set('i', imdbId);
+  url.searchParams.set('r', 'json');
+  url.searchParams.set('plot', 'short');
+
+  try {
+    const response = await fetch(url.toString(), {
+      next: { revalidate: ttlSeconds },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as OmdbResponse;
+    if (payload.Response !== 'True') {
+      const value = null;
+      externalRatingsCache.set(imdbId, {
+        value,
+        expiresAt: Date.now() + ttlSeconds * 1000,
+      });
+      return value;
+    }
+
+    const imdbValue =
+      parseNumber(payload.imdbRating) ??
+      parseRatingValue(payload.Ratings, 'Internet Movie Database');
+    const metascoreValue =
+      parseNumber(payload.Metascore) ??
+      parseRatingValue(payload.Ratings, 'Metacritic');
+    const metacriticUrl =
+      buildMetacriticUrl(options) ?? `https://www.imdb.com/title/${imdbId}/criticreviews/`;
+
+    const value: ExternalRatingsPayload | null =
+      imdbValue !== null || metascoreValue !== null
+        ? {
+            imdb_id: payload.imdbID || imdbId,
+            source: 'omdb',
+            cached_at: new Date().toISOString(),
+            imdb: imdbValue !== null
+              ? {
+                  value: imdbValue,
+                  scale: 10,
+                  votes: payload.imdbVotes && payload.imdbVotes !== 'N/A' ? payload.imdbVotes : null,
+                  url: `https://www.imdb.com/title/${imdbId}/`,
+                }
+              : null,
+            metascore: metascoreValue !== null
+              ? {
+                  value: metascoreValue,
+                  scale: 100,
+                  url: metacriticUrl,
+                }
+              : null,
+          }
+        : null;
+
+    externalRatingsCache.set(imdbId, {
+      value,
+      expiresAt: Date.now() + ttlSeconds * 1000,
+    });
+
+    return value;
+  } catch {
+    return null;
+  }
+}
 
 function hasOverview(text: string | null | undefined): text is string {
   return Boolean(text?.trim());
@@ -830,10 +1018,14 @@ export async function fetchPersonDetails(personId: number) {
 export async function fetchTvDetails(tvId: number) {
   const [detail, watchProviders] = await Promise.all([
     tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
-      append_to_response: 'credits,videos,recommendations',
+      append_to_response: 'credits,videos,recommendations,external_ids',
     }),
     fetchTvWatchProviders(tvId).catch(() => null),
   ]);
+  const externalRatings = await fetchExternalRatingsByImdbId(detail.external_ids?.imdb_id, {
+    mediaType: 'tv',
+    metacriticTitle: detail.original_name || detail.name,
+  });
 
   const needOverview = !detail.overview?.trim();
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
@@ -845,13 +1037,14 @@ export async function fetchTvDetails(tvId: number) {
     return {
       ...detail,
       watch_providers: watchProviders,
+      external_ratings: externalRatings,
     };
   }
 
   try {
     const fallbackEn = await tmdbFetch<TmdbTvDetail>(
       `/tv/${tvId}`,
-      { append_to_response: 'credits,videos,recommendations' },
+      { append_to_response: 'credits,videos,recommendations,external_ids' },
       { language: 'en-US' }
     );
 
@@ -869,11 +1062,13 @@ export async function fetchTvDetails(tvId: number) {
         results: mergedVideos,
       },
       watch_providers: watchProviders,
+      external_ratings: externalRatings,
     };
   } catch {
     return {
       ...detail,
       watch_providers: watchProviders,
+      external_ratings: externalRatings,
     };
   }
 }
@@ -910,6 +1105,10 @@ export async function fetchMovieDetails(movieId: number) {
     fetchMovieWatchProviders(movieId).catch(() => null),
     fetchMovieTheatricalStatus(movieId).catch(() => null),
   ]);
+  const externalRatings = await fetchExternalRatingsByImdbId(detail.imdb_id, {
+    mediaType: 'movie',
+    metacriticTitle: detail.original_title || detail.title,
+  });
 
   let mergedDetail = detail;
   const needOverview = !detail.overview?.trim();
@@ -988,6 +1187,7 @@ export async function fetchMovieDetails(movieId: number) {
     ...mergedDetail,
     watch_providers: watchProviders,
     theatrical_status: theatricalStatus,
+    external_ratings: externalRatings,
     recommendations: {
       results: dedupedRecommendations,
     },

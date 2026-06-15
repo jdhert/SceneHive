@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 230 72">
+  <title>The Movie Database</title>
+  <rect width="230" height="72" rx="10" fill="#0D253F" />
+  <circle cx="42" cy="36" r="19" fill="#01B4E4" />
+  <circle cx="59" cy="36" r="19" fill="#90CEA1" opacity="0.92" />
+  <text
+    x="91"
+    y="33"
+    font-family="Arial Black, Arial, Helvetica, sans-serif"
+    font-size="16.5"
+    font-weight="900"
+    letter-spacing="1"
+    fill="#FFFFFF"
+  >
+    THE MOVIE
+  </text>
+  <text
+    x="91"
+    y="52"
+    font-family="Arial Black, Arial, Helvetica, sans-serif"
+    font-size="20"
+    font-weight="900"
+    letter-spacing="1"
+    fill="#01B4E4"
+  >
+    DATABASE
+  </text>
+</svg>
