@@ -162,6 +162,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 18:04:50 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 OTT 제공처 표시
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md / Out: Spring 백엔드 API 변경, JustWatch 유료 API 연동, Provider별 OTT 작품 딥링크 보장
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/components/media/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 OTT 제공처 표시" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, AGENTS.md" -ScopeOut "Spring 백엔드 API 변경, JustWatch 유료 API 연동, Provider별 OTT 작품 딥링크 보장" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 /api/movies/496243 watch_providers.KR 확인; 로컬 /api/tv/93405 watch_providers.KR 확인" -OpenRisks "TMDB Watch Providers는 provider별 OTT 작품 딥링크를 제공하지 않아 현재 버튼은 TMDB 한국 제공처 확인 페이지로 연결됨; 브라우저 자동화 도구 미노출로 화면 스크린샷 검증은 미수행" -Blockers "None" -NextAction1 "로컬 /movies/496243 또는 /tv/93405 화면에서 OTT 섹션 수동 확인" -NextAction2 "사용자 확인 후 커밋 및 원격 push" -NextAction3 "필요 시 JustWatch/제휴 API 기반 provider별 딥링크 연동 검토"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 /api/movies/496243 watch_providers.KR 확인; 로컬 /api/tv/93405 watch_providers.KR 확인
+- Open Risks: TMDB Watch Providers는 provider별 OTT 작품 딥링크를 제공하지 않아 현재 버튼은 TMDB 한국 제공처 확인 페이지로 연결됨; 브라우저 자동화 도구 미노출로 화면 스크린샷 검증은 미수행
+- Blockers: None
+- Next 3 Actions: 1) 로컬 /movies/496243 또는 /tv/93405 화면에서 OTT 섹션 수동 확인, 2) 사용자 확인 후 커밋 및 원격 push, 3) 필요 시 JustWatch/제휴 API 기반 provider별 딥링크 연동 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-12 17:57:05 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 OTT 제공처 표시
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md / Out: Spring 백엔드 API 변경, JustWatch 유료 API 연동, Provider별 딥링크 보장
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 OTT 제공처 표시" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md" -ScopeOut "Spring 백엔드 API 변경, JustWatch 유료 API 연동, Provider별 딥링크 보장" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "TMDB Watch Providers는 한국 기준 제공처 목록과 지역 링크를 제공하지만 provider별 정확한 딥링크는 보장하지 않음" -Blockers "None" -NextAction1 "TMDB Watch Providers 타입/조회 함수 추가" -NextAction2 "영화/TV 상세 API 응답에 watch_providers 병합" -NextAction3 "상세 화면 OTT 제공처 섹션 추가 후 lint/type/build 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: TMDB Watch Providers는 한국 기준 제공처 목록과 지역 링크를 제공하지만 provider별 정확한 딥링크는 보장하지 않음
+- Blockers: None
+- Next 3 Actions: 1) TMDB Watch Providers 타입/조회 함수 추가, 2) 영화/TV 상세 API 응답에 watch_providers 병합, 3) 상세 화면 OTT 제공처 섹션 추가 후 lint/type/build 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-12 17:23:59 +09:00
 - Agent Name: Codex
 - Branch: main

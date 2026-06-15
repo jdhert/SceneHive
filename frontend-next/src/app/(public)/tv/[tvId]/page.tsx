@@ -10,6 +10,7 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
+import { WatchProviderSection, type WatchProvidersPayload } from '@/components/media/watch-provider-section';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -91,6 +92,7 @@ type TvDetail = {
       first_air_date: string;
     }[];
   };
+  watch_providers?: WatchProvidersPayload | null;
 };
 
 function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
@@ -600,6 +602,8 @@ export default function TvDetailPage() {
                 </div>
               </section>
             ) : null}
+
+            <WatchProviderSection providers={tv.watch_providers} />
 
             <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>

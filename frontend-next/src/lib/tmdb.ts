@@ -93,6 +93,27 @@ export type TmdbDiscoverParams = {
   page?: number;
 };
 
+export type TmdbWatchProvider = {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority: number;
+};
+
+export type TmdbWatchProviderRegion = {
+  link?: string;
+  flatrate?: TmdbWatchProvider[];
+  rent?: TmdbWatchProvider[];
+  buy?: TmdbWatchProvider[];
+  ads?: TmdbWatchProvider[];
+  free?: TmdbWatchProvider[];
+};
+
+export type TmdbWatchProvidersResponse = {
+  id: number;
+  results: Record<string, TmdbWatchProviderRegion>;
+};
+
 export type TmdbMovieDetail = {
   id: number;
   title: string;
@@ -162,6 +183,7 @@ export type TmdbMovieDetail = {
   recommendations?: {
     results: TmdbMovie[];
   };
+  watch_providers?: TmdbWatchProvidersResponse | null;
 };
 
 export type TmdbVideoListResponse = {
@@ -338,6 +360,7 @@ export type TmdbTvDetail = {
   recommendations?: {
     results: TmdbTv[];
   };
+  watch_providers?: TmdbWatchProvidersResponse | null;
 };
 
 type TmdbFetchOptions = {
@@ -649,6 +672,14 @@ export async function fetchMovieVideos(movieId: number) {
   }
 }
 
+export async function fetchMovieWatchProviders(movieId: number) {
+  return tmdbFetch<TmdbWatchProvidersResponse>(`/movie/${movieId}/watch/providers`);
+}
+
+export async function fetchTvWatchProviders(tvId: number) {
+  return tmdbFetch<TmdbWatchProvidersResponse>(`/tv/${tvId}/watch/providers`);
+}
+
 export async function fetchSearchMovies(query: string, page = 1) {
   return tmdbFetch<TmdbMovieListResponse>('/search/movie', {
     query,
@@ -746,9 +777,12 @@ export async function fetchPersonDetails(personId: number) {
 }
 
 export async function fetchTvDetails(tvId: number) {
-  const detail = await tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
-    append_to_response: 'credits,videos,recommendations',
-  });
+  const [detail, watchProviders] = await Promise.all([
+    tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
+      append_to_response: 'credits,videos,recommendations',
+    }),
+    fetchTvWatchProviders(tvId).catch(() => null),
+  ]);
 
   const needOverview = !detail.overview?.trim();
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
@@ -757,7 +791,10 @@ export async function fetchTvDetails(tvId: number) {
   const needTrailerFallback = !hasKoreanTrailer;
 
   if (!needOverview && !needTrailerFallback) {
-    return detail;
+    return {
+      ...detail,
+      watch_providers: watchProviders,
+    };
   }
 
   try {
@@ -780,9 +817,13 @@ export async function fetchTvDetails(tvId: number) {
       videos: {
         results: mergedVideos,
       },
+      watch_providers: watchProviders,
     };
   } catch {
-    return detail;
+    return {
+      ...detail,
+      watch_providers: watchProviders,
+    };
   }
 }
 
@@ -811,9 +852,12 @@ async function fetchPopularMoviesFallback() {
 }
 
 export async function fetchMovieDetails(movieId: number) {
-  const detail = await tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
-    append_to_response: 'credits,videos,recommendations',
-  });
+  const [detail, watchProviders] = await Promise.all([
+    tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
+      append_to_response: 'credits,videos,recommendations',
+    }),
+    fetchMovieWatchProviders(movieId).catch(() => null),
+  ]);
 
   let mergedDetail = detail;
   const needOverview = !detail.overview?.trim();
@@ -890,6 +934,7 @@ export async function fetchMovieDetails(movieId: number) {
 
   return {
     ...mergedDetail,
+    watch_providers: watchProviders,
     recommendations: {
       results: dedupedRecommendations,
     },
