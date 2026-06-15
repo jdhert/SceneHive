@@ -6,6 +6,7 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const DEFAULT_LANGUAGE = 'ko-KR';
 const DEFAULT_REGION = 'KR';
 const DEFAULT_REVALIDATE_SECONDS = 600;
+const NOW_PLAYING_LOOKUP_PAGE_LIMIT = 5;
 
 export type TmdbMovie = {
   id: number;
@@ -114,6 +115,14 @@ export type TmdbWatchProvidersResponse = {
   results: Record<string, TmdbWatchProviderRegion>;
 };
 
+export type TmdbTheatricalStatus = {
+  region: string;
+  is_now_playing: boolean;
+  source: 'tmdb_now_playing';
+  checked_pages: number;
+  total_pages: number;
+};
+
 export type TmdbMovieDetail = {
   id: number;
   title: string;
@@ -184,6 +193,7 @@ export type TmdbMovieDetail = {
     results: TmdbMovie[];
   };
   watch_providers?: TmdbWatchProvidersResponse | null;
+  theatrical_status?: TmdbTheatricalStatus | null;
 };
 
 export type TmdbVideoListResponse = {
@@ -680,6 +690,47 @@ export async function fetchTvWatchProviders(tvId: number) {
   return tmdbFetch<TmdbWatchProvidersResponse>(`/tv/${tvId}/watch/providers`);
 }
 
+export async function fetchMovieTheatricalStatus(
+  movieId: number,
+  region = DEFAULT_REGION
+): Promise<TmdbTheatricalStatus> {
+  const firstPage = await tmdbFetch<TmdbMovieListResponse>('/movie/now_playing', {
+    region,
+    page: 1,
+  });
+  const totalPages = firstPage.total_pages ?? 1;
+  const pageLimit = Math.max(1, Math.min(totalPages, NOW_PLAYING_LOOKUP_PAGE_LIMIT));
+
+  if ((firstPage.results ?? []).some((movie) => movie.id === movieId)) {
+    return {
+      region,
+      is_now_playing: true,
+      source: 'tmdb_now_playing',
+      checked_pages: 1,
+      total_pages: totalPages,
+    };
+  }
+
+  const pageNumbers = Array.from({ length: pageLimit - 1 }, (_, index) => index + 2);
+  const pages = await Promise.all(
+    pageNumbers.map((page) =>
+      tmdbFetch<TmdbMovieListResponse>('/movie/now_playing', { region, page }).catch(() => null)
+    )
+  );
+  const checkedPages = 1 + pages.filter(Boolean).length;
+  const isNowPlaying = pages.some((page) =>
+    (page?.results ?? []).some((movie) => movie.id === movieId)
+  );
+
+  return {
+    region,
+    is_now_playing: isNowPlaying,
+    source: 'tmdb_now_playing',
+    checked_pages: checkedPages,
+    total_pages: totalPages,
+  };
+}
+
 export async function fetchSearchMovies(query: string, page = 1) {
   return tmdbFetch<TmdbMovieListResponse>('/search/movie', {
     query,
@@ -852,11 +903,12 @@ async function fetchPopularMoviesFallback() {
 }
 
 export async function fetchMovieDetails(movieId: number) {
-  const [detail, watchProviders] = await Promise.all([
+  const [detail, watchProviders, theatricalStatus] = await Promise.all([
     tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
       append_to_response: 'credits,videos,recommendations',
     }),
     fetchMovieWatchProviders(movieId).catch(() => null),
+    fetchMovieTheatricalStatus(movieId).catch(() => null),
   ]);
 
   let mergedDetail = detail;
@@ -935,6 +987,7 @@ export async function fetchMovieDetails(movieId: number) {
   return {
     ...mergedDetail,
     watch_providers: watchProviders,
+    theatrical_status: theatricalStatus,
     recommendations: {
       results: dedupedRecommendations,
     },

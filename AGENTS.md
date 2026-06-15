@@ -162,6 +162,134 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 10:01:44 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 극장 예매처 카드 비율 및 디자인 정리
+- Scope (In/Out): In: frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md / Out: 공식 로고 파일 로컬 저장, 극장별 상세 시간표 연동, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "극장 예매처 카드 비율 및 디자인 정리" -ScopeIn "frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md" -ScopeOut "공식 로고 파일 로컬 저장, 극장별 상세 시간표 연동, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; Chrome headless 로컬 /movies/936075 스크린샷 확인" -OpenRisks "로고는 외부 공식 이미지 URL을 참조하므로 해당 사이트가 hotlink를 차단하거나 경로를 변경하면 표시되지 않을 수 있음" -Blockers "None" -NextAction1 "사용자 화면에서 극장 카드 디자인 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 로고 asset을 권리 확인 후 public에 고정 저장"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; Chrome headless 로컬 /movies/936075 스크린샷 확인
+- Open Risks: 로고는 외부 공식 이미지 URL을 참조하므로 해당 사이트가 hotlink를 차단하거나 경로를 변경하면 표시되지 않을 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 사용자 화면에서 극장 카드 디자인 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 로고 asset을 권리 확인 후 public에 고정 저장
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:57:59 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 극장 예매처 카드 비율 및 디자인 정리
+- Scope (In/Out): In: frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md / Out: 공식 로고 파일 로컬 저장, 극장별 상세 시간표 연동, 배포/원격 검증
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "극장 예매처 카드 비율 및 디자인 정리" -ScopeIn "frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md" -ScopeOut "공식 로고 파일 로컬 저장, 극장별 상세 시간표 연동, 배포/원격 검증" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "외부 공식 로고 URL hotlink 차단/경로 변경 가능성은 남아 있음" -Blockers "None" -NextAction1 "예매처 카드 톤을 중립 UI로 정리" -NextAction2 "로고 박스 크기와 background-size를 비율 유지 기준으로 수정" -NextAction3 "lint/type 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 외부 공식 로고 URL hotlink 차단/경로 변경 가능성은 남아 있음
+- Blockers: None
+- Next 3 Actions: 1) 예매처 카드 톤을 중립 UI로 정리, 2) 로고 박스 크기와 background-size를 비율 유지 기준으로 수정, 3) lint/type 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:54:48 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 극장 예매처 공식 로고 경로 적용
+- Scope (In/Out): In: frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md / Out: 로고 파일 자체 저장, 극장별 영화코드 딥링크 매칭, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 극장 예매처 공식 로고 경로 적용" -ScopeIn "frontend-next/src/components/media/watch-provider-section.tsx, AGENTS.md" -ScopeOut "로고 파일 자체 저장, 극장별 영화코드 딥링크 매칭, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; CGV/CJ뉴스룸 이미지 200 확인; 롯데시네마 공식 이미지 200 확인; 메가박스 공식 이미지 200 확인" -OpenRisks "로고는 외부 공식 이미지 URL을 CSS background-image로 참조하므로 해당 사이트가 hotlink를 차단하거나 경로를 변경하면 표시되지 않을 수 있음; 그 경우 public asset으로 권리 확인 후 저장 필요" -Blockers "None" -NextAction1 "브라우저에서 영화 상세 극장 카드 실제 표시 확인" -NextAction2 "사용자 확인 후 커밋 및 원격 push" -NextAction3 "필요 시 공식 로고 파일을 public asset으로 관리하는 방식 검토"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; CGV/CJ뉴스룸 이미지 200 확인; 롯데시네마 공식 이미지 200 확인; 메가박스 공식 이미지 200 확인
+- Open Risks: 로고는 외부 공식 이미지 URL을 CSS background-image로 참조하므로 해당 사이트가 hotlink를 차단하거나 경로를 변경하면 표시되지 않을 수 있음; 그 경우 public asset으로 권리 확인 후 저장 필요
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 영화 상세 극장 카드 실제 표시 확인, 2) 사용자 확인 후 커밋 및 원격 push, 3) 필요 시 공식 로고 파일을 public asset으로 관리하는 방식 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:46:37 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 극장 예매처 로고형 아이콘 적용
+- Scope (In/Out): In: frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/*, AGENTS.md / Out: 공식 원본 로고 라이선스 확보, 극장별 영화코드 딥링크 매칭, 배포/원격 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/theaters/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 극장 예매처 로고형 아이콘 적용" -ScopeIn "frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/*, AGENTS.md" -ScopeOut "공식 원본 로고 라이선스 확보, 극장별 영화코드 딥링크 매칭, 배포/원격 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; 로컬 /theaters/cgv.svg /theaters/lottecinema.svg /theaters/megabox.svg 200 확인; 로컬 /movies/936075 200 확인" -OpenRisks "현재 SVG는 공식 원본 파일을 복제한 것이 아니라 서비스 식별용 로고형 asset임; 상용 공식 로고가 필요하면 권리 확인 후 public/theaters/*.svg만 교체 가능" -Blockers "None" -NextAction1 "브라우저에서 영화 상세 극장 카드 시각 확인" -NextAction2 "사용자 확인 후 커밋 및 원격 push" -NextAction3 "필요 시 공식 로고 asset 확보 후 SVG 교체"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; 로컬 /theaters/cgv.svg /theaters/lottecinema.svg /theaters/megabox.svg 200 확인; 로컬 /movies/936075 200 확인
+- Open Risks: 현재 SVG는 공식 원본 파일을 복제한 것이 아니라 서비스 식별용 로고형 asset임; 상용 공식 로고가 필요하면 권리 확인 후 public/theaters/*.svg만 교체 가능
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 영화 상세 극장 카드 시각 확인, 2) 사용자 확인 후 커밋 및 원격 push, 3) 필요 시 공식 로고 asset 확보 후 SVG 교체
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:43:53 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 극장 예매처 로고형 아이콘 적용
+- Scope (In/Out): In: frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/*, AGENTS.md / Out: 공식 원본 로고 라이선스 확보, 극장별 영화코드 딥링크 매칭, 배포/원격 검증
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 극장 예매처 로고형 아이콘 적용" -ScopeIn "frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/*, AGENTS.md" -ScopeOut "공식 원본 로고 라이선스 확보, 극장별 영화코드 딥링크 매칭, 배포/원격 검증" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "공식 원본 로고 파일이 아니라 서비스 식별용 로고형 SVG asset으로 구현 예정; 상용 공식 로고는 권리 확인 후 교체 필요" -Blockers "None" -NextAction1 "로고형 SVG asset 추가" -NextAction2 "극장 버튼 렌더링을 이미지 기반으로 변경" -NextAction3 "lint/type 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 공식 원본 로고 파일이 아니라 서비스 식별용 로고형 SVG asset으로 구현 예정; 상용 공식 로고는 권리 확인 후 교체 필요
+- Blockers: None
+- Next 3 Actions: 1) 로고형 SVG asset 추가, 2) 극장 버튼 렌더링을 이미지 기반으로 변경, 3) lint/type 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:34:55 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 영화 상세 극장 상영중 예매처 안내
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, AGENTS.md / Out: 극장사 내부 영화코드 매칭, 지점별 시간표/좌석/예매 가능 여부 API 연동, TV 상세 극장 표시
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "영화 상세 극장 상영중 예매처 안내" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, AGENTS.md" -ScopeOut "극장사 내부 영화코드 매칭, 지점별 시간표/좌석/예매 가능 여부 API 연동, TV 상세 극장 표시" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 dev 서버 3000 재기동 성공" -OpenRisks "CGV/롯데시네마/메가박스 버튼은 공식 예매 진입 페이지로 연결되며 영화별 자동 선택 딥링크는 극장사 내부 movie code가 없어 보장하지 않음" -Blockers "None" -NextAction1 "로컬 /movies/936075에서 극장 상영중 카드와 예매처 버튼 수동 확인" -NextAction2 "사용자 확인 후 커밋 및 원격 push" -NextAction3 "후속으로 KOBIS/극장사 데이터 연동 가능성 검토"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 dev 서버 3000 재기동 성공
+- Open Risks: CGV/롯데시네마/메가박스 버튼은 공식 예매 진입 페이지로 연결되며 영화별 자동 선택 딥링크는 극장사 내부 movie code가 없어 보장하지 않음
+- Blockers: None
+- Next 3 Actions: 1) 로컬 /movies/936075에서 극장 상영중 카드와 예매처 버튼 수동 확인, 2) 사용자 확인 후 커밋 및 원격 push, 3) 후속으로 KOBIS/극장사 데이터 연동 가능성 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:21:41 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 영화 상세 한국 극장 상영중 표시
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, AGENTS.md / Out: TV 상세 극장 표시, 극장별 시간표/예매 API 연동, Spring 백엔드 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M AGENTS.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "영화 상세 한국 극장 상영중 표시" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, AGENTS.md" -ScopeOut "TV 상세 극장 표시, 극장별 시간표/예매 API 연동, Spring 백엔드 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 /api/movies/936075 theatrical_status.is_now_playing=true 확인; 로컬 /api/movies/496243 theatrical_status.is_now_playing=false 확인" -OpenRisks "TMDB now_playing 기준이라 극장별 실제 상영 시간표/예매 가능 여부는 보장하지 않음; now_playing 조회는 상세 지연을 막기 위해 최대 5페이지까지만 확인함" -Blockers "None" -NextAction1 "로컬 /movies/936075 화면에서 극장 상영중 배지 수동 확인" -NextAction2 "사용자 확인 후 커밋 및 원격 push" -NextAction3 "필요 시 KOBIS/극장사 데이터로 상영 정확도 고도화 검토"
+- Tests Run + Result: git diff --check 성공; next lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/hook/themeColor 경고 잔존); 로컬 /api/movies/936075 theatrical_status.is_now_playing=true 확인; 로컬 /api/movies/496243 theatrical_status.is_now_playing=false 확인
+- Open Risks: TMDB now_playing 기준이라 극장별 실제 상영 시간표/예매 가능 여부는 보장하지 않음; now_playing 조회는 상세 지연을 막기 위해 최대 5페이지까지만 확인함
+- Blockers: None
+- Next 3 Actions: 1) 로컬 /movies/936075 화면에서 극장 상영중 배지 수동 확인, 2) 사용자 확인 후 커밋 및 원격 push, 3) 필요 시 KOBIS/극장사 데이터로 상영 정확도 고도화 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 09:14:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 영화 상세 한국 극장 상영중 표시
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, AGENTS.md / Out: TV 상세 극장 표시, 극장별 시간표/예매 API 연동, Spring 백엔드 변경
+- Current Status: in progress
+- Percent Complete: 10
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "영화 상세 한국 극장 상영중 표시" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, AGENTS.md" -ScopeOut "TV 상세 극장 표시, 극장별 시간표/예매 API 연동, Spring 백엔드 변경" -Status "in progress" -PercentComplete "10" -TestsResult "Not run yet" -OpenRisks "TMDB now_playing 기준이라 극장별 실제 상영 시간표/예매 가능 여부는 보장하지 않음" -Blockers "None" -NextAction1 "TMDB now_playing 기반 theatrical_status 추가" -NextAction2 "영화 상세 시청 방법 섹션에 극장 상영중 표시 추가" -NextAction3 "lint/type/build 및 API 응답 확인"
+- Tests Run + Result: Not run yet
+- Open Risks: TMDB now_playing 기준이라 극장별 실제 상영 시간표/예매 가능 여부는 보장하지 않음
+- Blockers: None
+- Next 3 Actions: 1) TMDB now_playing 기반 theatrical_status 추가, 2) 영화 상세 시청 방법 섹션에 극장 상영중 표시 추가, 3) lint/type/build 및 API 응답 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-12 18:04:50 +09:00
 - Agent Name: Codex
 - Branch: main

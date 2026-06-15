@@ -10,7 +10,11 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
-import { WatchProviderSection, type WatchProvidersPayload } from '@/components/media/watch-provider-section';
+import {
+  WatchProviderSection,
+  type TheatricalStatus,
+  type WatchProvidersPayload,
+} from '@/components/media/watch-provider-section';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -113,6 +117,7 @@ type MovieDetail = {
     }[];
   };
   watch_providers?: WatchProvidersPayload | null;
+  theatrical_status?: TheatricalStatus | null;
 };
 
 function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
@@ -707,7 +712,11 @@ export default function MovieDetailPage() {
               </section>
             ) : null}
 
-            <WatchProviderSection providers={movie.watch_providers} />
+            <WatchProviderSection
+              providers={movie.watch_providers}
+              theatricalStatus={movie.theatrical_status}
+              theatricalMovieTitle={movie.title}
+            />
 
             <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
