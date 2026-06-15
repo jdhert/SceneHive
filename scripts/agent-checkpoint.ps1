@@ -13,14 +13,55 @@ param(
     [string]$NextAction2 = "Plan verification",
     [string]$NextAction3 = "Update handoff",
     [string]$ResumeCommand = "git status --short && git branch --show-current",
-    [string]$AgentsFile = "AGENTS.md"
+    [string]$HandoffFile = "HANDOFF.md",
+    [string]$AgentsFile = ""
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-if (-not (Test-Path -Path $AgentsFile)) {
-    throw "AGENTS file not found: $AgentsFile"
+function Write-Utf8File {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string]$Content
+    )
+
+    $resolvedPath = if (Test-Path -Path $Path) {
+        (Resolve-Path -Path $Path).Path
+    }
+    else {
+        Join-Path (Get-Location) $Path
+    }
+
+    [System.IO.File]::WriteAllText(
+        $resolvedPath,
+        $Content.TrimEnd() + "`r`n",
+        [System.Text.UTF8Encoding]::new($false)
+    )
+}
+
+$targetFile = if (-not [string]::IsNullOrWhiteSpace($AgentsFile)) { $AgentsFile } else { $HandoffFile }
+
+if (-not (Test-Path -Path $targetFile)) {
+    $initialContent = @'
+# HANDOFF.md
+
+이 문서는 SceneHive 작업 세션의 최신/누적 Handoff Snapshot을 보관한다.
+에이전트 운영 규칙과 프로젝트 고정 컨텍스트는 `AGENTS.md`를 기준으로 하고, 실제 이어받기 시작점은 이 파일의 가장 최신 Snapshot을 기준으로 한다.
+
+## 운영 규칙
+
+- 최신 Snapshot은 항상 위쪽에 추가한다.
+- 오래된 Snapshot은 `checkpoint-prune -Keep 30` 또는 `./scripts/checkpoint-prune.ps1 -Keep 30`으로 `AGENTS_ARCHIVE.md`에 보관한다.
+- 작업 종료 또는 긴 작업 전에는 `checkpoint`/`ckp`를 실행해 현재 상태를 남긴다.
+
+## Handoff Snapshot Log (Auto)
+<!-- HANDOFF_LOG_START -->
+<!-- HANDOFF_LOG_END -->
+'@
+    Write-Utf8File -Path $targetFile -Content $initialContent
 }
 
 $koreaTimeZone = [System.TimeZoneInfo]::FindSystemTimeZoneById("Korea Standard Time")
@@ -60,7 +101,7 @@ $snapshot = @"
 - Resume Command: $ResumeCommand
 "@
 
-$content = Get-Content -Path $AgentsFile -Raw -Encoding UTF8
+$content = Get-Content -Path $targetFile -Raw -Encoding UTF8
 $startMarker = "<!-- HANDOFF_LOG_START -->"
 $endMarker = "<!-- HANDOFF_LOG_END -->"
 
@@ -81,7 +122,7 @@ if ($content.Contains($startMarker) -and $content.Contains($endMarker)) {
         },
         1
     )
-    Set-Content -Path $AgentsFile -Value $updated -Encoding UTF8
+    Write-Utf8File -Path $targetFile -Content $updated
 }
 else {
     $logBlock = @"
@@ -91,15 +132,10 @@ $snapshot
 <!-- HANDOFF_LOG_END -->
 "@
 
-    if ($content -match "(?m)^## 10\. 변경 이력") {
-        $updated = $content -replace "(?m)^## 10\. 변경 이력", ($logBlock.TrimEnd() + "`r`n`r`n## 10. 변경 이력")
-    }
-    else {
-        $updated = $content.TrimEnd() + "`r`n`r`n" + $logBlock.TrimEnd() + "`r`n"
-    }
-    Set-Content -Path $AgentsFile -Value $updated -Encoding UTF8
+    $updated = $content.TrimEnd() + "`r`n`r`n" + $logBlock.TrimEnd() + "`r`n"
+    Write-Utf8File -Path $targetFile -Content $updated
 }
 
-Write-Host "Checkpoint updated in $AgentsFile"
+Write-Host "Checkpoint updated in $targetFile"
 Write-Host "Timestamp: $timestamp"
 Write-Host "Branch: $branch"
