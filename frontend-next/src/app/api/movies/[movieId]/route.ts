@@ -10,7 +10,7 @@ type RouteContext = {
 export const revalidate = 600;
 
 const CACHE_HEADERS = {
-  'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1800',
+  'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=1800',
 };
 
 export async function GET(_: Request, { params }: RouteContext) {

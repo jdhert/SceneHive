@@ -15,6 +15,7 @@ import {
   ExternalRatingsSection,
   type ExternalRatingsPayload,
 } from '@/components/media/external-ratings-section';
+import { prefetchMediaDetail } from '@/lib/detail-prefetch';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -589,11 +590,7 @@ export default function TvDetailPage() {
               </div>
             </section>
 
-            <ExternalRatingsSection
-              ratings={tv.external_ratings}
-              tmdbRating={tv.vote_average}
-              tmdbVotes={tv.vote_count}
-            />
+            <ExternalRatingsSection ratings={tv.external_ratings} />
 
             {trailerEmbedUrl ? (
               <section className="mt-6 rounded-2xl border p-5" style={{ borderColor: 'rgba(255,255,255,0.14)', background: PANEL }}>
@@ -724,6 +721,9 @@ export default function TvDetailPage() {
                       key={item.id}
                       href={`/tv/${item.id}`}
                       draggable={false}
+                      onPointerEnter={() => prefetchMediaDetail(`/tv/${item.id}`)}
+                      onFocus={() => prefetchMediaDetail(`/tv/${item.id}`)}
+                      onTouchStart={() => prefetchMediaDetail(`/tv/${item.id}`)}
                       onDragStart={(event) => event.preventDefault()}
                       className="group rounded-lg border p-2 block w-40 md:w-48 shrink-0"
                       style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}

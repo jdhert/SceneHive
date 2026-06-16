@@ -4,6 +4,11 @@ export type ExternalRatingsPayload = {
   imdb_id: string;
   source: 'omdb';
   cached_at: string;
+  rotten_tomatoes?: {
+    value: number;
+    scale: 100;
+    url: string;
+  } | null;
   imdb?: {
     value: number;
     scale: 10;
@@ -26,42 +31,41 @@ type RatingCardProps = {
   logo: {
     src: string;
     alt: string;
-    width: number;
-    height: number;
-    className?: string;
   };
   tone: {
     accent: string;
     border: string;
     background: string;
     shadow: string;
+    logoBackground?: string;
+    score?: string;
   };
 };
 
 function RatingCard({ label, value, description, detail, href, logo, tone }: RatingCardProps) {
-  const [score, scale] = value.split(' / ');
+  const [score, scale] = value.includes(' / ') ? value.split(' / ') : [value, null];
 
   const content = (
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <span
-            className="flex h-16 w-full max-w-[280px] items-center justify-center overflow-hidden rounded-xl border"
+            className="flex h-12 w-44 max-w-full items-center justify-center overflow-hidden rounded-lg border"
             style={{
               borderColor: `${tone.accent}44`,
-              background: tone.accent,
+              background: tone.logoBackground ?? 'rgba(255,255,255,0.94)',
               backgroundImage: `url("${logo.src}")`,
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              backgroundSize: '100% 100%',
-              boxShadow: `0 12px 30px ${tone.shadow}`,
+              backgroundSize: 'contain',
+              boxShadow: `0 10px 26px ${tone.shadow}`,
             }}
             role="img"
             aria-label={logo.alt}
           />
-          <span className="mt-4 block min-w-0">
-            <span className="block truncate text-base font-bold text-white">{label}</span>
-            <span className="mt-1 block truncate text-sm" style={{ color: 'rgba(255,255,255,0.54)' }}>
+          <span className="mt-5 block min-w-0">
+            <span className="block truncate text-sm font-bold uppercase tracking-[0.08em] text-white">{label}</span>
+            <span className="mt-1 block truncate text-sm" style={{ color: 'rgba(255,255,255,0.62)' }}>
               {description}
             </span>
           </span>
@@ -75,14 +79,16 @@ function RatingCard({ label, value, description, detail, href, logo, tone }: Rat
           </span>
         ) : null}
       </div>
-      <div className="mt-6">
+      <div className="mt-8">
         <p className="flex items-baseline gap-2">
-          <span className="text-5xl font-black leading-none sm:text-6xl" style={{ color: tone.accent }}>
+          <span className="text-5xl font-black leading-none sm:text-6xl" style={{ color: tone.score ?? tone.accent }}>
             {score}
           </span>
-          <span className="text-xl font-black" style={{ color: 'rgba(255,255,255,0.76)' }}>
-            / {scale}
-          </span>
+          {scale ? (
+            <span className="text-xl font-black" style={{ color: 'rgba(255,255,255,0.76)' }}>
+              / {scale}
+            </span>
+          ) : null}
         </p>
         {detail ? (
           <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>
@@ -94,7 +100,7 @@ function RatingCard({ label, value, description, detail, href, logo, tone }: Rat
   );
 
   const className =
-    'group block rounded-xl border p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60';
+    'group block min-h-[242px] rounded-xl border p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60';
   const style = {
     borderColor: tone.border,
     background: tone.background,
@@ -148,19 +154,24 @@ function metascoreTone(score: number) {
 
 export function ExternalRatingsSection({
   ratings,
-  tmdbRating,
-  tmdbVotes,
 }: {
   ratings?: ExternalRatingsPayload | null;
-  tmdbRating: number;
-  tmdbVotes: number;
 }) {
-  if (!ratings?.imdb && !ratings?.metascore) {
+  if (!ratings?.rotten_tomatoes && !ratings?.imdb && !ratings?.metascore) {
     return null;
   }
 
-  const tmdbVoteText = `${tmdbVotes.toLocaleString()} votes`;
   const metacriticTone = ratings.metascore ? metascoreTone(ratings.metascore.value) : null;
+  const ratingCardCount = [
+    ratings.rotten_tomatoes,
+    ratings.metascore,
+    ratings.imdb,
+  ].filter(Boolean).length;
+  const gridClassName = ratingCardCount === 3
+      ? 'mt-5 grid grid-cols-1 gap-3 md:grid-cols-3'
+      : ratingCardCount === 2
+        ? 'mt-5 grid grid-cols-1 gap-3 md:grid-cols-2'
+        : 'mt-5 grid grid-cols-1 gap-3 md:grid-cols-1';
 
   return (
     <section
@@ -177,26 +188,24 @@ export function ExternalRatingsSection({
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-        {ratings.imdb ? (
+      <div className={gridClassName}>
+        {ratings.rotten_tomatoes ? (
           <RatingCard
-            label="IMDb"
-            value={`${ratings.imdb.value.toFixed(1)} / ${ratings.imdb.scale}`}
-            description="사용자 평점"
-            detail={ratings.imdb.votes ? `${ratings.imdb.votes} votes` : undefined}
-            href={ratings.imdb.url}
+            label="Rotten Tomatoes"
+            value={`${Math.round(ratings.rotten_tomatoes.value)}%`}
+            description="Tomatometer %"
+            href={ratings.rotten_tomatoes.url}
             logo={{
-              src: '/ratings/imdb.svg',
-              alt: 'IMDb',
-              width: 180,
-              height: 72,
+              src: '/ratings/rottentomatoes.svg',
+              alt: 'Rotten Tomatoes',
             }}
             tone={{
-              accent: '#F5C518',
-              border: 'rgba(245,197,24,0.36)',
+              accent: '#FA320A',
+              border: 'rgba(250,50,10,0.42)',
               background:
-                'linear-gradient(135deg, rgba(245,197,24,0.18) 0%, rgba(24,22,12,0.74) 42%, rgba(255,255,255,0.035) 100%)',
-              shadow: 'rgba(245,197,24,0.08)',
+                'linear-gradient(145deg, rgba(250,50,10,0.22) 0%, rgba(49,12,13,0.84) 42%, rgba(12,14,22,0.98) 100%)',
+              shadow: 'rgba(250,50,10,0.12)',
+              score: '#FF4B2F',
             }}
           />
         ) : null}
@@ -209,31 +218,30 @@ export function ExternalRatingsSection({
             logo={{
               src: '/ratings/metacritic.svg',
               alt: 'Metacritic',
-              width: 230,
-              height: 72,
             }}
             tone={metacriticTone}
           />
         ) : null}
-        <RatingCard
-          label="TMDB"
-          value={`${tmdbRating.toFixed(1)} / 10`}
-          description="TMDB 커뮤니티 평점"
-          detail={tmdbVoteText}
-          logo={{
-            src: '/ratings/tmdb.svg',
-            alt: 'TMDB',
-            width: 210,
-            height: 72,
-          }}
-          tone={{
-            accent: '#01B4E4',
-            border: 'rgba(1,180,228,0.34)',
-            background:
-              'linear-gradient(135deg, rgba(1,180,228,0.16) 0%, rgba(9,25,42,0.78) 42%, rgba(144,206,161,0.06) 100%)',
-            shadow: 'rgba(1,180,228,0.08)',
-          }}
-        />
+        {ratings.imdb ? (
+          <RatingCard
+            label="IMDb"
+            value={`${ratings.imdb.value.toFixed(1)} / ${ratings.imdb.scale}`}
+            description="사용자 평점"
+            detail={ratings.imdb.votes ? `${ratings.imdb.votes} votes` : undefined}
+            href={ratings.imdb.url}
+            logo={{
+              src: '/ratings/imdb.svg',
+              alt: 'IMDb',
+            }}
+            tone={{
+              accent: '#F5C518',
+              border: 'rgba(245,197,24,0.36)',
+              background:
+                'linear-gradient(135deg, rgba(245,197,24,0.18) 0%, rgba(24,22,12,0.74) 42%, rgba(255,255,255,0.035) 100%)',
+              shadow: 'rgba(245,197,24,0.08)',
+            }}
+          />
+        ) : null}
       </div>
     </section>
   );

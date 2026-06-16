@@ -28,6 +28,7 @@ import {
   toRecentlyViewedRequest,
   type RecentlyViewedItem,
 } from '@/lib/recently-viewed';
+import { prefetchMediaDetail } from '@/lib/detail-prefetch';
 import type { FavoriteItem, FavoriteTargetType, GenrePreferenceItem } from '@/types';
 import type { Genre, HomePayload, Movie, Person, Tv } from '@/types/home';
 
@@ -988,7 +989,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
       </header>
 
       <section
-        className="relative z-10 w-full -mt-20 pt-32 md:pt-36 pb-20 md:pb-24 min-h-[calc(100vh-64px)] md:min-h-[90vh] flex items-center overflow-hidden"
+        className="relative z-10 w-full -mt-20 pt-32 md:pt-36 pb-16 md:pb-20 min-h-[560px] md:min-h-[640px] lg:min-h-[680px] flex items-center overflow-hidden"
         style={{ background: 'linear-gradient(180deg, rgba(4,6,12,0.30) 0%, rgba(4,6,12,0.76) 100%)' }}
       >
         <div className="absolute inset-0 pointer-events-none">
@@ -1085,7 +1086,13 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
                     className="font-semibold px-7 py-6 text-base rounded-2xl"
                     style={{ borderColor: 'rgba(255,255,255,0.24)', background: 'rgba(255,255,255,0.08)', color: 'white' }}
                   >
-                    <Link href={heroMovie.href ?? `/movies/${heroMovie.id}`} className="inline-flex items-center gap-2">
+                    <Link
+                      href={heroMovie.href ?? `/movies/${heroMovie.id}`}
+                      onPointerEnter={() => prefetchMediaDetail(heroMovie.href ?? `/movies/${heroMovie.id}`)}
+                      onFocus={() => prefetchMediaDetail(heroMovie.href ?? `/movies/${heroMovie.id}`)}
+                      onTouchStart={() => prefetchMediaDetail(heroMovie.href ?? `/movies/${heroMovie.id}`)}
+                      className="inline-flex items-center gap-2"
+                    >
                       <Info className="w-4 h-4" />
                       More Info
                     </Link>
@@ -1674,10 +1681,15 @@ function MoviePosterCard({
   index: number;
   numbered: boolean;
 }) {
+  const href = movie.href ?? `/movies/${movie.id}`;
+
   return (
     <Link
-      href={movie.href ?? `/movies/${movie.id}`}
+      href={href}
       draggable={false}
+      onPointerEnter={() => prefetchMediaDetail(href)}
+      onFocus={() => prefetchMediaDetail(href)}
+      onTouchStart={() => prefetchMediaDetail(href)}
       onDragStart={(event) => event.preventDefault()}
       className="relative w-40 md:w-48 shrink-0 group block transition-transform duration-300 hover:-translate-y-1"
     >

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import { useUser } from '@/providers/user-provider';
+import { prefetchMediaDetail } from '@/lib/detail-prefetch';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.68)';
@@ -636,8 +637,16 @@ function DiscoverPageContent() {
 }
 
 function DiscoverCard({ item }: { item: DiscoverItem }) {
+  const href = hrefFor(item);
+
   return (
-    <Link href={hrefFor(item)} className="group block">
+    <Link
+      href={href}
+      onPointerEnter={() => prefetchMediaDetail(href)}
+      onFocus={() => prefetchMediaDetail(href)}
+      onTouchStart={() => prefetchMediaDetail(href)}
+      className="group block"
+    >
       <div
         className="relative aspect-[2/3] rounded-xl overflow-hidden border"
         style={{ borderColor: 'rgba(85,168,255,0.16)', background: 'rgba(255,255,255,0.03)' }}

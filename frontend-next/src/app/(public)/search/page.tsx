@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
+import { prefetchMediaDetail } from '@/lib/detail-prefetch';
 
 const BG = '#04060C';
 const PANEL = 'rgba(9,13,24,0.58)';
@@ -417,8 +418,16 @@ function SearchResultSection({ title, items }: { title: string; items: MultiSear
 }
 
 function SearchResultCard({ item }: { item: MultiSearchItem }) {
+  const href = getItemHref(item);
+
   return (
-    <Link href={getItemHref(item)} className="group block">
+    <Link
+      href={href}
+      onPointerEnter={() => prefetchMediaDetail(href)}
+      onFocus={() => prefetchMediaDetail(href)}
+      onTouchStart={() => prefetchMediaDetail(href)}
+      className="group block"
+    >
       <div
         className="relative aspect-[2/3] rounded-xl overflow-hidden border"
         style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.03)' }}

@@ -12,6 +12,198 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-16 15:54:31 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 로컬 Next dev 캐시 오류 복구
+- Scope (In/Out): In: frontend-next/.next 재생성, 로컬 dev 서버 재시작, HANDOFF.md / Out: 애플리케이션 로직 변경, 커밋/원격 push
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/discover/page.tsx,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/search/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? .tmp-next-dev.err, ?? frontend-next/public/ratings/rottentomatoes.svg, ?? frontend-next/src/lib/detail-prefetch.ts
+- Commands Run: git branch --show-current, git status --short, Remove-Item -LiteralPath 'D:\project\.tmp-movie-936075-fixed.png' -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath 'D:\project\.tmp-chrome-profile-movie-fixed' -Recurse -Force -ErrorAction SilentlyContinue; & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "로컬 Next dev 캐시 오류 복구" -ScopeIn "frontend-next/.next 재생성, 로컬 dev 서버 재시작, HANDOFF.md" -ScopeOut "애플리케이션 로직 변경, 커밋/원격 push" -Status "done" -PercentComplete "100" -TestsResult "localhost:3000/movies/936075 200; localhost:3000/api/movies/936075 200; Chrome headless 상세 페이지 캡처 정상 렌더링 확인" -OpenRisks "현재 dev 서버는 새 프로세스로 실행 중이며, 기존 themeColor metadata 경고는 남아 있으나 화면 중단 원인은 아님" -Blockers "None" -NextAction1 "브라우저에서 /movies/936075 새로고침 후 확인" -NextAction2 "themeColor 경고는 별도 viewport export 정리 가능" -NextAction3 "현재 변경분 확정 시 커밋 및 원격 push"; git status --short
+- Tests Run + Result: localhost:3000/movies/936075 200; localhost:3000/api/movies/936075 200; Chrome headless 상세 페이지 캡처 정상 렌더링 확인
+- Open Risks: 현재 dev 서버는 새 프로세스로 실행 중이며, 기존 themeColor metadata 경고는 남아 있으나 화면 중단 원인은 아님
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 /movies/936075 새로고침 후 확인, 2) themeColor 경고는 별도 viewport export 정리 가능, 3) 현재 변경분 확정 시 커밋 및 원격 push
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-16 15:30:57 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 이미지 비율 복구 및 히어로 높이 조정
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, 상세 prefetch 변경분, HANDOFF.md / Out: 커밋/원격 push, 운영 서버 수동 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/discover/page.tsx,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/search/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg, ?? frontend-next/src/lib/detail-prefetch.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 이미지 비율 복구 및 히어로 높이 조정" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, 상세 prefetch 변경분, HANDOFF.md" -ScopeOut "커밋/원격 push, 운영 서버 수동 검증" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; Chrome headless /home 캡처 확인 - 히어로 아래 For You 섹션 노출" -OpenRisks "사용자 브라우저의 기존 HMR 상태가 꼬였으면 새로고침 또는 dev 서버 재시작이 필요할 수 있음" -Blockers "None" -NextAction1 "브라우저에서 /home 새로고침 후 히어로/카드 비율 확인" -NextAction2 "문제 없으면 현재 변경분 커밋 및 원격 push" -NextAction3 "상세 이미지 전체화면 이슈는 별도 재현 URL 기준으로 좁게 수정"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; Chrome headless /home 캡처 확인 - 히어로 아래 For You 섹션 노출
+- Open Risks: 사용자 브라우저의 기존 HMR 상태가 꼬였으면 새로고침 또는 dev 서버 재시작이 필요할 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 /home 새로고침 후 히어로/카드 비율 확인, 2) 문제 없으면 현재 변경분 커밋 및 원격 push, 3) 상세 이미지 전체화면 이슈는 별도 재현 URL 기준으로 좁게 수정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-16 15:18:16 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세/카드 이미지 화면 점유 방지
+- Scope (In/Out): In: frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/search/page.tsx, frontend-next/src/app/(public)/discover/page.tsx, frontend-next/src/app/(public)/people/page.tsx, frontend-next/src/components/media/watch-provider-section.tsx, HANDOFF.md / Out: 배포/원격 서버 검증, 기존 로컬 dev 서버 프로세스 종료
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/discover/page.tsx,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/people/page.tsx,  M frontend-next/src/app/(public)/search/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg, ?? frontend-next/src/lib/detail-prefetch.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세/카드 이미지 화면 점유 방지" -ScopeIn "frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/(public)/people/[personId]/page.tsx, frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/search/page.tsx, frontend-next/src/app/(public)/discover/page.tsx, frontend-next/src/app/(public)/people/page.tsx, frontend-next/src/components/media/watch-provider-section.tsx, HANDOFF.md" -ScopeOut "배포/원격 서버 검증, 기존 로컬 dev 서버 프로세스 종료" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; 로컬 화면 캡처는 기존 Next dev 서버의 .next vendor-chunks 캐시 오류로 불가" -OpenRisks "로컬 dev 서버가 Cannot find module './vendor-chunks/axios.js' 상태라 화면 캡처 검증은 못함; 배포 후 상세/인물 페이지에서 수동 확인 필요" -Blockers "None" -NextAction1 "필요 시 로컬 node dev 서버 종료 후 .next 정리 및 npm run dev 재실행" -NextAction2 "배포 후 /movies, /tv, /people 상세에서 이미지가 카드/헤더 안에 고정되는지 확인" -NextAction3 "확정 시 현재 평점/최적화/이미지 방어 변경분을 함께 커밋 및 push"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; 로컬 화면 캡처는 기존 Next dev 서버의 .next vendor-chunks 캐시 오류로 불가
+- Open Risks: 로컬 dev 서버가 Cannot find module './vendor-chunks/axios.js' 상태라 화면 캡처 검증은 못함; 배포 후 상세/인물 페이지에서 수동 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 필요 시 로컬 node dev 서버 종료 후 .next 정리 및 npm run dev 재실행, 2) 배포 후 /movies, /tv, /people 상세에서 이미지가 카드/헤더 안에 고정되는지 확인, 3) 확정 시 현재 평점/최적화/이미지 방어 변경분을 함께 커밋 및 push
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-16 15:02:12 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 진입 딜레이 최적화
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/lib/detail-prefetch.ts, 홈/검색/Discover/상세 추천/인물 필모 링크 prefetch, HANDOFF.md / Out: 상세 페이지 SSR 전환, API 응답 분리 대규모 리팩터링, 커밋/원격 push
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/discover/page.tsx,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/search/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg, ?? frontend-next/src/lib/detail-prefetch.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 진입 딜레이 최적화" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/lib/detail-prefetch.ts, 홈/검색/Discover/상세 추천/인물 필모 링크 prefetch, HANDOFF.md" -ScopeOut "상세 페이지 SSR 전환, API 응답 분리 대규모 리팩터링, 커밋/원격 push" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 Cache-Control max-age=60 확인; 상세 API 응답 확인; npm run build는 로컬 node dev 프로세스가 .next/trace를 잠가 EPERM으로 실패" -OpenRisks "사전 fetch는 hover/focus/touch 이후에만 효과가 있어 모바일 즉시 탭에서는 개선폭이 제한적일 수 있음; 더 큰 개선은 상세 API를 main/supplemental로 분리하는 작업이 필요" -Blockers "None" -NextAction1 "사용자 확인 후 변경분 커밋 및 원격 push" -NextAction2 "로컬 dev 서버 종료 후 npm run build 재실행 가능" -NextAction3 "추가 최적화가 필요하면 상세 본문 먼저 렌더링 후 평점/OTT/추천을 별도 API로 지연 로딩"; git status --short
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 Cache-Control max-age=60 확인; 상세 API 응답 확인; npm run build는 로컬 node dev 프로세스가 .next/trace를 잠가 EPERM으로 실패
+- Open Risks: 사전 fetch는 hover/focus/touch 이후에만 효과가 있어 모바일 즉시 탭에서는 개선폭이 제한적일 수 있음; 더 큰 개선은 상세 API를 main/supplemental로 분리하는 작업이 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 변경분 커밋 및 원격 push, 2) 로컬 dev 서버 종료 후 npm run build 재실행 가능, 3) 추가 최적화가 필요하면 상세 본문 먼저 렌더링 후 평점/OTT/추천을 별도 API로 지연 로딩
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-16 14:50:22 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 진입 딜레이 최적화
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/lib/detail-prefetch.ts, 홈/검색/상세 추천 링크 prefetch, HANDOFF.md / Out: 상세 페이지 SSR 전환, API 응답 분리 대규모 리팩터링, 커밋/원격 push
+- Current Status: in progress
+- Percent Complete: 15
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 진입 딜레이 최적화" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/lib/detail-prefetch.ts, 홈/검색/상세 추천 링크 prefetch, HANDOFF.md" -ScopeOut "상세 페이지 SSR 전환, API 응답 분리 대규모 리팩터링, 커밋/원격 push" -Status "in progress" -PercentComplete "15" -TestsResult "Not run yet" -OpenRisks "사전 fetch는 브라우저/네트워크 상태에 따라 체감 개선폭이 다를 수 있음" -Blockers "None" -NextAction1 "상세 API 내부 보조 데이터 요청 병렬화" -NextAction2 "브라우저 캐시 가능한 Cache-Control 및 상세 API prefetch 추가" -NextAction3 "lint/type/API 응답 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 사전 fetch는 브라우저/네트워크 상태에 따라 체감 개선폭이 다를 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 상세 API 내부 보조 데이터 요청 병렬화, 2) 브라우저 캐시 가능한 Cache-Control 및 상세 API prefetch 추가, 3) lint/type/API 응답 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 18:03:17 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 외부 사이트 직접 링크 개선
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: 공식 URL 검증 API, 크롤링, 커밋/원격 push
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, Remove-Item -LiteralPath 'D:\project\.tmp-ratings-links.png' -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath 'D:\project\.tmp-chrome-profile' -Recurse -Force -ErrorAction SilentlyContinue; & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 외부 사이트 직접 링크 개선" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "공식 URL 검증 API, 크롤링, 커밋/원격 push" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 RT/Metacritic 직접 URL 확인; /api/tv/1396 RT 직접 URL 확인; Chrome headless /movies/278 화면 캡처 확인" -OpenRisks "Rotten Tomatoes/Metacritic URL은 제목 기반 slug 생성이라 동명이작/부제목/연도 케이스에서 일부 오매칭될 수 있음; OMDb가 공식 상세 URL을 제공하지 않음" -Blockers "None" -NextAction1 "사용자 확인 후 변경분 커밋 및 원격 push" -NextAction2 "실제 배포 후 대표 영화/TV 상세에서 외부 링크 동작 수동 확인" -NextAction3 "오매칭이 발견되면 imdb_id 기반 URL override map 추가 검토"; git status --short
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 RT/Metacritic 직접 URL 확인; /api/tv/1396 RT 직접 URL 확인; Chrome headless /movies/278 화면 캡처 확인
+- Open Risks: Rotten Tomatoes/Metacritic URL은 제목 기반 slug 생성이라 동명이작/부제목/연도 케이스에서 일부 오매칭될 수 있음; OMDb가 공식 상세 URL을 제공하지 않음
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 변경분 커밋 및 원격 push, 2) 실제 배포 후 대표 영화/TV 상세에서 외부 링크 동작 수동 확인, 3) 오매칭이 발견되면 imdb_id 기반 URL override map 추가 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 18:00:11 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 외부 사이트 직접 링크 개선
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: 공식 URL 검증 API, 크롤링, 커밋/원격 push
+- Current Status: in progress
+- Percent Complete: 15
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 외부 사이트 직접 링크 개선" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "공식 URL 검증 API, 크롤링, 커밋/원격 push" -Status "in progress" -PercentComplete "15" -TestsResult "Not run yet" -OpenRisks "Rotten Tomatoes/Metacritic은 OMDb가 공식 URL slug를 제공하지 않아 제목 기반 URL이 일부 콘텐츠에서 오매칭될 수 있음" -Blockers "None" -NextAction1 "RT/Metacritic 직접 URL 생성 로직 추가" -NextAction2 "RT 카드 href 연결 및 Metacritic IMDb fallback 제거" -NextAction3 "lint/type/API 응답 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: Rotten Tomatoes/Metacritic은 OMDb가 공식 URL slug를 제공하지 않아 제목 기반 URL이 일부 콘텐츠에서 오매칭될 수 있음
+- Blockers: None
+- Next 3 Actions: 1) RT/Metacritic 직접 URL 생성 로직 추가, 2) RT 카드 href 연결 및 Metacritic IMDb fallback 제거, 3) lint/type/API 응답 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 17:59:00 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 시인성 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md / Out: 평점 데이터 소스 변경, Rotten Tomatoes 관객 점수 연동, 커밋/원격 push
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, Remove-Item -LiteralPath 'D:\project\.tmp-ratings-visibility.png' -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath 'D:\project\.tmp-chrome-profile' -Recurse -Force -ErrorAction SilentlyContinue; & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 시인성 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md" -ScopeOut "평점 데이터 소스 변경, Rotten Tomatoes 관객 점수 연동, 커밋/원격 push" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; Chrome headless /movies/278 화면 캡처 확인" -OpenRisks "Rotten Tomatoes 값은 OMDb Ratings에 있을 때만 노출됨; OMDb 기준 Popcornmeter/관객 점수는 제공되지 않아 현재 Tomatometer % 단일 지표만 표시함; 로고는 로컬 SVG 근사 배지라 공식 상표 가이드 검토는 별도 필요" -Blockers "None" -NextAction1 "사용자 확인 후 변경분 커밋 및 원격 push" -NextAction2 "RT 값 누락 콘텐츠에서 카드 수/배열 수동 확인" -NextAction3 "Popcornmeter가 필요하면 별도 유료/공식 데이터 소스 검토"; git status --short
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; Chrome headless /movies/278 화면 캡처 확인
+- Open Risks: Rotten Tomatoes 값은 OMDb Ratings에 있을 때만 노출됨; OMDb 기준 Popcornmeter/관객 점수는 제공되지 않아 현재 Tomatometer % 단일 지표만 표시함; 로고는 로컬 SVG 근사 배지라 공식 상표 가이드 검토는 별도 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 변경분 커밋 및 원격 push, 2) RT 값 누락 콘텐츠에서 카드 수/배열 수동 확인, 3) Popcornmeter가 필요하면 별도 유료/공식 데이터 소스 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 17:56:33 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 시인성 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md / Out: 평점 데이터 소스 변경, Rotten Tomatoes 관객 점수 연동, 커밋/원격 push
+- Current Status: in progress
+- Percent Complete: 15
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 시인성 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md" -ScopeOut "평점 데이터 소스 변경, Rotten Tomatoes 관객 점수 연동, 커밋/원격 push" -Status "in progress" -PercentComplete "15" -TestsResult "Not run yet" -OpenRisks "디자인 변경은 실제 화면 캡처로 확인 필요" -Blockers "None" -NextAction1 "평점 카드 레이아웃을 로고 중심에서 점수 중심으로 재정리" -NextAction2 "RT 로고 비율과 카드 대비 개선" -NextAction3 "lint/type/화면 캡처 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: 디자인 변경은 실제 화면 캡처로 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 평점 카드 레이아웃을 로고 중심에서 점수 중심으로 재정리, 2) RT 로고 비율과 카드 대비 개선, 3) lint/type/화면 캡처 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 17:54:12 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Rotten Tomatoes 중심 평점 카드 정리
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md / Out: 공식 Rotten Tomatoes API 연동, Popcornmeter/audience score 연동, 백엔드 변경, 커밋/원격 push
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Rotten Tomatoes 중심 평점 카드 정리" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md" -ScopeOut "공식 Rotten Tomatoes API 연동, Popcornmeter/audience score 연동, 백엔드 변경, 커밋/원격 push" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 rotten_tomatoes 89% 확인; /api/tv/1396 rotten_tomatoes 96% 확인; Chrome headless /movies/278 화면 캡처 확인" -OpenRisks "Rotten Tomatoes 값은 OMDb Ratings에 존재할 때만 노출됨; OMDb 응답 기준으로 Popcornmeter/관객 점수는 제공되지 않아 현재는 Tomatometer % 단일 지표만 표시함; 로고는 로컬 SVG 근사 배지라 공식 상표 가이드 검토는 별도 필요" -Blockers "None" -NextAction1 "사용자 확인 후 변경분 커밋 및 원격 push" -NextAction2 "RT 값 누락 콘텐츠에서 평점 섹션 카드 수/배열 수동 확인" -NextAction3 "Popcornmeter가 필요하면 별도 유료/공식 데이터 소스 검토"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 rotten_tomatoes 89% 확인; /api/tv/1396 rotten_tomatoes 96% 확인; Chrome headless /movies/278 화면 캡처 확인
+- Open Risks: Rotten Tomatoes 값은 OMDb Ratings에 존재할 때만 노출됨; OMDb 응답 기준으로 Popcornmeter/관객 점수는 제공되지 않아 현재는 Tomatometer % 단일 지표만 표시함; 로고는 로컬 SVG 근사 배지라 공식 상표 가이드 검토는 별도 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 변경분 커밋 및 원격 push, 2) RT 값 누락 콘텐츠에서 평점 섹션 카드 수/배열 수동 확인, 3) Popcornmeter가 필요하면 별도 유료/공식 데이터 소스 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 17:40:58 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Rotten Tomatoes 평점 카드 추가 및 배열 조정
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md / Out: 공식 Rotten Tomatoes API 연동, Rotten Tomatoes 상세 링크 정확 매핑, 백엔드 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/public/ratings/rottentomatoes.svg
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Rotten Tomatoes 평점 카드 추가 및 배열 조정" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md" -ScopeOut "공식 Rotten Tomatoes API 연동, Rotten Tomatoes 상세 링크 정확 매핑, 백엔드 변경" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 rotten_tomatoes 89/100 확인; /api/tv/1396 rotten_tomatoes 96/100 확인; Chrome headless /movies/278 화면 캡처 확인" -OpenRisks "Rotten Tomatoes 값은 OMDb Ratings에 있을 때만 노출되며 일부 TV/영화에서는 누락될 수 있음; 로고는 로컬 SVG 배지로 구성했으므로 공식 상표 가이드 검토는 별도 필요" -Blockers "None" -NextAction1 "사용자 화면에서 RT/Metascore/TMDB/IMDb 순서 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "RT 상세 링크가 필요하면 slug/override 정책 별도 설계"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; /api/movies/278 rotten_tomatoes 89/100 확인; /api/tv/1396 rotten_tomatoes 96/100 확인; Chrome headless /movies/278 화면 캡처 확인
+- Open Risks: Rotten Tomatoes 값은 OMDb Ratings에 있을 때만 노출되며 일부 TV/영화에서는 누락될 수 있음; 로고는 로컬 SVG 배지로 구성했으므로 공식 상표 가이드 검토는 별도 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 화면에서 RT/Metascore/TMDB/IMDb 순서 확인, 2) 확정 시 커밋 및 원격 push, 3) RT 상세 링크가 필요하면 slug/override 정책 별도 설계
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-15 17:36:18 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Rotten Tomatoes 평점 카드 추가 및 배열 조정
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md / Out: 공식 Rotten Tomatoes API 연동, Rotten Tomatoes 상세 링크 정확 매핑, 백엔드 변경
+- Current Status: in progress
+- Percent Complete: 20
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Rotten Tomatoes 평점 카드 추가 및 배열 조정" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md" -ScopeOut "공식 Rotten Tomatoes API 연동, Rotten Tomatoes 상세 링크 정확 매핑, 백엔드 변경" -Status "in progress" -PercentComplete "20" -TestsResult "Not run yet" -OpenRisks "Rotten Tomatoes 값은 OMDb Ratings에 있을 때만 노출되며 일부 TV/영화에서는 누락될 수 있음" -Blockers "None" -NextAction1 "OMDb Rotten Tomatoes percent 파싱 추가" -NextAction2 "평점 카드 순서를 RT/Metascore/TMDB/IMDb로 재배치" -NextAction3 "lint/type/API 응답 검증"
+- Tests Run + Result: Not run yet
+- Open Risks: Rotten Tomatoes 값은 OMDb Ratings에 있을 때만 노출되며 일부 TV/영화에서는 누락될 수 있음
+- Blockers: None
+- Next 3 Actions: 1) OMDb Rotten Tomatoes percent 파싱 추가, 2) 평점 카드 순서를 RT/Metascore/TMDB/IMDb로 재배치, 3) lint/type/API 응답 검증
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-15 16:32:47 +09:00
 - Agent Name: Codex
 - Branch: main

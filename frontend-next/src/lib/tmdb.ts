@@ -132,6 +132,11 @@ export type ExternalRatingsPayload = {
   imdb_id: string;
   source: 'omdb';
   cached_at: string;
+  rotten_tomatoes?: {
+    value: number;
+    scale: 100;
+    url: string;
+  } | null;
   imdb?: {
     value: number;
     scale: 10;
@@ -413,6 +418,7 @@ type OmdbRating = {
 type OmdbResponse = {
   Response: 'True' | 'False';
   Error?: string;
+  Title?: string;
   imdbID?: string;
   imdbRating?: string;
   imdbVotes?: string;
@@ -459,6 +465,24 @@ function parseRatingValue(ratings: OmdbRating[] | undefined, source: string) {
   return parseNumber(rawValue);
 }
 
+function parsePercentValue(value: string | undefined | null) {
+  if (!value || value === 'N/A') {
+    return null;
+  }
+
+  const normalized = value.trim().replace('%', '');
+  return parseNumber(normalized);
+}
+
+function parsePercentRatingValue(ratings: OmdbRating[] | undefined, source: string) {
+  const rating = ratings?.find((item) => item.Source.toLowerCase() === source.toLowerCase());
+  if (!rating) {
+    return null;
+  }
+
+  return parsePercentValue(rating.Value);
+}
+
 function slugifyMetacriticTitle(title: string) {
   return title
     .normalize('NFKD')
@@ -483,6 +507,31 @@ function buildMetacriticUrl(options: ExternalRatingsRequestOptions | undefined) 
   return `https://www.metacritic.com/${options.mediaType}/${slug}/`;
 }
 
+function slugifyRottenTomatoesTitle(title: string) {
+  return title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function buildRottenTomatoesUrl(options: ExternalRatingsRequestOptions | undefined) {
+  if (!options?.mediaType || !options.metacriticTitle?.trim()) {
+    return null;
+  }
+
+  const slug = slugifyRottenTomatoesTitle(options.metacriticTitle);
+  if (!slug) {
+    return null;
+  }
+
+  const pathPrefix = options.mediaType === 'tv' ? 'tv' : 'm';
+  return `https://www.rottentomatoes.com/${pathPrefix}/${slug}`;
+}
+
 async function fetchExternalRatingsByImdbId(
   imdbId: string | null | undefined,
   options?: ExternalRatingsRequestOptions
@@ -502,6 +551,7 @@ async function fetchExternalRatingsByImdbId(
   url.searchParams.set('i', imdbId);
   url.searchParams.set('r', 'json');
   url.searchParams.set('plot', 'short');
+  url.searchParams.set('tomatoes', 'true');
 
   try {
     const response = await fetch(url.toString(), {
@@ -528,15 +578,27 @@ async function fetchExternalRatingsByImdbId(
     const metascoreValue =
       parseNumber(payload.Metascore) ??
       parseRatingValue(payload.Ratings, 'Metacritic');
-    const metacriticUrl =
-      buildMetacriticUrl(options) ?? `https://www.imdb.com/title/${imdbId}/criticreviews/`;
+    const rottenTomatoesValue = parsePercentRatingValue(payload.Ratings, 'Rotten Tomatoes');
+    const titleOptions = {
+      ...options,
+      metacriticTitle: options?.metacriticTitle ?? payload.Title,
+    };
+    const metacriticUrl = buildMetacriticUrl(titleOptions);
+    const rottenTomatoesUrl = buildRottenTomatoesUrl(titleOptions);
 
     const value: ExternalRatingsPayload | null =
-      imdbValue !== null || metascoreValue !== null
+      imdbValue !== null || metascoreValue !== null || rottenTomatoesValue !== null
         ? {
             imdb_id: payload.imdbID || imdbId,
             source: 'omdb',
             cached_at: new Date().toISOString(),
+            rotten_tomatoes: rottenTomatoesValue !== null
+              ? {
+                  value: rottenTomatoesValue,
+                  scale: 100,
+                  url: rottenTomatoesUrl ?? `https://www.rottentomatoes.com/search?search=${encodeURIComponent(payload.Title ?? imdbId)}`,
+                }
+              : null,
             imdb: imdbValue !== null
               ? {
                   value: imdbValue,
@@ -549,7 +611,7 @@ async function fetchExternalRatingsByImdbId(
               ? {
                   value: metascoreValue,
                   scale: 100,
-                  url: metacriticUrl,
+                  url: metacriticUrl ?? `https://www.metacritic.com/search/${encodeURIComponent(payload.Title ?? imdbId)}/`,
                 }
               : null,
           }
@@ -1022,10 +1084,10 @@ export async function fetchTvDetails(tvId: number) {
     }),
     fetchTvWatchProviders(tvId).catch(() => null),
   ]);
-  const externalRatings = await fetchExternalRatingsByImdbId(detail.external_ids?.imdb_id, {
+  const externalRatingsPromise = fetchExternalRatingsByImdbId(detail.external_ids?.imdb_id, {
     mediaType: 'tv',
     metacriticTitle: detail.original_name || detail.name,
-  });
+  }).catch(() => null);
 
   const needOverview = !detail.overview?.trim();
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
@@ -1034,6 +1096,8 @@ export async function fetchTvDetails(tvId: number) {
   const needTrailerFallback = !hasKoreanTrailer;
 
   if (!needOverview && !needTrailerFallback) {
+    const externalRatings = await externalRatingsPromise;
+
     return {
       ...detail,
       watch_providers: watchProviders,
@@ -1062,13 +1126,13 @@ export async function fetchTvDetails(tvId: number) {
         results: mergedVideos,
       },
       watch_providers: watchProviders,
-      external_ratings: externalRatings,
+      external_ratings: await externalRatingsPromise,
     };
   } catch {
     return {
       ...detail,
       watch_providers: watchProviders,
-      external_ratings: externalRatings,
+      external_ratings: await externalRatingsPromise,
     };
   }
 }
@@ -1105,10 +1169,10 @@ export async function fetchMovieDetails(movieId: number) {
     fetchMovieWatchProviders(movieId).catch(() => null),
     fetchMovieTheatricalStatus(movieId).catch(() => null),
   ]);
-  const externalRatings = await fetchExternalRatingsByImdbId(detail.imdb_id, {
+  const externalRatingsPromise = fetchExternalRatingsByImdbId(detail.imdb_id, {
     mediaType: 'movie',
     metacriticTitle: detail.original_title || detail.title,
-  });
+  }).catch(() => null);
 
   let mergedDetail = detail;
   const needOverview = !detail.overview?.trim();
@@ -1187,7 +1251,7 @@ export async function fetchMovieDetails(movieId: number) {
     ...mergedDetail,
     watch_providers: watchProviders,
     theatrical_status: theatricalStatus,
-    external_ratings: externalRatings,
+    external_ratings: await externalRatingsPromise,
     recommendations: {
       results: dedupedRecommendations,
     },

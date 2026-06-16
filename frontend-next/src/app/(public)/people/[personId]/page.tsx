@@ -10,6 +10,7 @@ import { useUser } from '@/providers/user-provider';
 import UserMenu from '@/components/layout/user-menu';
 import { SceneHiveIcon } from '@/components/layout/scenehive-icon';
 import FavoriteToggleButton from '@/components/favorite/favorite-toggle-button';
+import { prefetchMediaDetail } from '@/lib/detail-prefetch';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -508,6 +509,9 @@ export default function PersonDetailPage() {
                     <Link
                       key={`featured-${work.movie.id}`}
                       href={`/movies/${work.movie.id}`}
+                      onPointerEnter={() => prefetchMediaDetail(`/movies/${work.movie.id}`)}
+                      onFocus={() => prefetchMediaDetail(`/movies/${work.movie.id}`)}
+                      onTouchStart={() => prefetchMediaDetail(`/movies/${work.movie.id}`)}
                       className="group rounded-lg border p-2 block"
                       style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                     >
@@ -576,6 +580,9 @@ export default function PersonDetailPage() {
                             <Link
                               key={`${section.key}-${work.movie.id}-${work.creditType}`}
                               href={`/movies/${work.movie.id}`}
+                              onPointerEnter={() => prefetchMediaDetail(`/movies/${work.movie.id}`)}
+                              onFocus={() => prefetchMediaDetail(`/movies/${work.movie.id}`)}
+                              onTouchStart={() => prefetchMediaDetail(`/movies/${work.movie.id}`)}
                               className="group rounded-lg border p-2 block"
                               style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)' }}
                             >
