@@ -12,6 +12,70 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 16:24:14 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Metacritic 로고 마크 실제 형태 보정
+- Scope (In/Out): In: frontend-next/public/ratings/metacritic.svg, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md / Out: 공식 상표 원본 파일 외부 다운로드, 평점 API 계약 변경, OMDb 응답 구조 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/public/ratings/metacritic.svg,  M frontend-next/public/ratings/rottentomatoes.svg,  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Metacritic 로고 마크 실제 형태 보정" -ScopeIn "frontend-next/public/ratings/metacritic.svg, frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, HANDOFF.md" -ScopeOut "공식 상표 원본 파일 외부 다운로드, 평점 API 계약 변경, OMDb 응답 구조 변경" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공" -OpenRisks "Metacritic 공식 원본 벡터를 직접 포함한 것은 아니며, 앱 내 SVG를 참고 이미지에 가깝게 재구성한 상태" -Blockers "None" -NextAction1 "상세 화면에서 Metacritic 로고가 다크 카드 위에서 자연스럽게 보이는지 사용자 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 로고 wordmark 너비/아이콘 크기 추가 튜닝"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공
+- Open Risks: Metacritic 공식 원본 벡터를 직접 포함한 것은 아니며, 앱 내 SVG를 참고 이미지에 가깝게 재구성한 상태
+- Blockers: None
+- Next 3 Actions: 1) 상세 화면에서 Metacritic 로고가 다크 카드 위에서 자연스럽게 보이는지 사용자 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 로고 wordmark 너비/아이콘 크기 추가 튜닝
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 16:11:20 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 로고 배경 투명화 및 글라스 카드 정리
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, frontend-next/public/ratings/metacritic.svg, HANDOFF.md / Out: 공식 외부 로고 API 연동, OMDb 데이터 계약 변경, 전체 평점 섹션 재배치
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/public/ratings/metacritic.svg,  M frontend-next/public/ratings/rottentomatoes.svg,  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 로고 배경 투명화 및 글라스 카드 정리" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, frontend-next/public/ratings/rottentomatoes.svg, frontend-next/public/ratings/metacritic.svg, HANDOFF.md" -ScopeOut "공식 외부 로고 API 연동, OMDb 데이터 계약 변경, 전체 평점 섹션 재배치" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)" -OpenRisks "Metacritic 투명 배경에서는 원래 검정 워드마크가 어두운 UI에서 보이지 않아 다크 UI용 흰색 워드마크로 조정함" -Blockers "None" -NextAction1 "로컬 상세 화면에서 Rotten Tomatoes/Metacritic 로고 배경 제거 상태 확인" -NextAction2 "사용자 확인 후 커밋/push" -NextAction3 "필요 시 로고 크기와 상단 여백 추가 조정"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)
+- Open Risks: Metacritic 투명 배경에서는 원래 검정 워드마크가 어두운 UI에서 보이지 않아 다크 UI용 흰색 워드마크로 조정함
+- Blockers: None
+- Next 3 Actions: 1) 로컬 상세 화면에서 Rotten Tomatoes/Metacritic 로고 배경 제거 상태 확인, 2) 사용자 확인 후 커밋/push, 3) 필요 시 로고 크기와 상단 여백 추가 조정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 16:01:36 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 글라스모피즘 및 점수 강조 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: OMDb 데이터 계약 변경, 공식 점수 이미지 연동, 평점 API 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 글라스모피즘 및 점수 강조 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "OMDb 데이터 계약 변경, 공식 점수 이미지 연동, 평점 API 변경" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)" -OpenRisks "OMDb는 점수 문자열 중심 응답이라 공식 점수 이미지는 제공하지 않음; 시각 디자인은 앱 내 정적 로고와 CSS로 유지" -Blockers "None" -NextAction1 "로컬 상세 화면에서 점수 카드 가시성 확인" -NextAction2 "사용자 확인 후 커밋/push" -NextAction3 "필요 시 점수 박스 대비/로고 크기 추가 튜닝"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)
+- Open Risks: OMDb는 점수 문자열 중심 응답이라 공식 점수 이미지는 제공하지 않음; 시각 디자인은 앱 내 정적 로고와 CSS로 유지
+- Blockers: None
+- Next 3 Actions: 1) 로컬 상세 화면에서 점수 카드 가시성 확인, 2) 사용자 확인 후 커밋/push, 3) 필요 시 점수 박스 대비/로고 크기 추가 튜닝
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 15:50:12 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 카드 색상 체계 고정
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: OMDb 데이터 계약 변경, 공식 로고/이미지 외부 연동, 평점 API 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 카드 색상 체계 고정" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "OMDb 데이터 계약 변경, 공식 로고/이미지 외부 연동, 평점 API 변경" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)" -OpenRisks "OMDb는 평점 이미지가 아닌 점수 문자열 중심 응답이라 로고/카드 디자인은 앱 내 정적 자산으로 유지해야 함" -Blockers "None" -NextAction1 "로컬 상세 화면에서 Metascore 점수별 카드 색상이 고정되는지 확인" -NextAction2 "사용자 확인 후 커밋/push" -NextAction3 "필요 시 평점 카드 로고 크기/여백 추가 튜닝"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존)
+- Open Risks: OMDb는 평점 이미지가 아닌 점수 문자열 중심 응답이라 로고/카드 디자인은 앱 내 정적 자산으로 유지해야 함
+- Blockers: None
+- Next 3 Actions: 1) 로컬 상세 화면에서 Metascore 점수별 카드 색상이 고정되는지 확인, 2) 사용자 확인 후 커밋/push, 3) 필요 시 평점 카드 로고 크기/여백 추가 튜닝
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-18 15:12:23 +09:00
 - Agent Name: Codex
 - Branch: main

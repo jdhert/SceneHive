@@ -38,27 +38,79 @@ type RatingCardProps = {
     background: string;
     shadow: string;
     logoBackground?: string;
-    score?: string;
+  };
+  scoreTone?: {
+    accent: string;
+    border: string;
+    background: string;
+    shadow: string;
   };
 };
 
-function RatingCard({ label, value, description, detail, href, logo, tone }: RatingCardProps) {
+const RATING_TONES = {
+  rottenTomatoes: {
+    accent: '#FA320A',
+    border: 'rgba(250,50,10,0.42)',
+    background:
+      'linear-gradient(145deg, rgba(250,50,10,0.12) 0%, rgba(17,18,28,0.78) 46%, rgba(8,11,18,0.94) 100%)',
+    shadow: 'rgba(250,50,10,0.10)',
+  },
+  metacritic: {
+    accent: '#F7D13B',
+    border: 'rgba(247,209,59,0.34)',
+    background:
+      'linear-gradient(145deg, rgba(247,209,59,0.10) 0%, rgba(17,18,28,0.78) 46%, rgba(8,11,18,0.94) 100%)',
+    shadow: 'rgba(247,209,59,0.08)',
+  },
+  imdb: {
+    accent: '#F5C518',
+    border: 'rgba(245,197,24,0.36)',
+    background:
+      'linear-gradient(145deg, rgba(245,197,24,0.11) 0%, rgba(17,18,28,0.78) 46%, rgba(8,11,18,0.94) 100%)',
+    shadow: 'rgba(245,197,24,0.08)',
+    logoBackground: '#F5C518',
+  },
+} satisfies Record<string, RatingCardProps['tone']>;
+
+function scoreToneFromAccent(accent: string): NonNullable<RatingCardProps['scoreTone']> {
+  return {
+    accent,
+    border: `${accent}5C`,
+    background: `linear-gradient(135deg, ${accent}22 0%, rgba(255,255,255,0.055) 100%)`,
+    shadow: `${accent}18`,
+  };
+}
+
+function metascoreTone(score: number): NonNullable<RatingCardProps['scoreTone']> {
+  if (score >= 61) {
+    return scoreToneFromAccent('#66CC33');
+  }
+
+  if (score >= 40) {
+    return scoreToneFromAccent('#F7D13B');
+  }
+
+  return scoreToneFromAccent('#FF4A4A');
+}
+
+function RatingCard({ label, value, description, detail, href, logo, tone, scoreTone }: RatingCardProps) {
   const [score, scale] = value.includes(' / ') ? value.split(' / ') : [value, null];
+  const activeScoreTone = scoreTone ?? scoreToneFromAccent(tone.accent);
 
   const content = (
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <span
-            className="flex h-12 w-44 max-w-full items-center justify-center overflow-hidden rounded-lg border"
+            className="flex h-14 w-48 max-w-full items-center justify-center overflow-hidden rounded-lg border"
             style={{
-              borderColor: `${tone.accent}44`,
-              background: tone.logoBackground ?? 'rgba(255,255,255,0.94)',
+              borderColor: tone.logoBackground ? `${tone.accent}44` : 'transparent',
+              background: tone.logoBackground ?? 'transparent',
               backgroundImage: `url("${logo.src}")`,
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'contain',
-              boxShadow: `0 10px 26px ${tone.shadow}`,
+              boxShadow: tone.logoBackground ? `0 10px 26px ${tone.shadow}` : 'none',
             }}
             role="img"
             aria-label={logo.alt}
@@ -79,19 +131,29 @@ function RatingCard({ label, value, description, detail, href, logo, tone }: Rat
           </span>
         ) : null}
       </div>
-      <div className="mt-8">
+      <div
+        className="mt-6 rounded-2xl border px-4 py-4"
+        style={{
+          borderColor: activeScoreTone.border,
+          background: activeScoreTone.background,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 34px ${activeScoreTone.shadow}`,
+        }}
+      >
         <p className="flex items-baseline gap-2">
-          <span className="text-5xl font-black leading-none sm:text-6xl" style={{ color: tone.score ?? tone.accent }}>
+          <span
+            className="text-5xl font-black leading-none sm:text-6xl"
+            style={{ color: activeScoreTone.accent, textShadow: `0 0 22px ${activeScoreTone.shadow}` }}
+          >
             {score}
           </span>
           {scale ? (
-            <span className="text-xl font-black" style={{ color: 'rgba(255,255,255,0.76)' }}>
+            <span className="text-xl font-black" style={{ color: 'rgba(255,255,255,0.82)' }}>
               / {scale}
             </span>
           ) : null}
         </p>
         {detail ? (
-          <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>
+          <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.54)' }}>
             {detail}
           </p>
         ) : null}
@@ -100,11 +162,11 @@ function RatingCard({ label, value, description, detail, href, logo, tone }: Rat
   );
 
   const className =
-    'group block min-h-[242px] rounded-xl border p-5 text-left transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60';
+    'group block min-h-[242px] rounded-xl border p-5 text-left backdrop-blur-xl transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60';
   const style = {
     borderColor: tone.border,
     background: tone.background,
-    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 48px ${tone.shadow}`,
+    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 48px ${tone.shadow}`,
   };
 
   if (!href) {
@@ -122,36 +184,6 @@ function RatingCard({ label, value, description, detail, href, logo, tone }: Rat
   );
 }
 
-function metascoreTone(score: number) {
-  if (score >= 61) {
-    return {
-      accent: '#66CC33',
-      border: 'rgba(102,204,51,0.34)',
-      background:
-        'linear-gradient(135deg, rgba(102,204,51,0.16) 0%, rgba(15,23,18,0.74) 42%, rgba(255,255,255,0.035) 100%)',
-      shadow: 'rgba(102,204,51,0.08)',
-    };
-  }
-
-  if (score >= 40) {
-    return {
-      accent: '#FFCC33',
-      border: 'rgba(255,204,51,0.34)',
-      background:
-        'linear-gradient(135deg, rgba(255,204,51,0.16) 0%, rgba(28,24,12,0.74) 42%, rgba(255,255,255,0.035) 100%)',
-      shadow: 'rgba(255,204,51,0.08)',
-    };
-  }
-
-  return {
-    accent: '#FF4A4A',
-    border: 'rgba(255,74,74,0.34)',
-    background:
-      'linear-gradient(135deg, rgba(255,74,74,0.17) 0%, rgba(30,14,18,0.74) 42%, rgba(255,255,255,0.035) 100%)',
-    shadow: 'rgba(255,74,74,0.10)',
-  };
-}
-
 export function ExternalRatingsSection({
   ratings,
 }: {
@@ -161,7 +193,6 @@ export function ExternalRatingsSection({
     return null;
   }
 
-  const metacriticTone = ratings.metascore ? metascoreTone(ratings.metascore.value) : null;
   const ratingCardCount = [
     ratings.rotten_tomatoes,
     ratings.metascore,
@@ -199,17 +230,10 @@ export function ExternalRatingsSection({
               src: '/ratings/rottentomatoes.svg',
               alt: 'Rotten Tomatoes',
             }}
-            tone={{
-              accent: '#FA320A',
-              border: 'rgba(250,50,10,0.42)',
-              background:
-                'linear-gradient(145deg, rgba(250,50,10,0.22) 0%, rgba(49,12,13,0.84) 42%, rgba(12,14,22,0.98) 100%)',
-              shadow: 'rgba(250,50,10,0.12)',
-              score: '#FF4B2F',
-            }}
+            tone={RATING_TONES.rottenTomatoes}
           />
         ) : null}
-        {ratings.metascore && metacriticTone ? (
+        {ratings.metascore ? (
           <RatingCard
             label="Metascore"
             value={`${Math.round(ratings.metascore.value)} / ${ratings.metascore.scale}`}
@@ -219,7 +243,8 @@ export function ExternalRatingsSection({
               src: '/ratings/metacritic.svg',
               alt: 'Metacritic',
             }}
-            tone={metacriticTone}
+            tone={RATING_TONES.metacritic}
+            scoreTone={metascoreTone(ratings.metascore.value)}
           />
         ) : null}
         {ratings.imdb ? (
@@ -233,14 +258,7 @@ export function ExternalRatingsSection({
               src: '/ratings/imdb.svg',
               alt: 'IMDb',
             }}
-            tone={{
-              accent: '#F5C518',
-              border: 'rgba(245,197,24,0.36)',
-              background:
-                'linear-gradient(135deg, rgba(245,197,24,0.18) 0%, rgba(24,22,12,0.74) 42%, rgba(255,255,255,0.035) 100%)',
-              shadow: 'rgba(245,197,24,0.08)',
-              logoBackground: '#F5C518',
-            }}
+            tone={RATING_TONES.imdb}
           />
         ) : null}
       </div>

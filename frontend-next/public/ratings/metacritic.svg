@@ -1,20 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 280 64">
   <title>Metacritic</title>
-  <rect width="280" height="64" rx="12" fill="#FFFFFF" />
+  <defs>
+    <clipPath id="metacritic-mark-clip">
+      <circle cx="44" cy="32" r="17" />
+    </clipPath>
+  </defs>
   <circle cx="44" cy="32" r="24" fill="#FFD342" />
   <circle cx="44" cy="32" r="17" fill="#050505" />
-  <text
-    x="44"
-    y="42"
-    text-anchor="middle"
-    transform="rotate(-34 44 32)"
-    font-family="Arial Black, Arial, Helvetica, sans-serif"
-    font-size="28"
-    font-weight="900"
-    fill="#FFFFFF"
-  >
-    m
-  </text>
+  <g clip-path="url(#metacritic-mark-clip)">
+    <text
+      x="44"
+      y="43"
+      text-anchor="middle"
+      font-family="Arial Black, Arial, Helvetica, sans-serif"
+      font-size="36"
+      font-weight="900"
+      letter-spacing="-2"
+      fill="#FFFFFF"
+      transform="rotate(-35 44 32)"
+    >
+      m
+    </text>
+  </g>
   <text
     x="80"
     y="42"
@@ -22,7 +29,7 @@
     font-size="31"
     font-weight="900"
     letter-spacing="-1.4"
-    fill="#070707"
+    fill="#FFFFFF"
   >
     metacritic
   </text>
