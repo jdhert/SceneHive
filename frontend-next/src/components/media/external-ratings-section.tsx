@@ -239,6 +239,7 @@ export function ExternalRatingsSection({
               background:
                 'linear-gradient(135deg, rgba(245,197,24,0.18) 0%, rgba(24,22,12,0.74) 42%, rgba(255,255,255,0.035) 100%)',
               shadow: 'rgba(245,197,24,0.08)',
+              logoBackground: '#F5C518',
             }}
           />
         ) : null}
