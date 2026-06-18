@@ -638,12 +638,20 @@ function hasOverview(text: string | null | undefined): text is string {
   return Boolean(text?.trim());
 }
 
+function hasKoreanText(text: string | null | undefined) {
+  return /[\u3131-\u318E\uAC00-\uD7A3]/.test(text ?? '');
+}
+
+function needsKoreanTextFallback(text: string | null | undefined) {
+  return !hasOverview(text) || !hasKoreanText(text);
+}
+
 async function fillMissingMovieOverviews(
   path: string,
   params: Record<string, string | number | undefined>,
   source: TmdbMovieListResponse
 ) {
-  const needsFallback = source.results.some((movie) => !hasOverview(movie.overview));
+  const needsFallback = source.results.some((movie) => needsKoreanTextFallback(movie.overview));
   if (!needsFallback) {
     return source;
   }
@@ -665,7 +673,7 @@ async function fillMissingMovieOverviews(
     return {
       ...source,
       results: source.results.map((movie) => {
-        if (hasOverview(movie.overview)) {
+        if (hasKoreanText(movie.overview)) {
           return movie;
         }
 
@@ -728,7 +736,7 @@ async function fillMissingTvOverviews(
   params: Record<string, string | number | undefined>,
   source: TmdbTvListResponse
 ) {
-  const needsFallback = source.results.some((show) => !hasOverview(show.overview));
+  const needsFallback = source.results.some((show) => needsKoreanTextFallback(show.overview));
   if (!needsFallback) {
     return source;
   }
@@ -750,7 +758,7 @@ async function fillMissingTvOverviews(
     return {
       ...source,
       results: source.results.map((show) => {
-        if (hasOverview(show.overview)) {
+        if (hasKoreanText(show.overview)) {
           return show;
         }
 
@@ -774,7 +782,7 @@ async function fillMissingTrendingAllOverviews(source: TmdbTrendingAllResponse) 
   const needsFallback = source.results.some(
     (item) =>
       (item.media_type === 'movie' || item.media_type === 'tv') &&
-      !hasOverview(item.overview)
+      needsKoreanTextFallback(item.overview)
   );
 
   if (!needsFallback) {
@@ -824,7 +832,7 @@ async function fillMissingTrendingAllOverviews(source: TmdbTrendingAllResponse) 
           return item;
         }
 
-        if (hasOverview(item.overview)) {
+        if (hasKoreanText(item.overview)) {
           return item;
         }
 
@@ -1104,7 +1112,7 @@ export async function fetchSearchMulti(query: string, page = 1) {
   const needOverviewFallback = (primary.results ?? []).some(
     (item) =>
       (item.media_type === 'movie' || item.media_type === 'tv') &&
-      !(item.overview ?? '').trim()
+      needsKoreanTextFallback(item.overview)
   );
 
   if (!needOverviewFallback) {
@@ -1151,7 +1159,7 @@ export async function fetchSearchMulti(query: string, page = 1) {
         ) {
           return item;
         }
-        if ((item.overview ?? '').trim()) {
+        if (hasKoreanText(item.overview)) {
           return item;
         }
         const fallbackOverview = fallbackMap.get(`${item.media_type}:${item.id}`);
@@ -1214,7 +1222,7 @@ export async function fetchTvDetails(tvId: number) {
     metacriticTitle: detail.original_name || detail.name,
   }).catch(() => null);
 
-  const needOverview = !detail.overview?.trim();
+  const needOverview = needsKoreanTextFallback(detail.overview);
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
     (video) => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')
   );
@@ -1243,13 +1251,16 @@ export async function fetchTvDetails(tvId: number) {
             array.findIndex((item) => item.key === video.key && item.site === video.site) === index
         )
       : detail.videos?.results ?? [];
+    const overviewSource = hasOverview(fallbackEn.overview)
+      ? fallbackEn.overview
+      : detail.overview;
     const translatedOverview =
-      needOverview && hasOverview(fallbackEn.overview)
+      needOverview && hasOverview(overviewSource)
         ? await translateTextToKorean(
-            fallbackEn.overview,
-            makeTranslationCacheKey('tv', tvId, 'overview', fallbackEn.overview)
+            overviewSource,
+            makeTranslationCacheKey('tv', tvId, 'overview', overviewSource)
           )
-        : fallbackEn.overview;
+        : overviewSource;
 
     return {
       ...detail,
@@ -1307,8 +1318,8 @@ export async function fetchMovieDetails(movieId: number) {
   }).catch(() => null);
 
   let mergedDetail = detail;
-  const needOverview = !detail.overview?.trim();
-  const needTagline = !detail.tagline?.trim();
+  const needOverview = needsKoreanTextFallback(detail.overview);
+  const needTagline = needsKoreanTextFallback(detail.tagline);
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
     (video) => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')
   );
@@ -1328,20 +1339,26 @@ export async function fetchMovieDetails(movieId: number) {
               array.findIndex((item) => item.key === video.key && item.site === video.site) === index
           )
         : detail.videos?.results ?? [];
+      const overviewSource = hasOverview(fallbackEn.overview)
+        ? fallbackEn.overview
+        : detail.overview;
+      const taglineSource = hasOverview(fallbackEn.tagline)
+        ? fallbackEn.tagline
+        : detail.tagline;
       const translatedOverview =
-        needOverview && hasOverview(fallbackEn.overview)
+        needOverview && hasOverview(overviewSource)
           ? await translateTextToKorean(
-              fallbackEn.overview,
-              makeTranslationCacheKey('movie', movieId, 'overview', fallbackEn.overview)
+              overviewSource,
+              makeTranslationCacheKey('movie', movieId, 'overview', overviewSource)
             )
-          : fallbackEn.overview;
+          : overviewSource;
       const translatedTagline =
-        needTagline && hasOverview(fallbackEn.tagline)
+        needTagline && hasOverview(taglineSource)
           ? await translateTextToKorean(
-              fallbackEn.tagline,
-              makeTranslationCacheKey('movie', movieId, 'tagline', fallbackEn.tagline)
+              taglineSource,
+              makeTranslationCacheKey('movie', movieId, 'tagline', taglineSource)
             )
-          : fallbackEn.tagline;
+          : taglineSource;
 
       mergedDetail = {
         ...detail,

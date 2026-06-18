@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 11:53:31 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 영어 태그라인 번역 조건 보강
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: 원격 서버 직접 접속 검증, 번역 품질 후처리
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "영어 태그라인 번역 조건 보강" -ScopeIn "frontend-next/src/lib/tmdb.ts, HANDOFF.md" -ScopeOut "원격 서버 직접 접속 검증, 번역 품질 후처리" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint -- --file src/lib/tmdb.ts --file src/lib/translation.ts 성공; npx tsc --noEmit 성공; localhost:3000/api/movies/1318413 tagline/overview 한국어 번역 확인" -OpenRisks "운영 반영은 새 커밋 배포 후 가능; 기존 Next/TMDB 캐시가 남아 있으면 배포 직후 잠깐 이전 영어 태그라인이 보일 수 있음" -Blockers "None" -NextAction1 "커밋 및 push" -NextAction2 "배포 후 /movies/1318413 태그라인 한국어 확인" -NextAction3 "필요 시 overview도 한글 부재 기준으로 추가 케이스 점검"
+- Tests Run + Result: git diff --check 성공; npm run lint -- --file src/lib/tmdb.ts --file src/lib/translation.ts 성공; npx tsc --noEmit 성공; localhost:3000/api/movies/1318413 tagline/overview 한국어 번역 확인
+- Open Risks: 운영 반영은 새 커밋 배포 후 가능; 기존 Next/TMDB 캐시가 남아 있으면 배포 직후 잠깐 이전 영어 태그라인이 보일 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 커밋 및 push, 2) 배포 후 /movies/1318413 태그라인 한국어 확인, 3) 필요 시 overview도 한글 부재 기준으로 추가 케이스 점검
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-18 10:36:56 +09:00
 - Agent Name: Codex
 - Branch: main
