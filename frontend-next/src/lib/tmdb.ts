@@ -1,5 +1,11 @@
 import 'server-only';
 
+import {
+  makeTranslationCacheKey,
+  translateTextToKorean,
+  translateTextsToKorean,
+} from '@/lib/translation';
+
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3';
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const OMDB_BASE_URL = process.env.OMDB_BASE_URL || 'https://www.omdbapi.com/';
@@ -644,8 +650,16 @@ async function fillMissingMovieOverviews(
 
   try {
     const fallbackEn = await tmdbFetch<TmdbMovieListResponse>(path, params, { language: 'en-US' });
+    const fallbackEntries = (fallbackEn.results ?? [])
+      .filter((movie) => hasOverview(movie.overview))
+      .map((movie) => ({
+        id: movie.id,
+        key: makeTranslationCacheKey('movie', movie.id, 'overview', movie.overview),
+        text: movie.overview,
+      }));
+    const translatedOverviews = await translateTextsToKorean(fallbackEntries);
     const fallbackMap = new Map(
-      (fallbackEn.results ?? []).map((movie) => [movie.id, movie.overview])
+      fallbackEntries.map((entry) => [entry.id, translatedOverviews.get(entry.key) ?? entry.text])
     );
 
     return {
@@ -721,8 +735,16 @@ async function fillMissingTvOverviews(
 
   try {
     const fallbackEn = await tmdbFetch<TmdbTvListResponse>(path, params, { language: 'en-US' });
+    const fallbackEntries = (fallbackEn.results ?? [])
+      .filter((show) => hasOverview(show.overview))
+      .map((show) => ({
+        id: show.id,
+        key: makeTranslationCacheKey('tv', show.id, 'overview', show.overview),
+        text: show.overview,
+      }));
+    const translatedOverviews = await translateTextsToKorean(fallbackEntries);
     const fallbackMap = new Map(
-      (fallbackEn.results ?? []).map((show) => [show.id, show.overview])
+      fallbackEntries.map((entry) => [entry.id, translatedOverviews.get(entry.key) ?? entry.text])
     );
 
     return {
@@ -748,12 +770,88 @@ async function fillMissingTvOverviews(
   }
 }
 
+async function fillMissingTrendingAllOverviews(source: TmdbTrendingAllResponse) {
+  const needsFallback = source.results.some(
+    (item) =>
+      (item.media_type === 'movie' || item.media_type === 'tv') &&
+      !hasOverview(item.overview)
+  );
+
+  if (!needsFallback) {
+    return source;
+  }
+
+  try {
+    const fallbackEn = await tmdbFetch<TmdbTrendingAllResponse>(
+      '/trending/all/day',
+      {},
+      { language: 'en-US' }
+    );
+    const fallbackEntries: {
+      id: number;
+      mediaType: 'movie' | 'tv';
+      key: string;
+      text: string;
+    }[] = [];
+
+    for (const item of fallbackEn.results ?? []) {
+      if (item.media_type !== 'movie' && item.media_type !== 'tv') {
+        continue;
+      }
+
+      if (hasOverview(item.overview)) {
+        fallbackEntries.push({
+          id: item.id,
+          mediaType: item.media_type,
+          key: makeTranslationCacheKey(item.media_type, item.id, 'overview', item.overview),
+          text: item.overview,
+        });
+      }
+    }
+
+    const translatedOverviews = await translateTextsToKorean(fallbackEntries);
+    const fallbackMap = new Map(
+      fallbackEntries.map((entry) => [
+        `${entry.mediaType}:${entry.id}`,
+        translatedOverviews.get(entry.key) ?? entry.text,
+      ])
+    );
+
+    return {
+      ...source,
+      results: source.results.map((item): TmdbTrendingAllItem => {
+        if (item.media_type !== 'movie' && item.media_type !== 'tv') {
+          return item;
+        }
+
+        if (hasOverview(item.overview)) {
+          return item;
+        }
+
+        const overviewEn = fallbackMap.get(`${item.media_type}:${item.id}`);
+        if (!hasOverview(overviewEn)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          overview: overviewEn,
+        };
+      }),
+    };
+  } catch {
+    return source;
+  }
+}
+
 export async function fetchTrendingAll() {
-  return tmdbFetch<TmdbTrendingAllResponse>('/trending/all/day');
+  const response = await tmdbFetch<TmdbTrendingAllResponse>('/trending/all/day');
+  return fillMissingTrendingAllOverviews(response);
 }
 
 export async function fetchTrendingTv() {
-  return tmdbFetch<TmdbTvListResponse>('/trending/tv/day');
+  const response = await tmdbFetch<TmdbTvListResponse>('/trending/tv/day');
+  return fillMissingTvOverviews('/trending/tv/day', {}, response);
 }
 
 export async function fetchTrendingPeople() {
@@ -795,16 +893,20 @@ export async function fetchPopularMovies() {
 }
 
 export async function fetchPopularTv() {
-  return tmdbFetch<TmdbTvListResponse>('/tv/popular', {
+  const params = {
     page: 1,
-  });
+  };
+  const response = await tmdbFetch<TmdbTvListResponse>('/tv/popular', params);
+  return fillMissingTvOverviews('/tv/popular', params, response);
 }
 
 export async function fetchAiringTodayTv() {
-  return tmdbFetch<TmdbTvListResponse>('/tv/airing_today', {
+  const params = {
     timezone: 'Asia/Seoul',
     page: 1,
-  });
+  };
+  const response = await tmdbFetch<TmdbTvListResponse>('/tv/airing_today', params);
+  return fillMissingTvOverviews('/tv/airing_today', params, response);
 }
 
 export async function fetchMoviesByGenres(genreIds: number[], page = 1) {
@@ -982,11 +1084,13 @@ export async function fetchMovieTheatricalStatus(
 }
 
 export async function fetchSearchMovies(query: string, page = 1) {
-  return tmdbFetch<TmdbMovieListResponse>('/search/movie', {
+  const params = {
     query,
     page,
     include_adult: 'false',
-  });
+  };
+  const response = await tmdbFetch<TmdbMovieListResponse>('/search/movie', params);
+  return fillMissingMovieOverviews('/search/movie', params, response);
 }
 
 export async function fetchSearchMulti(query: string, page = 1) {
@@ -1013,8 +1117,29 @@ export async function fetchSearchMulti(query: string, page = 1) {
       params,
       { language: 'en-US' }
     );
+    const fallbackEntries = (fallbackEn.results ?? [])
+      .filter(
+        (item) =>
+          (item.media_type === 'movie' || item.media_type === 'tv') &&
+          hasOverview(item.overview)
+      )
+      .map((item) => ({
+        id: item.id,
+        mediaType: item.media_type as 'movie' | 'tv',
+        key: makeTranslationCacheKey(
+          item.media_type as 'movie' | 'tv',
+          item.id,
+          'overview',
+          item.overview ?? ''
+        ),
+        text: item.overview ?? '',
+      }));
+    const translatedOverviews = await translateTextsToKorean(fallbackEntries);
     const fallbackMap = new Map(
-      (fallbackEn.results ?? []).map((item) => [`${item.media_type}:${item.id}`, item])
+      fallbackEntries.map((item) => [
+        `${item.mediaType}:${item.id}`,
+        translatedOverviews.get(item.key) ?? item.text,
+      ])
     );
 
     return {
@@ -1029,13 +1154,13 @@ export async function fetchSearchMulti(query: string, page = 1) {
         if ((item.overview ?? '').trim()) {
           return item;
         }
-        const fallback = fallbackMap.get(`${item.media_type}:${item.id}`);
-        if (!fallback || !(fallback.overview ?? '').trim()) {
+        const fallbackOverview = fallbackMap.get(`${item.media_type}:${item.id}`);
+        if (!hasOverview(fallbackOverview)) {
           return item;
         }
         return {
           ...item,
-          overview: fallback.overview,
+          overview: fallbackOverview,
         };
       }),
     };
@@ -1118,10 +1243,17 @@ export async function fetchTvDetails(tvId: number) {
             array.findIndex((item) => item.key === video.key && item.site === video.site) === index
         )
       : detail.videos?.results ?? [];
+    const translatedOverview =
+      needOverview && hasOverview(fallbackEn.overview)
+        ? await translateTextToKorean(
+            fallbackEn.overview,
+            makeTranslationCacheKey('tv', tvId, 'overview', fallbackEn.overview)
+          )
+        : fallbackEn.overview;
 
     return {
       ...detail,
-      overview: needOverview ? fallbackEn.overview : detail.overview,
+      overview: needOverview ? translatedOverview : detail.overview,
       videos: {
         results: mergedVideos,
       },
@@ -1196,11 +1328,25 @@ export async function fetchMovieDetails(movieId: number) {
               array.findIndex((item) => item.key === video.key && item.site === video.site) === index
           )
         : detail.videos?.results ?? [];
+      const translatedOverview =
+        needOverview && hasOverview(fallbackEn.overview)
+          ? await translateTextToKorean(
+              fallbackEn.overview,
+              makeTranslationCacheKey('movie', movieId, 'overview', fallbackEn.overview)
+            )
+          : fallbackEn.overview;
+      const translatedTagline =
+        needTagline && hasOverview(fallbackEn.tagline)
+          ? await translateTextToKorean(
+              fallbackEn.tagline,
+              makeTranslationCacheKey('movie', movieId, 'tagline', fallbackEn.tagline)
+            )
+          : fallbackEn.tagline;
 
       mergedDetail = {
         ...detail,
-        overview: needOverview ? fallbackEn.overview : detail.overview,
-        tagline: needTagline ? fallbackEn.tagline : detail.tagline,
+        overview: needOverview ? translatedOverview : detail.overview,
+        tagline: needTagline ? translatedTagline : detail.tagline,
         videos: {
           results: mergedVideos,
         },

@@ -12,6 +12,54 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-17 18:12:54 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Azure Translator 기반 TMDB 영어 fallback 번역 적용
+- Scope (In/Out): In: frontend-next/src/lib/translation.ts, frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: 커밋/원격 push, Redis 영속 캐시, 번역 품질 후처리 사전
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/public/ratings/imdb.svg,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/lib/translation.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "Azure Translator 기반 TMDB 영어 fallback 번역 적용" -ScopeIn "frontend-next/src/lib/translation.ts, frontend-next/src/lib/tmdb.ts, HANDOFF.md" -ScopeOut "커밋/원격 push, Redis 영속 캐시, 번역 품질 후처리 사전" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint -- --file src/lib/tmdb.ts --file src/lib/translation.ts 성공; npx tsc --noEmit 성공; localhost:3000/api/home Pressure overview 한국어 번역 확인; localhost:3000/api/movies/1318413 overview/tagline 한국어 번역 확인; Chrome headless /home 및 /movies/1318413 화면 확인" -OpenRisks "번역 캐시는 현재 Next 서버 프로세스 메모리 기반이라 컨테이너 재시작 시 초기화됨; 운영 반영 시 AZURE_TRANSLATOR_* env를 STAGING_ENV_FILE/서버 env에 추가해야 함; 이전 IMDb 로고 수정분이 아직 미커밋 상태로 함께 남아 있음" -Blockers "None" -NextAction1 "브라우저에서 http://localhost:3000/home 직접 확인" -NextAction2 "운영 배포 전 STAGING_ENV_FILE에 TRANSLATION_ENABLED/AZURE_TRANSLATOR_* 값 추가" -NextAction3 "확정 시 IMDb 로고 변경분과 번역 변경분 커밋 및 push"
+- Tests Run + Result: git diff --check 성공; npm run lint -- --file src/lib/tmdb.ts --file src/lib/translation.ts 성공; npx tsc --noEmit 성공; localhost:3000/api/home Pressure overview 한국어 번역 확인; localhost:3000/api/movies/1318413 overview/tagline 한국어 번역 확인; Chrome headless /home 및 /movies/1318413 화면 확인
+- Open Risks: 번역 캐시는 현재 Next 서버 프로세스 메모리 기반이라 컨테이너 재시작 시 초기화됨; 운영 반영 시 AZURE_TRANSLATOR_* env를 STAGING_ENV_FILE/서버 env에 추가해야 함; 이전 IMDb 로고 수정분이 아직 미커밋 상태로 함께 남아 있음
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 http://localhost:3000/home 직접 확인, 2) 운영 배포 전 STAGING_ENV_FILE에 TRANSLATION_ENABLED/AZURE_TRANSLATOR_* 값 추가, 3) 확정 시 IMDb 로고 변경분과 번역 변경분 커밋 및 push
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-17 09:35:17 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 트렌딩 줄거리 영어 fallback 적용
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: 커밋/원격 push, 번역 API 도입, 홈 UI 문구 변경
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/public/ratings/imdb.svg,  M frontend-next/src/components/media/external-ratings-section.tsx,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈 트렌딩 줄거리 영어 fallback 적용" -ScopeIn "frontend-next/src/lib/tmdb.ts, HANDOFF.md" -ScopeOut "커밋/원격 push, 번역 API 도입, 홈 UI 문구 변경" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint -- --file src/lib/tmdb.ts 성공; npx tsc --noEmit 성공; localhost:3000/api/home에서 Pressure 영어 overview 반환 확인" -OpenRisks "홈 payload는 10분 인메모리 캐시가 있어 기존 서버 프로세스에서는 잠시 이전 '줄거리 정보가 없습니다.'가 보일 수 있음; 배포/프로세스 재시작 후 새 fallback 로직 적용" -Blockers "None" -NextAction1 "사용자 확인 후 IMDb 로고 변경분과 함께 커밋 여부 결정" -NextAction2 "배포 후 /home 히어로에서 KR 줄거리 없는 영화의 영어 overview 표시 확인" -NextAction3 "필요하면 영어 fallback 표시 시 '영문 줄거리' 배지/번역 후보 검토"
+- Tests Run + Result: git diff --check 성공; npm run lint -- --file src/lib/tmdb.ts 성공; npx tsc --noEmit 성공; localhost:3000/api/home에서 Pressure 영어 overview 반환 확인
+- Open Risks: 홈 payload는 10분 인메모리 캐시가 있어 기존 서버 프로세스에서는 잠시 이전 '줄거리 정보가 없습니다.'가 보일 수 있음; 배포/프로세스 재시작 후 새 fallback 로직 적용
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 IMDb 로고 변경분과 함께 커밋 여부 결정, 2) 배포 후 /home 히어로에서 KR 줄거리 없는 영화의 영어 overview 표시 확인, 3) 필요하면 영어 fallback 표시 시 '영문 줄거리' 배지/번역 후보 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-17 09:16:25 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): IMDb 평점 로고 여백 제거
+- Scope (In/Out): In: frontend-next/public/ratings/imdb.svg, frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: 커밋/원격 push, 공식 로고 에셋 교체
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/public/ratings/imdb.svg,  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, Remove-Item -LiteralPath 'D:\project\.tmp-imdb-logo-rating.png' -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath 'D:\project\.tmp-chrome-profile-imdb-logo' -Recurse -Force -ErrorAction SilentlyContinue; & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "IMDb 평점 로고 여백 제거" -ScopeIn "frontend-next/public/ratings/imdb.svg, frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "커밋/원격 push, 공식 로고 에셋 교체" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint 대상 파일 성공; npx tsc --noEmit 성공; Chrome headless /movies/936075 캡처로 IMDb 로고 노란색 배지 확인" -OpenRisks "로컬 SVG 근사 로고를 사용 중이라 공식 상표 가이드 검토는 별도 필요" -Blockers "None" -NextAction1 "사용자 화면에서 IMDb 로고 배지 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요하면 Rotten Tomatoes/Metacritic 로고 폭도 같은 기준으로 추가 조정"; git status --short
+- Tests Run + Result: git diff --check 성공; npm run lint 대상 파일 성공; npx tsc --noEmit 성공; Chrome headless /movies/936075 캡처로 IMDb 로고 노란색 배지 확인
+- Open Risks: 로컬 SVG 근사 로고를 사용 중이라 공식 상표 가이드 검토는 별도 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 화면에서 IMDb 로고 배지 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요하면 Rotten Tomatoes/Metacritic 로고 폭도 같은 기준으로 추가 조정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-16 15:54:31 +09:00
 - Agent Name: Codex
 - Branch: main
