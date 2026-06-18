@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 10:36:56 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 번역 환경변수 프론트 컨테이너 전달 설정
+- Scope (In/Out): In: docker-compose.yml, docker-compose.prod.yml, HANDOFF.md / Out: 원격 서버 직접 접속 검증, GitHub Secret 값 수정
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M docker-compose.prod.yml,  M docker-compose.yml
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "번역 환경변수 프론트 컨테이너 전달 설정" -ScopeIn "docker-compose.yml, docker-compose.prod.yml, HANDOFF.md" -ScopeOut "원격 서버 직접 접속 검증, GitHub Secret 값 수정" -Status "done" -PercentComplete "100" -TestsResult "docker compose -f docker-compose.prod.yml config --quiet 성공; docker compose config --quiet 성공" -OpenRisks "서버 /opt/scenehive/.env가 아니라 다른 위치에 값을 넣었거나 GitHub STAGING_ENV_FILE에 값이 없으면 다음 배포 때 다시 누락될 수 있음" -Blockers "None" -NextAction1 "배포 후 docker exec scenehive-frontend printenv로 TRANSLATION/AZURE 변수 전달 확인" -NextAction2 "STAGING_ENV_FILE에도 동일 값 추가 여부 확인" -NextAction3 "프론트 재배포 후 /api/home Pressure overview 한국어 번역 확인"
+- Tests Run + Result: docker compose -f docker-compose.prod.yml config --quiet 성공; docker compose config --quiet 성공
+- Open Risks: 서버 /opt/scenehive/.env가 아니라 다른 위치에 값을 넣었거나 GitHub STAGING_ENV_FILE에 값이 없으면 다음 배포 때 다시 누락될 수 있음
+- Blockers: None
+- Next 3 Actions: 1) 배포 후 docker exec scenehive-frontend printenv로 TRANSLATION/AZURE 변수 전달 확인, 2) STAGING_ENV_FILE에도 동일 값 추가 여부 확인, 3) 프론트 재배포 후 /api/home Pressure overview 한국어 번역 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-17 18:12:54 +09:00
 - Agent Name: Codex
 - Branch: main
