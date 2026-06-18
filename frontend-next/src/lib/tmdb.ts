@@ -1210,38 +1210,33 @@ export async function fetchPersonDetails(personId: number) {
   }
 }
 
-export async function fetchTvDetails(tvId: number) {
-  const [detail, watchProviders] = await Promise.all([
-    tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
-      append_to_response: 'credits,videos,recommendations,external_ids',
-    }),
-    fetchTvWatchProviders(tvId).catch(() => null),
-  ]);
-  const externalRatingsPromise = fetchExternalRatingsByImdbId(detail.external_ids?.imdb_id, {
-    mediaType: 'tv',
-    metacriticTitle: detail.original_name || detail.name,
-  }).catch(() => null);
+async function fetchTvDetailsBase(
+  tvId: number,
+  includeSupplemental: boolean,
+  translateFallbackText = true
+) {
+  const appendToResponse = includeSupplemental
+    ? 'credits,videos,recommendations,external_ids'
+    : 'credits,videos';
+  const detail = await tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
+    append_to_response: appendToResponse,
+  });
 
   const needOverview = needsKoreanTextFallback(detail.overview);
+  const needTagline = needsKoreanTextFallback(detail.tagline);
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
     (video) => video.site === 'YouTube' && (video.type === 'Trailer' || video.type === 'Teaser')
   );
   const needTrailerFallback = !hasKoreanTrailer;
 
-  if (!needOverview && !needTrailerFallback) {
-    const externalRatings = await externalRatingsPromise;
-
-    return {
-      ...detail,
-      watch_providers: watchProviders,
-      external_ratings: externalRatings,
-    };
+  if (!needOverview && !needTagline && !needTrailerFallback) {
+    return detail;
   }
 
   try {
     const fallbackEn = await tmdbFetch<TmdbTvDetail>(
       `/tv/${tvId}`,
-      { append_to_response: 'credits,videos,recommendations,external_ids' },
+      { append_to_response: appendToResponse },
       { language: 'en-US' }
     );
 
@@ -1254,30 +1249,82 @@ export async function fetchTvDetails(tvId: number) {
     const overviewSource = hasOverview(fallbackEn.overview)
       ? fallbackEn.overview
       : detail.overview;
-    const translatedOverview =
-      needOverview && hasOverview(overviewSource)
-        ? await translateTextToKorean(
+    const taglineSource = hasOverview(fallbackEn.tagline)
+      ? fallbackEn.tagline
+      : detail.tagline;
+    const [translatedOverview, translatedTagline] = await Promise.all([
+      needOverview && hasOverview(overviewSource) && translateFallbackText
+        ? translateTextToKorean(
             overviewSource,
             makeTranslationCacheKey('tv', tvId, 'overview', overviewSource)
           )
-        : overviewSource;
+        : overviewSource,
+      needTagline && hasOverview(taglineSource) && translateFallbackText
+        ? translateTextToKorean(
+            taglineSource,
+            makeTranslationCacheKey('tv', tvId, 'tagline', taglineSource)
+          )
+        : taglineSource,
+    ]);
 
     return {
       ...detail,
       overview: needOverview ? translatedOverview : detail.overview,
+      tagline: needTagline ? translatedTagline : detail.tagline,
       videos: {
         results: mergedVideos,
       },
-      watch_providers: watchProviders,
-      external_ratings: await externalRatingsPromise,
     };
   } catch {
-    return {
-      ...detail,
-      watch_providers: watchProviders,
-      external_ratings: await externalRatingsPromise,
-    };
+    return detail;
   }
+}
+
+export async function fetchTvDetailsPrimary(tvId: number) {
+  return fetchTvDetailsBase(tvId, false, false);
+}
+
+export async function fetchTvDetailsSupplemental(tvId: number, baseDetail?: TmdbTvDetail) {
+  const detail =
+    baseDetail ??
+    (await tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
+      append_to_response: 'recommendations,external_ids',
+    }));
+
+  const [watchProviders, externalRatings] = await Promise.all([
+    fetchTvWatchProviders(tvId).catch(() => null),
+    fetchExternalRatingsByImdbId(detail.external_ids?.imdb_id, {
+      mediaType: 'tv',
+      metacriticTitle: detail.original_name || detail.name,
+    }).catch(() => null),
+  ]);
+
+  return {
+    watch_providers: watchProviders,
+    external_ratings: externalRatings,
+    recommendations: {
+      results: detail.recommendations?.results ?? [],
+    },
+  };
+}
+
+export async function fetchTvDetails(tvId: number) {
+  const detail = await fetchTvDetailsBase(tvId, true);
+  const supplemental = await fetchTvDetailsSupplemental(tvId, detail);
+
+  return {
+    ...detail,
+    ...supplemental,
+  };
+}
+
+export async function fetchTvDetailsTextTranslation(tvId: number) {
+  const detail = await fetchTvDetailsBase(tvId, false, true);
+
+  return {
+    overview: detail.overview,
+    tagline: detail.tagline,
+  };
 }
 
 async function fetchSimilarMovies(movieId: number) {
@@ -1304,19 +1351,17 @@ async function fetchPopularMoviesFallback() {
   });
 }
 
-export async function fetchMovieDetails(movieId: number) {
-  const [detail, watchProviders, theatricalStatus] = await Promise.all([
-    tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
-      append_to_response: 'credits,videos,recommendations',
-    }),
-    fetchMovieWatchProviders(movieId).catch(() => null),
-    fetchMovieTheatricalStatus(movieId).catch(() => null),
-  ]);
-  const externalRatingsPromise = fetchExternalRatingsByImdbId(detail.imdb_id, {
-    mediaType: 'movie',
-    metacriticTitle: detail.original_title || detail.title,
-  }).catch(() => null);
-
+async function fetchMovieDetailsBase(
+  movieId: number,
+  includeSupplemental: boolean,
+  translateFallbackText = true
+) {
+  const appendToResponse = includeSupplemental
+    ? 'credits,videos,recommendations'
+    : 'credits,videos';
+  const detail = await tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
+    append_to_response: appendToResponse,
+  });
   let mergedDetail = detail;
   const needOverview = needsKoreanTextFallback(detail.overview);
   const needTagline = needsKoreanTextFallback(detail.tagline);
@@ -1329,7 +1374,7 @@ export async function fetchMovieDetails(movieId: number) {
     try {
       const fallbackEn = await tmdbFetch<TmdbMovieDetail>(
         `/movie/${movieId}`,
-        { append_to_response: 'credits,videos,recommendations' },
+        { append_to_response: appendToResponse },
         { language: 'en-US' }
       );
 
@@ -1345,20 +1390,20 @@ export async function fetchMovieDetails(movieId: number) {
       const taglineSource = hasOverview(fallbackEn.tagline)
         ? fallbackEn.tagline
         : detail.tagline;
-      const translatedOverview =
-        needOverview && hasOverview(overviewSource)
-          ? await translateTextToKorean(
+      const [translatedOverview, translatedTagline] = await Promise.all([
+        needOverview && hasOverview(overviewSource) && translateFallbackText
+          ? translateTextToKorean(
               overviewSource,
               makeTranslationCacheKey('movie', movieId, 'overview', overviewSource)
             )
-          : overviewSource;
-      const translatedTagline =
-        needTagline && hasOverview(taglineSource)
-          ? await translateTextToKorean(
+          : overviewSource,
+        needTagline && hasOverview(taglineSource) && translateFallbackText
+          ? translateTextToKorean(
               taglineSource,
               makeTranslationCacheKey('movie', movieId, 'tagline', taglineSource)
             )
-          : taglineSource;
+          : taglineSource,
+      ]);
 
       mergedDetail = {
         ...detail,
@@ -1373,7 +1418,30 @@ export async function fetchMovieDetails(movieId: number) {
     }
   }
 
-  let recommendationCandidates = mergedDetail.recommendations?.results ?? [];
+  return mergedDetail;
+}
+
+export async function fetchMovieDetailsPrimary(movieId: number) {
+  return fetchMovieDetailsBase(movieId, false, false);
+}
+
+export async function fetchMovieDetailsSupplemental(movieId: number, baseDetail?: TmdbMovieDetail) {
+  const detail =
+    baseDetail ??
+    (await tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
+      append_to_response: 'recommendations',
+    }));
+
+  const [watchProviders, theatricalStatus, externalRatings] = await Promise.all([
+    fetchMovieWatchProviders(movieId).catch(() => null),
+    fetchMovieTheatricalStatus(movieId).catch(() => null),
+    fetchExternalRatingsByImdbId(detail.imdb_id, {
+      mediaType: 'movie',
+      metacriticTitle: detail.original_title || detail.title,
+    }).catch(() => null),
+  ]);
+
+  let recommendationCandidates = detail.recommendations?.results ?? [];
 
   if (!recommendationCandidates.length) {
     try {
@@ -1387,7 +1455,7 @@ export async function fetchMovieDetails(movieId: number) {
   if (!recommendationCandidates.length) {
     try {
       const discover = await fetchDiscoverMoviesByGenres(
-        mergedDetail.genres?.map((genre) => genre.id).slice(0, 3) ?? []
+        detail.genres?.map((genre) => genre.id).slice(0, 3) ?? []
       );
       recommendationCandidates = discover?.results ?? [];
     } catch {
@@ -1411,12 +1479,30 @@ export async function fetchMovieDetails(movieId: number) {
   );
 
   return {
-    ...mergedDetail,
     watch_providers: watchProviders,
     theatrical_status: theatricalStatus,
-    external_ratings: await externalRatingsPromise,
+    external_ratings: externalRatings,
     recommendations: {
       results: dedupedRecommendations,
     },
+  };
+}
+
+export async function fetchMovieDetails(movieId: number) {
+  const detail = await fetchMovieDetailsBase(movieId, true);
+  const supplemental = await fetchMovieDetailsSupplemental(movieId, detail);
+
+  return {
+    ...detail,
+    ...supplemental,
+  };
+}
+
+export async function fetchMovieDetailsTextTranslation(movieId: number) {
+  const detail = await fetchMovieDetailsBase(movieId, false, true);
+
+  return {
+    overview: detail.overview,
+    tagline: detail.tagline,
   };
 }

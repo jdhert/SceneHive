@@ -16,6 +16,7 @@ import {
   type ExternalRatingsPayload,
 } from '@/components/media/external-ratings-section';
 import { prefetchMediaDetail } from '@/lib/detail-prefetch';
+import { shouldLoadKoreanText } from '@/lib/korean-text';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -101,6 +102,8 @@ type TvDetail = {
   external_ratings?: ExternalRatingsPayload | null;
 };
 
+type TvTextTranslation = Pick<TvDetail, 'overview' | 'tagline'>;
+
 function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
@@ -110,6 +113,10 @@ function toYear(date: string | undefined | null) {
   if (!date) return '미정';
   const year = new Date(date).getFullYear();
   return Number.isNaN(year) ? '미정' : String(year);
+}
+
+function shouldLoadTvTextTranslation(tv: TvDetail) {
+  return shouldLoadKoreanText(tv.overview) || shouldLoadKoreanText(tv.tagline);
 }
 
 export default function TvDetailPage() {
@@ -131,6 +138,7 @@ export default function TvDetailPage() {
   const velocityRef = useRef(0);
   const momentumFrameRef = useRef<number | null>(null);
   const edgeAutoFrameRef = useRef<number | null>(null);
+  const recordedRemoteTvIdRef = useRef<number | null>(null);
 
   const tvId = useMemo(() => Number(params.tvId), [params.tvId]);
   const userId = user?.id ?? null;
@@ -336,7 +344,7 @@ export default function TvDetailPage() {
       try {
         setIsLoading(true);
         setError(null);
-        const res = await fetch(`/api/tv/${tvId}`);
+        const res = await fetch(`/api/tv/${tvId}?view=primary`);
         if (!res.ok) {
           throw new Error('TV 시리즈 정보를 불러오지 못했습니다.');
         }
@@ -352,6 +360,40 @@ export default function TvDetailPage() {
           subtitle: `${toYear(data.first_air_date)} · TV`,
           href: `/tv/${data.id}`,
         });
+        if (shouldLoadTvTextTranslation(data)) {
+          void fetch(`/api/tv/${tvId}/translations`)
+            .then((translationRes) => {
+              if (!translationRes.ok) {
+                throw new Error('Failed to load TV translations');
+              }
+              return translationRes.json() as Promise<TvTextTranslation>;
+            })
+            .then((translations) => {
+              if (!isMounted) return;
+              setTv((current) =>
+                current
+                  ? {
+                      ...current,
+                      overview: translations.overview?.trim() || current.overview,
+                      tagline: translations.tagline?.trim() || current.tagline,
+                    }
+                  : current
+              );
+            })
+            .catch((error) => console.error('Failed to load TV translations:', error));
+        }
+        void fetch(`/api/tv/${tvId}/supplemental`)
+          .then((supplementalRes) => {
+            if (!supplementalRes.ok) {
+              throw new Error('Failed to load TV supplemental data');
+            }
+            return supplementalRes.json() as Promise<Partial<TvDetail>>;
+          })
+          .then((supplemental) => {
+            if (!isMounted) return;
+            setTv((current) => (current ? { ...current, ...supplemental } : current));
+          })
+          .catch((error) => console.error('Failed to load TV supplemental data:', error));
       } catch (e) {
         if (!isMounted) return;
         const message = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
@@ -371,6 +413,8 @@ export default function TvDetailPage() {
 
   useEffect(() => {
     if (!userId || !tv) return;
+    if (recordedRemoteTvIdRef.current === tv.id) return;
+    recordedRemoteTvIdRef.current = tv.id;
 
     const item = {
       targetType: 'TV' as const,
@@ -479,6 +523,7 @@ export default function TvDetailPage() {
                     alt=""
                     fill
                     priority
+                    unoptimized
                     sizes="100vw"
                     className="object-cover"
                   />
@@ -499,6 +544,7 @@ export default function TvDetailPage() {
                       src={imageUrl(tv.poster_path, 'w500')}
                       alt={tv.name}
                       fill
+                      unoptimized
                       sizes="12rem"
                       className="object-cover"
                     />
@@ -662,6 +708,7 @@ export default function TvDetailPage() {
                             src={imageUrl(cast.profile_path, 'w500')}
                             alt={cast.name}
                             fill
+                            unoptimized
                             sizes="(min-width: 1280px) 8rem, (min-width: 768px) 25vw, 50vw"
                             className="object-cover"
                           />
@@ -734,6 +781,7 @@ export default function TvDetailPage() {
                             src={imageUrl(item.poster_path, 'w500')}
                             alt={item.name}
                             fill
+                            unoptimized
                             sizes="(min-width: 768px) 12rem, 10rem"
                             draggable={false}
                             className="object-cover transition-transform duration-300 group-hover:scale-105"

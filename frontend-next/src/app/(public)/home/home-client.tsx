@@ -44,6 +44,7 @@ const DRAG_START_THRESHOLD = 6;
 const EDGE_AUTO_SCROLL_ZONE = 88;
 const EDGE_AUTO_SCROLL_MAX_STEP = 14;
 const MASK_START_THRESHOLD = 48;
+const FIRST_VIEWPORT_CARD_EAGER_COUNT = 6;
 
 type MovieTrailerPayload = {
   results?: Array<{
@@ -1000,6 +1001,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
                 alt=""
                 fill
                 priority
+                unoptimized
                 sizes="100vw"
                 className="object-cover"
                 style={{
@@ -1146,6 +1148,7 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
           title="For You"
           subtitle="추천, 최근 본 콘텐츠, 찜한 콘텐츠를 한 곳에서 확인하세요"
           tabs={forYouTabs}
+          eagerImageCount={FIRST_VIEWPORT_CARD_EAGER_COUNT}
         />
         <MovieCarouselSection
           id="trending"
@@ -1372,11 +1375,13 @@ function TabbedMovieSection({
   title,
   subtitle,
   tabs,
+  eagerImageCount = 0,
 }: {
   id: string;
   title: string;
   subtitle: string;
   tabs: MovieTab[];
+  eagerImageCount?: number;
 }) {
   const [activeTabId, setActiveTabId] = useState(() => tabs[0]?.id ?? '');
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
@@ -1438,6 +1443,7 @@ function TabbedMovieSection({
         movies={activeTab.movies}
         numbered={activeTab.numbered}
         compact
+        eagerImageCount={eagerImageCount}
       />
     </section>
   );
@@ -1450,6 +1456,7 @@ function MovieCarouselSection({
   movies,
   numbered = false,
   compact = false,
+  eagerImageCount = 0,
 }: {
   id: string;
   title: string;
@@ -1457,6 +1464,7 @@ function MovieCarouselSection({
   movies: Movie[];
   numbered?: boolean;
   compact?: boolean;
+  eagerImageCount?: number;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [isAtStart, setIsAtStart] = useState(true);
@@ -1665,6 +1673,7 @@ function MovieCarouselSection({
             movie={movie}
             index={index}
             numbered={numbered}
+            eagerImage={index < eagerImageCount}
           />
         ))}
       </div>
@@ -1676,10 +1685,12 @@ function MoviePosterCard({
   movie,
   index,
   numbered,
+  eagerImage,
 }: {
   movie: Movie;
   index: number;
   numbered: boolean;
+  eagerImage: boolean;
 }) {
   const href = movie.href ?? `/movies/${movie.id}`;
 
@@ -1710,6 +1721,9 @@ function MoviePosterCard({
             src={movieImage(movie.poster_path)}
             alt={movie.title}
             fill
+            priority={eagerImage}
+            loading={eagerImage ? undefined : 'lazy'}
+            unoptimized
             sizes="(min-width: 768px) 12rem, 10rem"
             draggable={false}
             className="object-cover transition-transform duration-300 group-hover:scale-105"

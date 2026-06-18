@@ -12,6 +12,54 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 15:12:23 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈/상세 이미지 로딩 병목 완화
+- Scope (In/Out): In: frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/layout.tsx, frontend-next/src/components/media/watch-provider-section.tsx, HANDOFF.md / Out: CDN 캐시/Nginx 프록시 설정, 이미지 포맷 변환 서버, 전체 이미지 컴포넌트 일괄 교체
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/app/layout.tsx,  M frontend-next/src/components/media/watch-provider-section.tsx,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/app/api/movies/[movieId]/supplemental/, ?? frontend-next/src/app/api/movies/[movieId]/translations/, ?? frontend-next/src/app/api/tv/[tvId]/supplemental/, ?? frontend-next/src/app/api/tv/[tvId]/translations/, ?? frontend-next/src/lib/korean-text.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "홈/상세 이미지 로딩 병목 완화" -ScopeIn "frontend-next/src/app/(public)/home/home-client.tsx, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/app/layout.tsx, frontend-next/src/components/media/watch-provider-section.tsx, HANDOFF.md" -ScopeOut "CDN 캐시/Nginx 프록시 설정, 이미지 포맷 변환 서버, 전체 이미지 컴포넌트 일괄 교체" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); /home image preload 7개 확인; dev /home 200 확인" -OpenRisks "TMDB 원본 CDN 응답 지연은 외부 의존성이라 남음; unoptimized 적용으로 Next 이미지 변환 이점은 포기하지만 OCI 첫 요청 병목은 줄어듦" -Blockers "None" -NextAction1 "배포 후 Chrome Network waterfall에서 /_next/image 대신 image.tmdb.org 직접 요청 확인" -NextAction2 "OCI에서 /home 최초 접속 시 첫 캐러셀 이미지 표시 지연 개선 확인" -NextAction3 "남는 지연은 Nginx/CDN 캐시 또는 카드 skeleton shimmer 검토"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); /home image preload 7개 확인; dev /home 200 확인
+- Open Risks: TMDB 원본 CDN 응답 지연은 외부 의존성이라 남음; unoptimized 적용으로 Next 이미지 변환 이점은 포기하지만 OCI 첫 요청 병목은 줄어듦
+- Blockers: None
+- Next 3 Actions: 1) 배포 후 Chrome Network waterfall에서 /_next/image 대신 image.tmdb.org 직접 요청 확인, 2) OCI에서 /home 최초 접속 시 첫 캐러셀 이미지 표시 지연 개선 확인, 3) 남는 지연은 Nginx/CDN 캐시 또는 카드 skeleton shimmer 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 14:34:14 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 번역 병목 점진 로딩 전환
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/lib/korean-text.ts, frontend-next/src/app/api/movies/[movieId]/translations/route.ts, frontend-next/src/app/api/tv/[tvId]/translations/route.ts, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, HANDOFF.md / Out: Redis/DB 영속 번역 캐시, UI 번역 중 배지, OCI 직접 응답시간 측정
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/app/api/movies/[movieId]/supplemental/, ?? frontend-next/src/app/api/movies/[movieId]/translations/, ?? frontend-next/src/app/api/tv/[tvId]/supplemental/, ?? frontend-next/src/app/api/tv/[tvId]/translations/, ?? frontend-next/src/lib/korean-text.ts
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 번역 병목 점진 로딩 전환" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/lib/korean-text.ts, frontend-next/src/app/api/movies/[movieId]/translations/route.ts, frontend-next/src/app/api/tv/[tvId]/translations/route.ts, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, HANDOFF.md" -ScopeOut "Redis/DB 영속 번역 캐시, UI 번역 중 배지, OCI 직접 응답시간 측정" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); 로컬 API primary/translations/supplemental 200 확인; dev 서버 /home 200 확인" -OpenRisks "primary는 이제 Azure 번역을 기다리지 않지만, KR/EN TMDB fallback과 이미지/상세 데이터 네트워크 지연은 여전히 영향을 줄 수 있음; 번역은 클라이언트 후속 요청이라 순간적으로 영문 텍스트가 먼저 보일 수 있음" -Blockers "None" -NextAction1 "OCI 배포 후 /movies/[id] 첫 렌더링 체감 확인" -NextAction2 "영문이 잠깐 보이는 UX가 거슬리면 번역 중 라벨 또는 문장 skeleton 추가" -NextAction3 "더 줄이려면 TMDB primary 응답 Redis/edge 캐시 또는 서버 warm-up 대상 확대"
+- Tests Run + Result: git diff --check 성공; npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); 로컬 API primary/translations/supplemental 200 확인; dev 서버 /home 200 확인
+- Open Risks: primary는 이제 Azure 번역을 기다리지 않지만, KR/EN TMDB fallback과 이미지/상세 데이터 네트워크 지연은 여전히 영향을 줄 수 있음; 번역은 클라이언트 후속 요청이라 순간적으로 영문 텍스트가 먼저 보일 수 있음
+- Blockers: None
+- Next 3 Actions: 1) OCI 배포 후 /movies/[id] 첫 렌더링 체감 확인, 2) 영문이 잠깐 보이는 UX가 거슬리면 번역 중 라벨 또는 문장 skeleton 추가, 3) 더 줄이려면 TMDB primary 응답 Redis/edge 캐시 또는 서버 warm-up 대상 확대
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 14:17:48 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 첫 렌더링 최적화
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/movies/[movieId]/supplemental/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/app/api/tv/[tvId]/supplemental/route.ts, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, HANDOFF.md / Out: 상세 페이지 SSR 전환, Redis 영속 캐시, Azure 번역 비동기 분리, 원격 OCI 직접 검증
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/api/movies/[movieId]/route.ts,  M frontend-next/src/app/api/tv/[tvId]/route.ts,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/app/api/movies/[movieId]/supplemental/, ?? frontend-next/src/app/api/tv/[tvId]/supplemental/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 첫 렌더링 최적화" -ScopeIn "frontend-next/src/lib/tmdb.ts, frontend-next/src/app/api/movies/[movieId]/route.ts, frontend-next/src/app/api/movies/[movieId]/supplemental/route.ts, frontend-next/src/app/api/tv/[tvId]/route.ts, frontend-next/src/app/api/tv/[tvId]/supplemental/route.ts, frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, HANDOFF.md" -ScopeOut "상세 페이지 SSR 전환, Redis 영속 캐시, Azure 번역 비동기 분리, 원격 OCI 직접 검증" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); 로컬 API movie/tv primary/supplemental 200 확인" -OpenRisks "primary도 KR 문구가 없으면 Azure 번역을 기다리므로 해당 케이스는 외부 번역 API 지연 영향을 일부 받을 수 있음; 브라우저 자동화 런타임 미노출로 실제 화면 스크린샷 검증은 API/빌드 검증으로 대체" -Blockers "None" -NextAction1 "OCI 배포 후 /movies/[id] 첫 진입 시 로딩 화면 체류 시간 확인" -NextAction2 "필요하면 번역도 별도 progressive API로 분리" -NextAction3 "초기 상세 API 응답시간을 CI/CD 또는 서버 로그에 계측 추가"
+- Tests Run + Result: git diff --check 성공; npm run lint 대상 파일 성공; npx tsc --noEmit 성공; npm run build 성공(기존 img/themeColor/hook 경고 잔존); 로컬 API movie/tv primary/supplemental 200 확인
+- Open Risks: primary도 KR 문구가 없으면 Azure 번역을 기다리므로 해당 케이스는 외부 번역 API 지연 영향을 일부 받을 수 있음; 브라우저 자동화 런타임 미노출로 실제 화면 스크린샷 검증은 API/빌드 검증으로 대체
+- Blockers: None
+- Next 3 Actions: 1) OCI 배포 후 /movies/[id] 첫 진입 시 로딩 화면 체류 시간 확인, 2) 필요하면 번역도 별도 progressive API로 분리, 3) 초기 상세 API 응답시간을 CI/CD 또는 서버 로그에 계측 추가
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-18 11:53:31 +09:00
 - Agent Name: Codex
 - Branch: main

@@ -86,6 +86,7 @@ function ProviderCard({ provider, link }: { provider: WatchProvider; link?: stri
             src={providerLogoUrl(provider.logo_path)}
             alt=""
             fill
+            unoptimized
             sizes="40px"
             className="object-cover"
           />

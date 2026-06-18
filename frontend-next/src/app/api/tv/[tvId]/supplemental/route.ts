@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchTvDetails, fetchTvDetailsPrimary } from '@/lib/tmdb';
+import { fetchTvDetailsSupplemental } from '@/lib/tmdb';
 
 type RouteContext = {
   params: {
@@ -13,19 +13,15 @@ const CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=1800',
 };
 
-export async function GET(request: Request, { params }: RouteContext) {
+export async function GET(_: Request, { params }: RouteContext) {
   const tvId = Number(params.tvId);
   if (Number.isNaN(tvId) || tvId <= 0) {
     return NextResponse.json({ message: 'Invalid tv id' }, { status: 400 });
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const tv =
-      searchParams.get('view') === 'primary'
-        ? await fetchTvDetailsPrimary(tvId)
-        : await fetchTvDetails(tvId);
-    return NextResponse.json(tv, { headers: CACHE_HEADERS });
+    const supplemental = await fetchTvDetailsSupplemental(tvId);
+    return NextResponse.json(supplemental, { headers: CACHE_HEADERS });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected TMDB error';
     return NextResponse.json({ message }, { status: 500 });

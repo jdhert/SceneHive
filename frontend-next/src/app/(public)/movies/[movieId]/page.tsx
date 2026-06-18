@@ -20,6 +20,7 @@ import {
   type ExternalRatingsPayload,
 } from '@/components/media/external-ratings-section';
 import { prefetchMediaDetail } from '@/lib/detail-prefetch';
+import { shouldLoadKoreanText } from '@/lib/korean-text';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
 import { recentlyViewedService } from '@/services/api';
 
@@ -126,6 +127,8 @@ type MovieDetail = {
   external_ratings?: ExternalRatingsPayload | null;
 };
 
+type MovieTextTranslation = Pick<MovieDetail, 'overview' | 'tagline'>;
+
 function imageUrl(path: string | null, size: 'w500' | 'w780' | 'w1280' = 'w780') {
   if (!path) return '';
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
@@ -144,6 +147,10 @@ function toCurrency(value: number) {
     currency: 'USD',
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function shouldLoadMovieTextTranslation(movie: MovieDetail) {
+  return shouldLoadKoreanText(movie.overview) || shouldLoadKoreanText(movie.tagline);
 }
 
 export default function MovieDetailPage() {
@@ -167,6 +174,7 @@ export default function MovieDetailPage() {
   const velocityRef = useRef(0);
   const momentumFrameRef = useRef<number | null>(null);
   const edgeAutoFrameRef = useRef<number | null>(null);
+  const recordedRemoteMovieIdRef = useRef<number | null>(null);
 
   const movieId = useMemo(() => Number(params.movieId), [params.movieId]);
   const userId = user?.id ?? null;
@@ -418,7 +426,7 @@ export default function MovieDetailPage() {
       try {
         setIsLoading(true);
         setError(null);
-        const res = await fetch(`/api/movies/${movieId}`);
+        const res = await fetch(`/api/movies/${movieId}?view=primary`);
         if (!res.ok) {
           throw new Error('영화 상세 정보를 불러오지 못했습니다.');
         }
@@ -434,6 +442,40 @@ export default function MovieDetailPage() {
           subtitle: `${toYear(data.release_date)} · 영화`,
           href: `/movies/${data.id}`,
         });
+        if (shouldLoadMovieTextTranslation(data)) {
+          void fetch(`/api/movies/${movieId}/translations`)
+            .then((translationRes) => {
+              if (!translationRes.ok) {
+                throw new Error('Failed to load movie translations');
+              }
+              return translationRes.json() as Promise<MovieTextTranslation>;
+            })
+            .then((translations) => {
+              if (!isMounted) return;
+              setMovie((current) =>
+                current
+                  ? {
+                      ...current,
+                      overview: translations.overview?.trim() || current.overview,
+                      tagline: translations.tagline?.trim() || current.tagline,
+                    }
+                  : current
+              );
+            })
+            .catch((error) => console.error('Failed to load movie translations:', error));
+        }
+        void fetch(`/api/movies/${movieId}/supplemental`)
+          .then((supplementalRes) => {
+            if (!supplementalRes.ok) {
+              throw new Error('Failed to load movie supplemental data');
+            }
+            return supplementalRes.json() as Promise<Partial<MovieDetail>>;
+          })
+          .then((supplemental) => {
+            if (!isMounted) return;
+            setMovie((current) => (current ? { ...current, ...supplemental } : current));
+          })
+          .catch((error) => console.error('Failed to load movie supplemental data:', error));
       } catch (e) {
         if (!isMounted) return;
         const message = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
@@ -455,6 +497,8 @@ export default function MovieDetailPage() {
 
   useEffect(() => {
     if (!userId || !movie) return;
+    if (recordedRemoteMovieIdRef.current === movie.id) return;
+    recordedRemoteMovieIdRef.current = movie.id;
 
     const item = {
       targetType: 'MOVIE' as const,
@@ -563,6 +607,7 @@ export default function MovieDetailPage() {
                     alt=""
                     fill
                     priority
+                    unoptimized
                     sizes="100vw"
                     className="object-cover"
                   />
@@ -583,6 +628,7 @@ export default function MovieDetailPage() {
                       src={imageUrl(movie.poster_path, 'w500')}
                       alt={movie.title}
                       fill
+                      unoptimized
                       sizes="12rem"
                       className="object-cover"
                     />
@@ -787,6 +833,7 @@ export default function MovieDetailPage() {
                             src={imageUrl(cast.profile_path, 'w500')}
                             alt={cast.name}
                             fill
+                            unoptimized
                             sizes="(min-width: 1280px) 8rem, (min-width: 768px) 25vw, 50vw"
                             className="object-cover"
                           />
@@ -833,6 +880,7 @@ export default function MovieDetailPage() {
                             src={imageUrl(crew.profile_path, 'w500')}
                             alt={crew.name}
                             fill
+                            unoptimized
                             sizes="(min-width: 1280px) 8rem, (min-width: 768px) 25vw, 50vw"
                             className="object-cover"
                           />
@@ -922,6 +970,7 @@ export default function MovieDetailPage() {
                             src={imageUrl(item.poster_path, 'w500')}
                             alt={item.title}
                             fill
+                            unoptimized
                             sizes="(min-width: 768px) 12rem, 10rem"
                             draggable={false}
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
