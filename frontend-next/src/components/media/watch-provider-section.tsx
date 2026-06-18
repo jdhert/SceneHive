@@ -48,20 +48,26 @@ const THEATER_BOOKING_LINKS = [
   {
     name: 'CGV',
     href: 'https://cgv.co.kr/cnm/movieBook/movie',
-    logoUrl: 'https://img.newsroom.cj.net/wp-content/uploads/2022/07/CI_logo_press_20220328_cgv_W.jpg',
-    logoSize: '148px auto',
+    logoUrl: '/theaters/cgv.png',
+    logoSize: '124px auto',
+    accent: '#E50914',
+    background: 'linear-gradient(145deg, rgba(229,9,20,0.16) 0%, rgba(24,16,20,0.78) 100%)',
   },
   {
     name: '롯데시네마',
     href: 'https://www.lottecinema.co.kr/NLCMW/Ticketing?filter=movie',
-    logoUrl: 'https://www.lottecinema.co.kr/NLCHS/Content/images/common/logo.png',
-    logoSize: '112px auto',
+    logoUrl: '/theaters/lottecinema.png',
+    logoSize: '126px auto',
+    accent: '#ED1C24',
+    background: 'linear-gradient(145deg, rgba(237,28,36,0.14) 0%, rgba(24,16,20,0.78) 100%)',
   },
   {
     name: '메가박스',
     href: 'https://www.megabox.co.kr/booking',
-    logoUrl: 'https://img.megabox.co.kr/static/pc/images/intro/logo-mega-purple.png',
-    logoSize: '104px auto',
+    logoUrl: '/theaters/megabox.png',
+    logoSize: '112px auto',
+    accent: '#6F3DD2',
+    background: 'linear-gradient(145deg, rgba(111,61,210,0.18) 0%, rgba(18,16,32,0.78) 100%)',
   },
 ];
 
@@ -219,20 +225,22 @@ export function WatchProviderSection({
                 aria-label={`${theatricalMovieTitle ?? '이 영화'} ${theater.name} 예매처에서 확인`}
                 className="group flex min-w-0 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors duration-200 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                 style={{
-                  borderColor: 'rgba(255,255,255,0.10)',
-                  background: 'rgba(255,255,255,0.045)',
+                  borderColor: `${theater.accent}33`,
+                  background: theater.background,
                   color: 'rgba(255,255,255,0.90)',
                 }}
               >
                 <span
                   aria-hidden="true"
-                  className="h-10 w-32 shrink-0 overflow-hidden rounded-md border bg-white"
+                  className="h-10 w-32 shrink-0 overflow-hidden rounded-md border"
                   style={{
-                    borderColor: 'rgba(255,255,255,0.14)',
+                    borderColor: 'transparent',
+                    backgroundColor: 'transparent',
                     backgroundImage: `url("${theater.logoUrl}")`,
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: theater.logoSize,
+                    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.28))',
                   }}
                 />
                 <span className="min-w-0 flex-1">

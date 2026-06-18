@@ -12,6 +12,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 17:05:53 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 최신 기능 반영
+- Scope (In/Out): In: README.md, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/cgv.png, frontend-next/public/theaters/lottecinema.png, frontend-next/public/theaters/megabox.png, HANDOFF.md / Out: PROJECT_GUIDE.md 대규모 재작성, 공식 상표 라이선스 문서화, 전체 README 구조 개편
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M HANDOFF.md,  M README.md,  M frontend-next/src/components/media/watch-provider-section.tsx, ?? frontend-next/public/theaters/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 최신 기능 반영" -ScopeIn "README.md, frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/cgv.png, frontend-next/public/theaters/lottecinema.png, frontend-next/public/theaters/megabox.png, HANDOFF.md" -ScopeOut "PROJECT_GUIDE.md 대규모 재작성, 공식 상표 라이선스 문서화, 전체 README 구조 개편" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; README route handler 경로 존재 확인" -OpenRisks "README는 최근 기능 중심으로 갱신했으며 PROJECT_GUIDE.md의 긴 개발 히스토리는 아직 일부 과거 표현이 남아 있음" -Blockers "None" -NextAction1 "사용자 README 내용 확인" -NextAction2 "확정 시 예매처 로고/README 변경분 커밋 및 원격 push" -NextAction3 "필요 시 PROJECT_GUIDE.md도 별도 최신화"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; git diff --check 성공; README route handler 경로 존재 확인
+- Open Risks: README는 최근 기능 중심으로 갱신했으며 PROJECT_GUIDE.md의 긴 개발 히스토리는 아직 일부 과거 표현이 남아 있음
+- Blockers: None
+- Next 3 Actions: 1) 사용자 README 내용 확인, 2) 확정 시 예매처 로고/README 변경분 커밋 및 원격 push, 3) 필요 시 PROJECT_GUIDE.md도 별도 최신화
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-18 16:56:27 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 예매처 로고 흰 배경 제거 및 투명 로고 적용
+- Scope (In/Out): In: frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/cgv.png, frontend-next/public/theaters/lottecinema.png, frontend-next/public/theaters/megabox.png, HANDOFF.md / Out: 극장별 실시간 상영관 API 연동, 예매처 검색 URL 자동화, 공식 로고 라이선스 검토 자동화
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M frontend-next/src/components/media/watch-provider-section.tsx, ?? frontend-next/public/theaters/
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "예매처 로고 흰 배경 제거 및 투명 로고 적용" -ScopeIn "frontend-next/src/components/media/watch-provider-section.tsx, frontend-next/public/theaters/cgv.png, frontend-next/public/theaters/lottecinema.png, frontend-next/public/theaters/megabox.png, HANDOFF.md" -ScopeOut "극장별 실시간 상영관 API 연동, 예매처 검색 URL 자동화, 공식 로고 라이선스 검토 자동화" -Status "done" -PercentComplete "100" -TestsResult "npm run lint 대상 파일 성공; npx tsc --noEmit 성공; 로컬 /movies/936075 캡처로 예매처 흰 배경 제거 확인" -OpenRisks "CGV 원본 JPG의 흰 배경을 제거하고 다크 UI용으로 글자색을 보정한 로컬 PNG를 사용함" -Blockers "None" -NextAction1 "사용자 UI 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 예매처 카드 로고 크기/색상 추가 튜닝"
+- Tests Run + Result: npm run lint 대상 파일 성공; npx tsc --noEmit 성공; 로컬 /movies/936075 캡처로 예매처 흰 배경 제거 확인
+- Open Risks: CGV 원본 JPG의 흰 배경을 제거하고 다크 UI용으로 글자색을 보정한 로컬 PNG를 사용함
+- Blockers: None
+- Next 3 Actions: 1) 사용자 UI 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 예매처 카드 로고 크기/색상 추가 튜닝
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-18 16:24:14 +09:00
 - Agent Name: Codex
 - Branch: main
