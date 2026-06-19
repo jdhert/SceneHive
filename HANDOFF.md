@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-19 15:49:37 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README Mermaid 렌더링 오류 수정
+- Scope (In/Out): In: README.md, HANDOFF.md / Out: README 전체 다이어그램 재작성, 프로젝트 문서 전체 개편
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M README.md
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README Mermaid 렌더링 오류 수정" -ScopeIn "README.md, HANDOFF.md" -ScopeOut "README 전체 다이어그램 재작성, 프로젝트 문서 전체 개편" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; README 서비스 맵 mindmap 제거 및 flowchart TD로 교체" -OpenRisks "GitHub 렌더링은 원격 push 후 GitHub UI에서 최종 확인 필요" -Blockers "None" -NextAction1 "사용자 확인 후 커밋/push 여부 결정" -NextAction2 "GitHub README에서 서비스 맵 렌더링 확인" -NextAction3 "다른 Mermaid 블록도 깨지면 같은 방식으로 flowchart 기반 단순화"
+- Tests Run + Result: git diff --check 성공; README 서비스 맵 mindmap 제거 및 flowchart TD로 교체
+- Open Risks: GitHub 렌더링은 원격 push 후 GitHub UI에서 최종 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 커밋/push 여부 결정, 2) GitHub README에서 서비스 맵 렌더링 확인, 3) 다른 Mermaid 블록도 깨지면 같은 방식으로 flowchart 기반 단순화
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-18 17:05:53 +09:00
 - Agent Name: Codex
 - Branch: main

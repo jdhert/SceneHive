@@ -24,30 +24,34 @@ http://158.180.74.119/
 ## 서비스 맵
 
 ```mermaid
-mindmap
-  root((SceneHive))
-    Explore
-      Home Trending
-      Search
-      Discover Filters
-      Movie/TV/People Detail
-      Watch Providers
-      External Ratings
-      Favorites
-    Community
-      Movie Clubs
-      Real-time Chat
-      Mentions
-      Notifications
-    Archive
-      Quote Snippets
-      Reviews and Memos
-      Workspace Search
-    Account
-      JWT Auth
-      Email Verification
-      Password Reset
-      OAuth2 Login
+flowchart TD
+    SceneHive((SceneHive))
+
+    SceneHive --> Explore[Explore]
+    Explore --> Home[Home Trending]
+    Explore --> Search[Search]
+    Explore --> Discover[Discover Filters]
+    Explore --> Detail["Movie / TV / People Detail"]
+    Explore --> Providers[Watch Providers]
+    Explore --> Ratings[External Ratings]
+    Explore --> Favorites[Favorites]
+
+    SceneHive --> Community[Community]
+    Community --> Clubs[Movie Clubs]
+    Community --> Chat[Real-time Chat]
+    Community --> Mentions[Mentions]
+    Community --> Notifications[Notifications]
+
+    SceneHive --> Archive[Archive]
+    Archive --> Snippets[Quote Snippets]
+    Archive --> Reviews[Reviews and Memos]
+    Archive --> WorkspaceSearch[Workspace Search]
+
+    SceneHive --> Account[Account]
+    Account --> Jwt[JWT Auth]
+    Account --> Email[Email Verification]
+    Account --> Reset[Password Reset]
+    Account --> OAuth[OAuth2 Login]
 ```
 
 ## 프로젝트 컨셉
