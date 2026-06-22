@@ -23,36 +23,13 @@ http://158.180.74.119/
 
 ## 서비스 맵
 
-```mermaid
-flowchart TD
-    SceneHive((SceneHive))
-
-    SceneHive --> Explore[Explore]
-    Explore --> Home[Home Trending]
-    Explore --> Search[Search]
-    Explore --> Discover[Discover Filters]
-    Explore --> Detail["Movie / TV / People Detail"]
-    Explore --> Providers[Watch Providers]
-    Explore --> Ratings[External Ratings]
-    Explore --> Favorites[Favorites]
-
-    SceneHive --> Community[Community]
-    Community --> Clubs[Movie Clubs]
-    Community --> Chat[Real-time Chat]
-    Community --> Mentions[Mentions]
-    Community --> Notifications[Notifications]
-
-    SceneHive --> Archive[Archive]
-    Archive --> Snippets[Quote Snippets]
-    Archive --> Reviews[Reviews and Memos]
-    Archive --> WorkspaceSearch[Workspace Search]
-
-    SceneHive --> Account[Account]
-    Account --> Jwt[JWT Auth]
-    Account --> Email[Email Verification]
-    Account --> Reset[Password Reset]
-    Account --> OAuth[OAuth2 Login]
-```
+| 영역 | 주요 기능 | 사용자 가치 |
+|------|----------|------------|
+| **Explore** | Home Trending, Search, Discover Filters, Movie/TV/People Detail | 영화·TV·인물을 한 흐름에서 찾고 비교합니다. |
+| **Watch** | Watch Providers, External Ratings, Theater Booking Links | 어디서 볼 수 있는지, 평점은 어떤지, 극장 예매는 어디서 할지 바로 확인합니다. |
+| **Community** | Movie Clubs, Real-time Chat, Mentions, Notifications | 관심 작품을 중심으로 모이고 실시간으로 대화합니다. |
+| **Archive** | Quote Snippets, Reviews and Memos, Workspace Search | 명대사와 감상 기록을 쌓고 클럽 안에서 다시 찾아봅니다. |
+| **Account** | JWT Auth, Email Verification, Password Reset, OAuth2 Login | 안전하게 로그인하고 개인화된 탐색 경험을 이어갑니다. |
 
 ## 프로젝트 컨셉
 

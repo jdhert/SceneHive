@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-19 16:20:39 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 서비스 맵 가독성 개선
+- Scope (In/Out): In: README.md, HANDOFF.md / Out: README 전체 재구성, 아키텍처 Mermaid 블록 수정
+- Current Status: done
+- Percent Complete: 100
+- Files Changed:  M README.md
+- Commands Run: git branch --show-current, git status --short, & .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 서비스 맵 가독성 개선" -ScopeIn "README.md, HANDOFF.md" -ScopeOut "README 전체 재구성, 아키텍처 Mermaid 블록 수정" -Status "done" -PercentComplete "100" -TestsResult "git diff --check 성공; 서비스 맵 Mermaid 제거 및 Markdown 표로 교체" -OpenRisks "표 기반 구조라 시각적 다이어그램 느낌은 줄지만 GitHub 렌더링 안정성과 가독성은 개선됨" -Blockers "None" -NextAction1 "사용자 확인 후 커밋/push 여부 결정" -NextAction2 "GitHub README에서 서비스 맵 표 렌더링 확인" -NextAction3 "필요 시 아키텍처/사용자 흐름 Mermaid도 표 또는 이미지로 교체"
+- Tests Run + Result: git diff --check 성공; 서비스 맵 Mermaid 제거 및 Markdown 표로 교체
+- Open Risks: 표 기반 구조라 시각적 다이어그램 느낌은 줄지만 GitHub 렌더링 안정성과 가독성은 개선됨
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 커밋/push 여부 결정, 2) GitHub README에서 서비스 맵 표 렌더링 확인, 3) 필요 시 아키텍처/사용자 흐름 Mermaid도 표 또는 이미지로 교체
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-19 15:49:37 +09:00
 - Agent Name: Codex
 - Branch: main
