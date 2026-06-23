@@ -11,7 +11,7 @@ function getDetailApiPath(href: string) {
     }
 
     const [, type, id] = match;
-    return type === 'movies' ? `/api/movies/${id}` : `/api/tv/${id}`;
+    return type === 'movies' ? `/api/movies/${id}?view=primary` : `/api/tv/${id}?view=primary`;
   } catch {
     return null;
   }

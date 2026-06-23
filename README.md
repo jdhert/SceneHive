@@ -23,13 +23,39 @@ http://158.180.74.119/
 
 ## 서비스 맵
 
-| 영역 | 주요 기능 | 사용자 가치 |
-|------|----------|------------|
-| **Explore** | Home Trending, Search, Discover Filters, Movie/TV/People Detail | 영화·TV·인물을 한 흐름에서 찾고 비교합니다. |
-| **Watch** | Watch Providers, External Ratings, Theater Booking Links | 어디서 볼 수 있는지, 평점은 어떤지, 극장 예매는 어디서 할지 바로 확인합니다. |
-| **Community** | Movie Clubs, Real-time Chat, Mentions, Notifications | 관심 작품을 중심으로 모이고 실시간으로 대화합니다. |
-| **Archive** | Quote Snippets, Reviews and Memos, Workspace Search | 명대사와 감상 기록을 쌓고 클럽 안에서 다시 찾아봅니다. |
-| **Account** | JWT Auth, Email Verification, Password Reset, OAuth2 Login | 안전하게 로그인하고 개인화된 탐색 경험을 이어갑니다. |
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Explore</strong><br/>
+      <sub>영화·TV·인물을 한 흐름에서 찾고 비교합니다.</sub><br/><br/>
+      <code>Home Trending</code> <code>Search</code> <code>Discover Filters</code> <code>Detail Pages</code>
+    </td>
+    <td width="50%">
+      <strong>Watch</strong><br/>
+      <sub>어디서 볼 수 있는지, 평점은 어떤지, 극장 예매는 어디서 할지 바로 확인합니다.</sub><br/><br/>
+      <code>Watch Providers</code> <code>External Ratings</code> <code>Theater Booking Links</code>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Community</strong><br/>
+      <sub>관심 작품을 중심으로 모이고 실시간으로 대화합니다.</sub><br/><br/>
+      <code>Movie Clubs</code> <code>Real-time Chat</code> <code>Mentions</code> <code>Notifications</code>
+    </td>
+    <td width="50%">
+      <strong>Archive</strong><br/>
+      <sub>명대사와 감상 기록을 쌓고 클럽 안에서 다시 찾아봅니다.</sub><br/><br/>
+      <code>Quote Snippets</code> <code>Reviews</code> <code>Memos</code> <code>Workspace Search</code>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <strong>Account</strong><br/>
+      <sub>안전하게 로그인하고 개인화된 탐색 경험을 이어갑니다.</sub><br/><br/>
+      <code>JWT Auth</code> <code>Email Verification</code> <code>Password Reset</code> <code>OAuth2 Login</code>
+    </td>
+  </tr>
+</table>
 
 ## 프로젝트 컨셉
 

@@ -19,6 +19,7 @@ import {
   ExternalRatingsSection,
   type ExternalRatingsPayload,
 } from '@/components/media/external-ratings-section';
+import { DetailPageSkeleton } from '@/components/media/detail-page-skeleton';
 import { prefetchMediaDetail } from '@/lib/detail-prefetch';
 import { shouldLoadKoreanText } from '@/lib/korean-text';
 import { recordRecentlyViewed, toRecentlyViewedRequest } from '@/lib/recently-viewed';
@@ -426,7 +427,7 @@ export default function MovieDetailPage() {
       try {
         setIsLoading(true);
         setError(null);
-        const res = await fetch(`/api/movies/${movieId}?view=primary`);
+        const res = await fetch(`/api/movies/${movieId}?view=primary`, { cache: 'force-cache' });
         if (!res.ok) {
           throw new Error('영화 상세 정보를 불러오지 못했습니다.');
         }
@@ -443,7 +444,7 @@ export default function MovieDetailPage() {
           href: `/movies/${data.id}`,
         });
         if (shouldLoadMovieTextTranslation(data)) {
-          void fetch(`/api/movies/${movieId}/translations`)
+          void fetch(`/api/movies/${movieId}/translations`, { cache: 'force-cache' })
             .then((translationRes) => {
               if (!translationRes.ok) {
                 throw new Error('Failed to load movie translations');
@@ -464,7 +465,7 @@ export default function MovieDetailPage() {
             })
             .catch((error) => console.error('Failed to load movie translations:', error));
         }
-        void fetch(`/api/movies/${movieId}/supplemental`)
+        void fetch(`/api/movies/${movieId}/supplemental`, { cache: 'force-cache' })
           .then((supplementalRes) => {
             if (!supplementalRes.ok) {
               throw new Error('Failed to load movie supplemental data');
@@ -538,14 +539,6 @@ export default function MovieDetailPage() {
     };
   }, []);
 
-  if (isUserLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
-        <div className="text-amber-400 text-xl">Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
       <header className="sticky top-0 z-40" style={{ background: 'linear-gradient(180deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.40) 60%, rgba(5,8,15,0) 100%)', backdropFilter: 'blur(10px)' }}>
@@ -555,7 +548,12 @@ export default function MovieDetailPage() {
             <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
           </Link>
           <div className="flex items-center gap-3">
-            {user ? (
+            {isUserLoading ? (
+              <>
+                <div className="hidden sm:block h-10 w-24 rounded-md animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                <div className="h-10 w-20 rounded-md animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              </>
+            ) : user ? (
               <>
                 <Button asChild className="hidden sm:inline-flex text-white font-medium"
                   style={{ background: 'rgba(85,168,255,0.20)', border: '1px solid rgba(85,168,255,0.30)' }}>
@@ -583,9 +581,7 @@ export default function MovieDetailPage() {
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 py-8">
         {isLoading && (
-          <div className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-            영화 상세 정보를 불러오는 중입니다...
-          </div>
+          <DetailPageSkeleton label="영화 상세 정보를 불러오는 중입니다" />
         )}
 
         {!isLoading && error && (

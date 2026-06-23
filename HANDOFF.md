@@ -12,6 +12,54 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-23 16:52:50 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 페이지 속도/로딩 UX 개선
+- Scope (In/Out): In: frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/lib/detail-prefetch.ts, frontend-next/src/components/media/detail-page-skeleton.tsx, HANDOFF.md / Out: 상세 페이지 SSR 전환, API 계약 변경, 이미지 CDN 구조 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M HANDOFF.md,  M README.md,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/lib/detail-prefetch.ts, ?? frontend-next/src/components/media/detail-page-skeleton.tsx
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 페이지 속도/로딩 UX 개선" -ScopeIn "frontend-next/src/app/(public)/movies/[movieId]/page.tsx, frontend-next/src/app/(public)/tv/[tvId]/page.tsx, frontend-next/src/lib/detail-prefetch.ts, frontend-next/src/components/media/detail-page-skeleton.tsx, HANDOFF.md" -ScopeOut "상세 페이지 SSR 전환, API 계약 변경, 이미지 CDN 구조 변경" -Status "done" -PercentComplete "100%" -TestsResult "git diff --check 통과; npm run lint 통과(기존 warning 유지)" -OpenRisks "직접 URL 최초 진입의 네트워크 시간 자체는 남아 있으며, 스켈레톤으로 체감 UX를 완화함" -Blockers "None" -NextAction1 "로컬/OCI에서 상세 페이지 첫 진입 체감 확인" -NextAction2 "필요 시 primary 데이터를 서버 컴포넌트 SSR로 넘기는 2차 최적화 검토" -NextAction3 "이미지 최적화/CDN 전략은 OCI 리소스와 비용 기준으로 별도 결정"
+- Tests Run + Result: git diff --check 통과; npm run lint 통과(기존 warning 유지)
+- Open Risks: 직접 URL 최초 진입의 네트워크 시간 자체는 남아 있으며, 스켈레톤으로 체감 UX를 완화함
+- Blockers: None
+- Next 3 Actions: 1) 로컬/OCI에서 상세 페이지 첫 진입 체감 확인, 2) 필요 시 primary 데이터를 서버 컴포넌트 SSR로 넘기는 2차 최적화 검토, 3) 이미지 최적화/CDN 전략은 OCI 리소스와 비용 기준으로 별도 결정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-22 18:01:55 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 서비스 맵 카드형 정리
+- Scope (In/Out): In: README.md, HANDOFF.md / Out: SVG/AI풍 다이어그램 재도입, 앱 로직 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M HANDOFF.md,  M README.md
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 서비스 맵 카드형 정리" -ScopeIn "README.md, HANDOFF.md" -ScopeOut "SVG/AI풍 다이어그램 재도입, 앱 로직 변경" -Status "done" -PercentComplete "100%" -TestsResult "git diff --check 통과(LF/CRLF 경고만 있음)" -OpenRisks "GitHub README HTML table 렌더링은 push 후 UI에서 최종 확인 필요" -Blockers "None" -NextAction1 "사용자 확인 후 커밋/push 여부 결정" -NextAction2 "GitHub README에서 카드형 서비스 맵 가독성 확인" -NextAction3 "필요 시 서비스 맵을 실제 화면 캡처 기반 이미지로 대체 검토"
+- Tests Run + Result: git diff --check 통과(LF/CRLF 경고만 있음)
+- Open Risks: GitHub README HTML table 렌더링은 push 후 UI에서 최종 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 커밋/push 여부 결정, 2) GitHub README에서 카드형 서비스 맵 가독성 확인, 3) 필요 시 서비스 맵을 실제 화면 캡처 기반 이미지로 대체 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-22 17:58:30 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): README 서비스 맵 SVG 시각화
+- Scope (In/Out): In: README.md, docs/assets/scenehive-service-map.svg, HANDOFF.md / Out: Mermaid 재도입, 앱 로직 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M README.md, ?? docs/assets/scenehive-service-map.svg
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "README 서비스 맵 SVG 시각화" -ScopeIn "README.md, docs/assets/scenehive-service-map.svg, HANDOFF.md" -ScopeOut "Mermaid 재도입, 앱 로직 변경" -Status "done" -PercentComplete "100%" -TestsResult "SVG XML parse 성공; git diff --check 통과(LF/CRLF 경고만 있음)" -OpenRisks "GitHub README에서 SVG 렌더링은 push 후 UI 최종 확인 필요" -Blockers "None" -NextAction1 "사용자 확인 후 커밋/push 여부 결정" -NextAction2 "GitHub README에서 서비스 맵 SVG 렌더링 확인" -NextAction3 "필요 시 SVG 색상/문구 튜닝"
+- Tests Run + Result: SVG XML parse 성공; git diff --check 통과(LF/CRLF 경고만 있음)
+- Open Risks: GitHub README에서 SVG 렌더링은 push 후 UI 최종 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 사용자 확인 후 커밋/push 여부 결정, 2) GitHub README에서 서비스 맵 SVG 렌더링 확인, 3) 필요 시 SVG 색상/문구 튜닝
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-19 16:20:39 +09:00
 - Agent Name: Codex
 - Branch: main
