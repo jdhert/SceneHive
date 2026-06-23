@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-23 17:56:25 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 점수판 가독성 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: OMDb API 계약 변경, 평점 데이터 로직 변경, 상세 페이지 레이아웃 전체 개편
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 점수판 가독성 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "OMDb API 계약 변경, 평점 데이터 로직 변경, 상세 페이지 레이아웃 전체 개편" -Status "done" -PercentComplete "100%" -TestsResult "git diff --check 통과(LF/CRLF 경고만 있음); npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과" -OpenRisks "실제 시각 톤은 브라우저에서 사용자 확인 후 색 농도 추가 튜닝 가능" -Blockers "None" -NextAction1 "상세 페이지에서 평점 카드 가독성 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 모바일 1열 카드에서 점수판 높이 추가 조정"
+- Tests Run + Result: git diff --check 통과(LF/CRLF 경고만 있음); npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과
+- Open Risks: 실제 시각 톤은 브라우저에서 사용자 확인 후 색 농도 추가 튜닝 가능
+- Blockers: None
+- Next 3 Actions: 1) 상세 페이지에서 평점 카드 가독성 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 모바일 1열 카드에서 점수판 높이 추가 조정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-23 17:38:44 +09:00
 - Agent Name: Codex
 - Branch: main

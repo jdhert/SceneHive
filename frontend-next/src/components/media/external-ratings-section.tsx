@@ -44,6 +44,9 @@ type RatingCardProps = {
     border: string;
     background: string;
     shadow: string;
+    foreground: string;
+    mutedForeground: string;
+    divider: string;
   };
 };
 
@@ -72,22 +75,30 @@ const RATING_TONES = {
   },
 } satisfies Record<string, RatingCardProps['tone']>;
 
-function scoreToneFromAccent(accent: string): NonNullable<RatingCardProps['scoreTone']> {
+function scoreToneFromAccent(
+  accent: string,
+  foreground = '#FFFFFF'
+): NonNullable<RatingCardProps['scoreTone']> {
+  const usesDarkText = foreground !== '#FFFFFF';
+
   return {
     accent,
-    border: `${accent}5C`,
-    background: `linear-gradient(135deg, ${accent}22 0%, rgba(255,255,255,0.055) 100%)`,
-    shadow: `${accent}18`,
+    border: `${accent}A8`,
+    background: `linear-gradient(135deg, ${accent} 0%, ${accent}E6 54%, ${accent}CC 100%)`,
+    shadow: `${accent}32`,
+    foreground,
+    mutedForeground: usesDarkText ? 'rgba(8,11,18,0.68)' : 'rgba(255,255,255,0.78)',
+    divider: usesDarkText ? 'rgba(8,11,18,0.34)' : 'rgba(255,255,255,0.34)',
   };
 }
 
 function metascoreTone(score: number): NonNullable<RatingCardProps['scoreTone']> {
   if (score >= 61) {
-    return scoreToneFromAccent('#66CC33');
+    return scoreToneFromAccent('#66CC33', '#071007');
   }
 
   if (score >= 40) {
-    return scoreToneFromAccent('#F7D13B');
+    return scoreToneFromAccent('#F7D13B', '#101006');
   }
 
   return scoreToneFromAccent('#FF4A4A');
@@ -132,28 +143,41 @@ function RatingCard({ label, value, description, detail, href, logo, tone, score
         ) : null}
       </div>
       <div
-        className="mt-6 rounded-2xl border px-4 py-4"
+        className="relative mt-6 overflow-hidden rounded-2xl border px-5 py-4"
         style={{
           borderColor: activeScoreTone.border,
           background: activeScoreTone.background,
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 34px ${activeScoreTone.shadow}`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.24), 0 16px 38px ${activeScoreTone.shadow}`,
         }}
       >
-        <p className="flex items-baseline gap-2">
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 w-1/3 opacity-45"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0) 68%)',
+          }}
+        />
+        <p className="relative flex items-baseline gap-2">
           <span
             className="text-5xl font-black leading-none sm:text-6xl"
-            style={{ color: activeScoreTone.accent, textShadow: `0 0 22px ${activeScoreTone.shadow}` }}
+            style={{
+              color: activeScoreTone.foreground,
+              textShadow:
+                activeScoreTone.foreground === '#FFFFFF'
+                  ? '0 2px 14px rgba(0,0,0,0.24)'
+                  : 'none',
+            }}
           >
             {score}
           </span>
           {scale ? (
-            <span className="text-xl font-black" style={{ color: 'rgba(255,255,255,0.82)' }}>
+            <span className="text-xl font-black" style={{ color: activeScoreTone.mutedForeground }}>
               / {scale}
             </span>
           ) : null}
         </p>
         {detail ? (
-          <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.54)' }}>
+          <p className="relative mt-3 border-t pt-3 text-xs" style={{ borderColor: activeScoreTone.divider, color: activeScoreTone.mutedForeground }}>
             {detail}
           </p>
         ) : null}
@@ -259,6 +283,7 @@ export function ExternalRatingsSection({
               alt: 'IMDb',
             }}
             tone={RATING_TONES.imdb}
+            scoreTone={scoreToneFromAccent(RATING_TONES.imdb.accent, '#0A0B10')}
           />
         ) : null}
       </div>
