@@ -411,6 +411,66 @@ export type TmdbTvDetail = {
   external_ratings?: ExternalRatingsPayload | null;
 };
 
+function pickMoviePrimaryDetail(detail: TmdbMovieDetail) {
+  return {
+    id: detail.id,
+    title: detail.title,
+    original_title: detail.original_title,
+    overview: detail.overview,
+    poster_path: detail.poster_path,
+    backdrop_path: detail.backdrop_path,
+    vote_average: detail.vote_average,
+    vote_count: detail.vote_count,
+    popularity: detail.popularity,
+    release_date: detail.release_date,
+    runtime: detail.runtime,
+    status: detail.status,
+    tagline: detail.tagline,
+    homepage: detail.homepage,
+    imdb_id: detail.imdb_id,
+    budget: detail.budget,
+    revenue: detail.revenue,
+    belongs_to_collection: detail.belongs_to_collection,
+    production_companies: detail.production_companies ?? [],
+    production_countries: detail.production_countries ?? [],
+    spoken_languages: detail.spoken_languages ?? [],
+    genres: detail.genres ?? [],
+    videos: {
+      results: detail.videos?.results ?? [],
+    },
+  };
+}
+
+function pickTvPrimaryDetail(detail: TmdbTvDetail) {
+  return {
+    id: detail.id,
+    name: detail.name,
+    original_name: detail.original_name,
+    overview: detail.overview,
+    poster_path: detail.poster_path,
+    backdrop_path: detail.backdrop_path,
+    vote_average: detail.vote_average,
+    vote_count: detail.vote_count,
+    popularity: detail.popularity,
+    first_air_date: detail.first_air_date,
+    last_air_date: detail.last_air_date,
+    number_of_episodes: detail.number_of_episodes,
+    number_of_seasons: detail.number_of_seasons,
+    episode_run_time: detail.episode_run_time ?? [],
+    status: detail.status,
+    tagline: detail.tagline,
+    homepage: detail.homepage,
+    in_production: detail.in_production,
+    genres: detail.genres ?? [],
+    networks: detail.networks ?? [],
+    origin_country: detail.origin_country ?? [],
+    production_companies: detail.production_companies ?? [],
+    videos: {
+      results: detail.videos?.results ?? [],
+    },
+  };
+}
+
 type TmdbFetchOptions = {
   revalidate?: number;
   language?: string;
@@ -1217,7 +1277,7 @@ async function fetchTvDetailsBase(
 ) {
   const appendToResponse = includeSupplemental
     ? 'credits,videos,recommendations,external_ids'
-    : 'credits,videos';
+    : 'videos';
   const detail = await tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
     append_to_response: appendToResponse,
   });
@@ -1281,14 +1341,15 @@ async function fetchTvDetailsBase(
 }
 
 export async function fetchTvDetailsPrimary(tvId: number) {
-  return fetchTvDetailsBase(tvId, false, false);
+  const detail = await fetchTvDetailsBase(tvId, false, false);
+  return pickTvPrimaryDetail(detail);
 }
 
 export async function fetchTvDetailsSupplemental(tvId: number, baseDetail?: TmdbTvDetail) {
   const detail =
     baseDetail ??
     (await tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
-      append_to_response: 'recommendations,external_ids',
+      append_to_response: 'credits,recommendations,external_ids',
     }));
 
   const [watchProviders, externalRatings] = await Promise.all([
@@ -1300,6 +1361,7 @@ export async function fetchTvDetailsSupplemental(tvId: number, baseDetail?: Tmdb
   ]);
 
   return {
+    credits: detail.credits,
     watch_providers: watchProviders,
     external_ratings: externalRatings,
     recommendations: {
@@ -1358,7 +1420,7 @@ async function fetchMovieDetailsBase(
 ) {
   const appendToResponse = includeSupplemental
     ? 'credits,videos,recommendations'
-    : 'credits,videos';
+    : 'videos';
   const detail = await tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
     append_to_response: appendToResponse,
   });
@@ -1422,14 +1484,15 @@ async function fetchMovieDetailsBase(
 }
 
 export async function fetchMovieDetailsPrimary(movieId: number) {
-  return fetchMovieDetailsBase(movieId, false, false);
+  const detail = await fetchMovieDetailsBase(movieId, false, false);
+  return pickMoviePrimaryDetail(detail);
 }
 
 export async function fetchMovieDetailsSupplemental(movieId: number, baseDetail?: TmdbMovieDetail) {
   const detail =
     baseDetail ??
     (await tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
-      append_to_response: 'recommendations',
+      append_to_response: 'credits,recommendations',
     }));
 
   const [watchProviders, theatricalStatus, externalRatings] = await Promise.all([
@@ -1479,6 +1542,7 @@ export async function fetchMovieDetailsSupplemental(movieId: number, baseDetail?
   );
 
   return {
+    credits: detail.credits,
     watch_providers: watchProviders,
     theatrical_status: theatricalStatus,
     external_ratings: externalRatings,

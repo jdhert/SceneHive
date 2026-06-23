@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-23 17:13:48 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 상세 primary API 응답 슬림화
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: 상세 SSR 전환, supplemental API 분리, 이미지 CDN 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "상세 primary API 응답 슬림화" -ScopeIn "frontend-next/src/lib/tmdb.ts, HANDOFF.md" -ScopeOut "상세 SSR 전환, supplemental API 분리, 이미지 CDN 변경" -Status "done" -PercentComplete "100%" -TestsResult "git diff --check 통과; npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과; 로컬 primary/supplemental 응답 구조 확인" -OpenRisks "출연진/추천/평점 섹션은 supplemental 도착 후 표시되므로 첫 렌더 이후 점진적으로 붙는 구조를 유지함" -Blockers "None" -NextAction1 "로컬/OCI 상세 페이지에서 첫 렌더와 아래 섹션 점진 로딩 체감 확인" -NextAction2 "필요 시 영화 상세부터 Server Component 분리 실험" -NextAction3 "supplemental을 ratings/watch/basic으로 추가 분리할지 결정"
+- Tests Run + Result: git diff --check 통과; npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과; 로컬 primary/supplemental 응답 구조 확인
+- Open Risks: 출연진/추천/평점 섹션은 supplemental 도착 후 표시되므로 첫 렌더 이후 점진적으로 붙는 구조를 유지함
+- Blockers: None
+- Next 3 Actions: 1) 로컬/OCI 상세 페이지에서 첫 렌더와 아래 섹션 점진 로딩 체감 확인, 2) 필요 시 영화 상세부터 Server Component 분리 실험, 3) supplemental을 ratings/watch/basic으로 추가 분리할지 결정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-23 16:52:50 +09:00
 - Agent Name: Codex
 - Branch: main
