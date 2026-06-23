@@ -131,7 +131,7 @@ function PeopleSearchContent() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <Link href="/home" className="flex items-center gap-3">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
-            <h1 className="text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
+            <h1 className="font-header-en text-xl font-black tracking-tight" style={{ color: AMBER }}>SceneHive</h1>
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild variant="outline" className="font-medium"

@@ -188,7 +188,7 @@ export default function WorkspacePage() {
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <button onClick={() => router.push('/home')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
-              <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>SceneHive</span>
+              <span className="font-header-en text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>SceneHive</span>
             </button>
             <span style={{ color: 'rgba(245,158,11,0.3)' }}>|</span>
             <h1 className="text-base sm:text-lg font-semibold text-white truncate">{workspace?.name}</h1>

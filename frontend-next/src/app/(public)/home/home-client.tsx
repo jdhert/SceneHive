@@ -944,9 +944,9 @@ export default function HomeClient({ initialData, initialError = null }: HomeCli
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
           <button type="button" onClick={handleBrandReload} className="flex items-center gap-3">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
-            <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
+            <h1 className="font-header-en text-xl font-black tracking-tight text-white">SceneHive</h1>
           </button>
-          <nav className="hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.64)' }}>
+          <nav className="font-header-en hidden lg:flex items-center gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.64)' }}>
             <a href="#for-you" className="hover:text-white transition-colors">For You</a>
             <Link href="/discover" className="hover:text-white transition-colors">Discover</Link>
             <a href="#trending" className="hover:text-white transition-colors">Trending</a>

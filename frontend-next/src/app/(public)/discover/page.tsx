@@ -346,9 +346,9 @@ function DiscoverPageContent() {
           <div className="flex items-center gap-4 min-w-0">
             <Link href="/home" className="flex items-center gap-3 shrink-0">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
-              <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">SceneHive</h1>
+              <h1 className="font-header-en text-lg sm:text-xl font-black tracking-tight text-white">SceneHive</h1>
             </Link>
-            <span className="text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <span className="font-header-en text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Discover
             </span>
           </div>

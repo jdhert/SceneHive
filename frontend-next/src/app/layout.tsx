@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
+import localFont from 'next/font/local';
 import './globals.css';
 import Providers from './providers';
+
+const headerFont = localFont({
+  src: './fonts/header/SceneHeader.otf',
+  variable: '--font-header',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: { default: 'SceneHive', template: '%s | SceneHive' },
@@ -25,7 +32,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
       </head>
-      <body className="antialiased">
+      <body className={`${headerFont.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

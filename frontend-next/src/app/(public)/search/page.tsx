@@ -217,7 +217,7 @@ function MovieSearchPageContent() {
           <div className="flex items-center gap-4">
             <Link href="/home" className="flex items-center gap-3">
               <SceneHiveIcon className="w-6 h-6 shrink-0" />
-              <h1 className="text-xl font-black tracking-tight text-white">SceneHive</h1>
+              <h1 className="font-header-en text-xl font-black tracking-tight text-white">SceneHive</h1>
             </Link>
             <span className="text-sm hidden md:inline" style={{ color: 'rgba(255,255,255,0.55)' }}>
               통합 검색

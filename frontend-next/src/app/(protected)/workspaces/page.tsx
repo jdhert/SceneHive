@@ -108,7 +108,7 @@ export default function WorkspacesPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
           <Link href="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <SceneHiveIcon className="w-6 h-6 shrink-0" />
-            <span className="text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>SceneHive</span>
+            <span className="font-header-en text-base sm:text-lg font-bold tracking-tight" style={{ color: BRAND_TEXT }}>SceneHive</span>
           </Link>
           <div className="flex items-center gap-4">
             <NotificationBell />

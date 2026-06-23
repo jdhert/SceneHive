@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-23 17:38:44 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 헤더 영문 폰트 적용
+- Scope (In/Out): In: frontend-next/src/app/fonts/header/SceneHeader.otf, frontend-next/src/app/layout.tsx, frontend-next/src/app/globals.css, frontend-next/src/app/(public)/**, frontend-next/src/app/(protected)/**, HANDOFF.md / Out: 전역 body 폰트 변경, 한국어 UI 폰트 변경, 로그인/회원가입 카드 타이틀 폰트 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/app/(protected)/dashboard/page.tsx,  M frontend-next/src/app/(protected)/profile/edit/page.tsx,  M frontend-next/src/app/(protected)/profile/page.tsx,  M frontend-next/src/app/(protected)/settings/page.tsx,  M frontend-next/src/app/(protected)/workspaces/[id]/page.tsx,  M frontend-next/src/app/(protected)/workspaces/page.tsx,  M frontend-next/src/app/(public)/discover/page.tsx,  M frontend-next/src/app/(public)/home/home-client.tsx,  M frontend-next/src/app/(public)/movies/[movieId]/page.tsx,  M frontend-next/src/app/(public)/people/[personId]/page.tsx,  M frontend-next/src/app/(public)/people/page.tsx,  M frontend-next/src/app/(public)/search/page.tsx,  M frontend-next/src/app/(public)/tv/[tvId]/page.tsx,  M frontend-next/src/app/globals.css,  M frontend-next/src/app/layout.tsx, ?? frontend-next/src/app/fonts/
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "헤더 영문 폰트 적용" -ScopeIn "frontend-next/src/app/fonts/header/SceneHeader.otf, frontend-next/src/app/layout.tsx, frontend-next/src/app/globals.css, frontend-next/src/app/(public)/**, frontend-next/src/app/(protected)/**, HANDOFF.md" -ScopeOut "전역 body 폰트 변경, 한국어 UI 폰트 변경, 로그인/회원가입 카드 타이틀 폰트 변경" -Status "done" -PercentComplete "100%" -TestsResult "git diff --check 통과(LF/CRLF 경고만 있음); npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과; localhost /home, /discover 200 OK; npm run build는 실행 중인 next dev의 .next/trace 잠금으로 EPERM 실패" -OpenRisks "로컬 next dev가 .next/trace를 잡고 있어 production build는 dev 서버 종료 후 재검증 필요" -Blockers "None" -NextAction1 "브라우저에서 헤더 SceneHive/영문 nav 폰트 시각 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 OTF를 WOFF2로 변환해 폰트 용량 최적화"
+- Tests Run + Result: git diff --check 통과(LF/CRLF 경고만 있음); npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과; localhost /home, /discover 200 OK; npm run build는 실행 중인 next dev의 .next/trace 잠금으로 EPERM 실패
+- Open Risks: 로컬 next dev가 .next/trace를 잡고 있어 production build는 dev 서버 종료 후 재검증 필요
+- Blockers: None
+- Next 3 Actions: 1) 브라우저에서 헤더 SceneHive/영문 nav 폰트 시각 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 OTF를 WOFF2로 변환해 폰트 용량 최적화
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-23 17:13:48 +09:00
 - Agent Name: Codex
 - Branch: main
