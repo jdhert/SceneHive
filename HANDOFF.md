@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-26 14:06:58 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 평점 로고 surface 가독성 개선
+- Scope (In/Out): In: frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md / Out: 평점 데이터 로직 변경, 로고 SVG 재제작, 상세 페이지 전체 레이아웃 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/components/media/external-ratings-section.tsx
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "평점 로고 surface 가독성 개선" -ScopeIn "frontend-next/src/components/media/external-ratings-section.tsx, HANDOFF.md" -ScopeOut "평점 데이터 로직 변경, 로고 SVG 재제작, 상세 페이지 전체 레이아웃 변경" -Status "done" -PercentComplete "100%" -TestsResult "git diff --check 통과(LF/CRLF 경고만 있음); npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과" -OpenRisks "실제 시각 톤은 브라우저 확인 후 로고 surface 밝기/폭 추가 튜닝 가능" -Blockers "None" -NextAction1 "상세 페이지에서 로고 surface 가독성 확인" -NextAction2 "확정 시 커밋 및 원격 push" -NextAction3 "필요 시 Rotten Tomatoes/Metacritic 로고 배지 밝기 추가 조정"
+- Tests Run + Result: git diff --check 통과(LF/CRLF 경고만 있음); npm run lint 통과(기존 warning 유지); npx tsc --noEmit 통과
+- Open Risks: 실제 시각 톤은 브라우저 확인 후 로고 surface 밝기/폭 추가 튜닝 가능
+- Blockers: None
+- Next 3 Actions: 1) 상세 페이지에서 로고 surface 가독성 확인, 2) 확정 시 커밋 및 원격 push, 3) 필요 시 Rotten Tomatoes/Metacritic 로고 배지 밝기 추가 조정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-23 17:56:25 +09:00
 - Agent Name: Codex
 - Branch: main

@@ -37,7 +37,12 @@ type RatingCardProps = {
     border: string;
     background: string;
     shadow: string;
-    logoBackground?: string;
+    logoSurface: {
+      background: string;
+      border: string;
+      shadow: string;
+      backgroundSize?: string;
+    };
   };
   scoreTone?: {
     accent: string;
@@ -57,6 +62,13 @@ const RATING_TONES = {
     background:
       'linear-gradient(145deg, rgba(250,50,10,0.12) 0%, rgba(17,18,28,0.78) 46%, rgba(8,11,18,0.94) 100%)',
     shadow: 'rgba(250,50,10,0.10)',
+    logoSurface: {
+      background:
+        'linear-gradient(135deg, rgba(255,245,241,0.98) 0%, rgba(255,218,208,0.94) 100%)',
+      border: 'rgba(250,50,10,0.34)',
+      shadow: 'rgba(250,50,10,0.22)',
+      backgroundSize: '82% auto',
+    },
   },
   metacritic: {
     accent: '#F7D13B',
@@ -64,6 +76,13 @@ const RATING_TONES = {
     background:
       'linear-gradient(145deg, rgba(247,209,59,0.10) 0%, rgba(17,18,28,0.78) 46%, rgba(8,11,18,0.94) 100%)',
     shadow: 'rgba(247,209,59,0.08)',
+    logoSurface: {
+      background:
+        'linear-gradient(135deg, rgba(7,8,12,0.98) 0%, rgba(27,29,36,0.96) 100%)',
+      border: 'rgba(247,209,59,0.34)',
+      shadow: 'rgba(247,209,59,0.18)',
+      backgroundSize: '82% auto',
+    },
   },
   imdb: {
     accent: '#F5C518',
@@ -71,7 +90,12 @@ const RATING_TONES = {
     background:
       'linear-gradient(145deg, rgba(245,197,24,0.11) 0%, rgba(17,18,28,0.78) 46%, rgba(8,11,18,0.94) 100%)',
     shadow: 'rgba(245,197,24,0.08)',
-    logoBackground: '#F5C518',
+    logoSurface: {
+      background: 'linear-gradient(135deg, #F5C518 0%, #FFD84A 100%)',
+      border: 'rgba(245,197,24,0.42)',
+      shadow: 'rgba(245,197,24,0.22)',
+      backgroundSize: '72% auto',
+    },
   },
 } satisfies Record<string, RatingCardProps['tone']>;
 
@@ -113,15 +137,15 @@ function RatingCard({ label, value, description, detail, href, logo, tone, score
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <span
-            className="flex h-14 w-48 max-w-full items-center justify-center overflow-hidden rounded-lg border"
+            className="flex h-16 w-56 max-w-full items-center justify-center overflow-hidden rounded-xl border"
             style={{
-              borderColor: tone.logoBackground ? `${tone.accent}44` : 'transparent',
-              background: tone.logoBackground ?? 'transparent',
+              borderColor: tone.logoSurface.border,
+              background: tone.logoSurface.background,
               backgroundImage: `url("${logo.src}")`,
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'contain',
-              boxShadow: tone.logoBackground ? `0 10px 26px ${tone.shadow}` : 'none',
+              backgroundSize: tone.logoSurface.backgroundSize ?? 'contain',
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.24), 0 12px 26px ${tone.logoSurface.shadow}`,
             }}
             role="img"
             aria-label={logo.alt}
