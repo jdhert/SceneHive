@@ -12,6 +12,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-29 17:25:59 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 Feed Snapshot 및 상세 Enrichment 캐시 1차 구현
+- Scope (In/Out): In: frontend-next/src/lib/server-memory-cache.ts, frontend-next/src/lib/home-data.ts, frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: Spring 백엔드 DB 스키마 변경, 외부 워커 인프라 구축
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M HANDOFF.md,  M frontend-next/src/lib/home-data.ts,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/lib/server-memory-cache.ts
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: npm run lint 통과(기존 경고만), npx tsc --noEmit 통과, npm run build 통과(기존 themeColor 경고), next start -p 3001 후 /api/home 200 확인
+- Open Risks: 1차 구현은 Next 서버 메모리/Next fetch cache 기반이라 컨테이너 재시작/재배포 시 캐시가 초기화됨; 완전한 영속 캐시는 DB/Redis 기반 2차 필요
+- Blockers: None
+- Next 3 Actions: 1) OCI 배포 후 /api/home 첫 요청/두 번째 요청 응답시간 비교, 2) 상세 페이지 클릭 시 supplemental/translation 캐시 체감 확인, 3) 필요하면 Redis 또는 PostgreSQL 기반 media_enrichment_cache 2차 설계
+- Resume Command: git status --short; git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-29 17:10:08 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 홈 Feed Snapshot 및 상세 Enrichment 캐시 1차 구현
+- Scope (In/Out): In: frontend-next/src/lib/home-data.ts, frontend-next/src/lib/tmdb.ts / Out: Spring 백엔드 DB 스키마 변경, 외부 워커 인프라 구축
+- Current Status: in progress
+- Percent Complete: 10%
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: Not run
+- Open Risks: 현재 1차 구현은 Next 서버 메모리/Next fetch cache 기반이라 배포 재시작 시 영속 캐시는 아님
+- Blockers: None
+- Next 3 Actions: 1) TMDB 상세 primary/supplemental/translation 캐시 래퍼 추가, 2) 홈 Feed Snapshot 로드 후 상위 영화/TV background enrichment 워밍 추가, 3) lint/type 검증 및 HANDOFF 완료 스냅샷 갱신
+- Resume Command: git status --short; git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-26 14:06:58 +09:00
 - Agent Name: Codex
 - Branch: main
