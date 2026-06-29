@@ -29,11 +29,13 @@ const HOME_FEED_SNAPSHOT_TTL_MS = readPositiveNumber(
   process.env.HOME_FEED_SNAPSHOT_TTL_SECONDS,
   10 * 60
 ) * 1000;
+const HOME_BACKGROUND_ENRICHMENT_ENABLED =
+  process.env.HOME_BACKGROUND_ENRICHMENT_ENABLED === 'true';
 const HOME_BACKGROUND_ENRICHMENT_LIMIT = Math.floor(
-  readPositiveNumber(process.env.HOME_BACKGROUND_ENRICHMENT_LIMIT, 6)
+  readPositiveNumber(process.env.HOME_BACKGROUND_ENRICHMENT_LIMIT, 2)
 );
 const HOME_BACKGROUND_ENRICHMENT_CONCURRENCY = Math.floor(
-  readPositiveNumber(process.env.HOME_BACKGROUND_ENRICHMENT_CONCURRENCY, 2)
+  readPositiveNumber(process.env.HOME_BACKGROUND_ENRICHMENT_CONCURRENCY, 1)
 );
 
 let cachedHomePayload: {
@@ -135,6 +137,10 @@ function collectHomeEnrichmentCandidates(data: HomePayload) {
 }
 
 async function warmHomeMediaEnrichment(data: HomePayload) {
+  if (!HOME_BACKGROUND_ENRICHMENT_ENABLED) {
+    return;
+  }
+
   const candidates = collectHomeEnrichmentCandidates(data);
   if (!candidates.length) {
     return;
