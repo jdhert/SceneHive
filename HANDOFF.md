@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-29 17:51:39 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): OCI 홈 백그라운드 enrichment 과부하 핫픽스
+- Scope (In/Out): In: frontend-next/src/lib/home-data.ts, deploy.sh / Out: DB/Redis 영속 캐시 구현
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: npx tsc --noEmit 통과, npm run build 통과(기존 lint/themeColor 경고만)
+- Open Risks: HOME_BACKGROUND_ENRICHMENT_ENABLED=false 기본값으로 상세 보강 선워밍은 비활성; 필요 시 운영 env에서 true로 켜되 limit/concurrency 보수적으로 조정 필요
+- Blockers: None
+- Next 3 Actions: 1) GitHub Actions 배포 완료 확인, 2) OCI에서 http://158.180.74.119/home 접속 및 /api/home 응답시간 확인, 3) 장기적으로 Redis/PostgreSQL 기반 영속 enrichment cache 설계
+- Resume Command: git status --short; git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-29 17:25:59 +09:00
 - Agent Name: Codex
 - Branch: main
