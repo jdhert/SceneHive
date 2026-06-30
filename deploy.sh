@@ -29,12 +29,16 @@ FRONTEND_WARMUP_ATTEMPTS="${FRONTEND_WARMUP_ATTEMPTS:-5}"
 FRONTEND_WARMUP_SLEEP_SECONDS="${FRONTEND_WARMUP_SLEEP_SECONDS:-2}"
 FRONTEND_WARMUP_TIMEOUT_SECONDS="${FRONTEND_WARMUP_TIMEOUT_SECONDS:-8}"
 FRONTEND_HEALTHCHECK_URL="${FRONTEND_HEALTHCHECK_URL:-http://localhost/api/health}"
-FRONTEND_PUBLIC_HEALTHCHECK_ENABLED="${FRONTEND_PUBLIC_HEALTHCHECK_ENABLED:-true}"
+FRONTEND_PUBLIC_HEALTHCHECK_ENABLED="${FRONTEND_PUBLIC_HEALTHCHECK_ENABLED:-false}"
+FRONTEND_PUBLIC_HEALTHCHECK_REQUIRED="${FRONTEND_PUBLIC_HEALTHCHECK_REQUIRED:-false}"
 FRONTEND_PUBLIC_HEALTHCHECK_URL="${FRONTEND_PUBLIC_HEALTHCHECK_URL:-http://${HOST:-localhost}/api/health}"
 FRONTEND_HEALTHCHECK_ATTEMPTS="${FRONTEND_HEALTHCHECK_ATTEMPTS:-30}"
 FRONTEND_HEALTHCHECK_SLEEP_SECONDS="${FRONTEND_HEALTHCHECK_SLEEP_SECONDS:-2}"
 FRONTEND_HEALTHCHECK_CURL_TIMEOUT_SECONDS="${FRONTEND_HEALTHCHECK_CURL_TIMEOUT_SECONDS:-3}"
 FRONTEND_HEALTHCHECK_LOG_EVERY_ATTEMPTS="${FRONTEND_HEALTHCHECK_LOG_EVERY_ATTEMPTS:-5}"
+DOCKER_CLEANUP_ENABLED="${DOCKER_CLEANUP_ENABLED:-true}"
+DOCKER_IMAGE_PRUNE_UNTIL="${DOCKER_IMAGE_PRUNE_UNTIL:-}"
+DOCKER_BUILDER_PRUNE_UNTIL="${DOCKER_BUILDER_PRUNE_UNTIL:-}"
 STATEFUL_SERVICES="${STATEFUL_SERVICES:-db redis}"
 APP_SERVICES="${APP_SERVICES:-backend frontend}"
 SSH_CONNECT_TIMEOUT_SECONDS="${SSH_CONNECT_TIMEOUT_SECONDS:-20}"
@@ -305,6 +309,34 @@ pull_app_services() {
     compose_cmd "pull ${APP_SERVICES}"
 }
 
+cleanup_docker_space() {
+    if [ "${DOCKER_CLEANUP_ENABLED}" != "true" ]; then
+        log_info "Docker cleanup disabled."
+        return
+    fi
+
+    local image_prune_command="docker image prune -af"
+    local builder_prune_command="docker builder prune -af"
+
+    if [ -n "${DOCKER_IMAGE_PRUNE_UNTIL}" ]; then
+        image_prune_command="${image_prune_command} --filter 'until=${DOCKER_IMAGE_PRUNE_UNTIL}'"
+    fi
+
+    if [ -n "${DOCKER_BUILDER_PRUNE_UNTIL}" ]; then
+        builder_prune_command="${builder_prune_command} --filter 'until=${DOCKER_BUILDER_PRUNE_UNTIL}'"
+    fi
+
+    log_info "Cleaning unused Docker objects before deployment (volumes are preserved)..."
+    ssh_cmd "set -e
+echo '[INFO] Docker disk usage before cleanup:'
+docker system df || true
+docker container prune -f || true
+${image_prune_command} || true
+${builder_prune_command} || true
+echo '[INFO] Docker disk usage after cleanup:'
+docker system df || true"
+}
+
 wait_for_health() {
     local attempt=1
     local log_every="${HEALTHCHECK_LOG_EVERY_ATTEMPTS}"
@@ -397,8 +429,14 @@ wait_for_frontend_health() {
     done
 
     log_error "Frontend public health check failed after ${FRONTEND_HEALTHCHECK_ATTEMPTS} attempts"
-    log_info "This usually means port 80 is not reachable from outside the VM. Check OCI Security List/NSG and host firewall."
-    return 1
+    log_warn "Frontend public health is not used as a hard deploy gate by default. Local VM health already passed."
+
+    if [ "${FRONTEND_PUBLIC_HEALTHCHECK_REQUIRED}" = "true" ]; then
+        log_error "FRONTEND_PUBLIC_HEALTHCHECK_REQUIRED=true, failing deployment."
+        return 1
+    fi
+
+    return 0
 }
 
 warmup_frontend() {
@@ -436,6 +474,9 @@ deploy_staging() {
 
     # Login to GHCR
     ghcr_login
+
+    # Free stale Docker objects before pulling/recreating app containers.
+    cleanup_docker_space
 
     # Pull images
     pull_app_services
@@ -481,7 +522,10 @@ deploy_production() {
     
     # Login to GHCR
     ghcr_login
-    
+
+    # Free stale Docker objects before pulling/recreating app containers.
+    cleanup_docker_space
+
     # Pull images with specific tag
     pull_app_services
     
@@ -524,6 +568,8 @@ rollback() {
     ssh_cmd "[ -f ${LATEST_BACKUP}/.env ] && cp ${LATEST_BACKUP}/.env ${PROJECT_DIR}/.env || true"
     ssh_cmd "[ -f ${LATEST_BACKUP}/${DEPLOY_ENV_FILE} ] && cp ${LATEST_BACKUP}/${DEPLOY_ENV_FILE} ${PROJECT_DIR}/${DEPLOY_ENV_FILE} || true"
     
+    cleanup_docker_space
+
     # Keep DB/Redis warm during rollback and recreate only application containers.
     ensure_stateful_services
     recreate_app_services

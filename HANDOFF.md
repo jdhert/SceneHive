@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-30 09:56:05 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 프론트 배포 health gate 및 Docker 공간 부족 대응
+- Scope (In/Out): In: deploy.sh, HANDOFF.md / Out: OCI 보안목록/방화벽 직접 변경, Docker volume 삭제
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M deploy.sh
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: git diff --check 통과; bash -n은 로컬 WSL /bin/bash 부재로 미실행; deploy.sh 변경부 rg 확인
+- Open Risks: 원격 디스크가 Docker prune으로도 부족하면 서버에서 df -h/df -i 및 /var/log 정리가 추가 필요
+- Blockers: None
+- Next 3 Actions: 1) GitHub Actions 재배포에서 Docker cleanup 로그 확인, 2) 배포 후 /api/health 및 /home 접근 확인, 3) 여전히 no space left on device면 OCI 서버에서 docker system df, df -h, df -i 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-30 09:34:51 +09:00
 - Agent Name: Codex
 - Branch: main
