@@ -24,10 +24,17 @@ HEALTHCHECK_SLEEP_SECONDS="${HEALTHCHECK_SLEEP_SECONDS:-3}"
 HEALTHCHECK_CURL_TIMEOUT_SECONDS="${HEALTHCHECK_CURL_TIMEOUT_SECONDS:-2}"
 HEALTHCHECK_LOG_EVERY_ATTEMPTS="${HEALTHCHECK_LOG_EVERY_ATTEMPTS:-5}"
 FRONTEND_WARMUP_ENABLED="${FRONTEND_WARMUP_ENABLED:-true}"
-FRONTEND_WARMUP_URLS="${FRONTEND_WARMUP_URLS:-http://localhost:3000/home}"
+FRONTEND_WARMUP_URLS="${FRONTEND_WARMUP_URLS:-http://localhost/home}"
 FRONTEND_WARMUP_ATTEMPTS="${FRONTEND_WARMUP_ATTEMPTS:-5}"
 FRONTEND_WARMUP_SLEEP_SECONDS="${FRONTEND_WARMUP_SLEEP_SECONDS:-2}"
 FRONTEND_WARMUP_TIMEOUT_SECONDS="${FRONTEND_WARMUP_TIMEOUT_SECONDS:-8}"
+FRONTEND_HEALTHCHECK_URL="${FRONTEND_HEALTHCHECK_URL:-http://localhost/api/health}"
+FRONTEND_PUBLIC_HEALTHCHECK_ENABLED="${FRONTEND_PUBLIC_HEALTHCHECK_ENABLED:-true}"
+FRONTEND_PUBLIC_HEALTHCHECK_URL="${FRONTEND_PUBLIC_HEALTHCHECK_URL:-http://${HOST:-localhost}/api/health}"
+FRONTEND_HEALTHCHECK_ATTEMPTS="${FRONTEND_HEALTHCHECK_ATTEMPTS:-30}"
+FRONTEND_HEALTHCHECK_SLEEP_SECONDS="${FRONTEND_HEALTHCHECK_SLEEP_SECONDS:-2}"
+FRONTEND_HEALTHCHECK_CURL_TIMEOUT_SECONDS="${FRONTEND_HEALTHCHECK_CURL_TIMEOUT_SECONDS:-3}"
+FRONTEND_HEALTHCHECK_LOG_EVERY_ATTEMPTS="${FRONTEND_HEALTHCHECK_LOG_EVERY_ATTEMPTS:-5}"
 STATEFUL_SERVICES="${STATEFUL_SERVICES:-db redis}"
 APP_SERVICES="${APP_SERVICES:-backend frontend}"
 SSH_CONNECT_TIMEOUT_SECONDS="${SSH_CONNECT_TIMEOUT_SECONDS:-20}"
@@ -332,6 +339,68 @@ wait_for_health() {
     return 1
 }
 
+wait_for_frontend_health() {
+    local attempt=1
+    local log_every="${FRONTEND_HEALTHCHECK_LOG_EVERY_ATTEMPTS}"
+
+    if ! service_selected frontend; then
+        log_info "Skipping frontend health check because frontend is not being deployed."
+        return 0
+    fi
+
+    if [ "$log_every" -lt 1 ]; then
+        log_every=1
+    fi
+
+    log_info "Waiting for frontend local health: ${FRONTEND_HEALTHCHECK_URL}"
+    while [ "$attempt" -le "$FRONTEND_HEALTHCHECK_ATTEMPTS" ]; do
+        if ssh_cmd "curl -sf --max-time ${FRONTEND_HEALTHCHECK_CURL_TIMEOUT_SECONDS} ${FRONTEND_HEALTHCHECK_URL}" >/dev/null 2>&1; then
+            log_info "Frontend local health check passed on attempt ${attempt}/${FRONTEND_HEALTHCHECK_ATTEMPTS}"
+            break
+        fi
+
+        if [ "$attempt" -eq 1 ] || [ $((attempt % log_every)) -eq 0 ] || [ "$attempt" -eq "$FRONTEND_HEALTHCHECK_ATTEMPTS" ]; then
+            log_info "Frontend local health not ready (${attempt}/${FRONTEND_HEALTHCHECK_ATTEMPTS}). Retrying every ${FRONTEND_HEALTHCHECK_SLEEP_SECONDS}s..."
+        fi
+
+        sleep "${FRONTEND_HEALTHCHECK_SLEEP_SECONDS}"
+        attempt=$((attempt + 1))
+    done
+
+    if [ "$attempt" -gt "$FRONTEND_HEALTHCHECK_ATTEMPTS" ]; then
+        log_error "Frontend local health check failed after ${FRONTEND_HEALTHCHECK_ATTEMPTS} attempts"
+        log_info "Recent frontend status/logs:"
+        ssh_cmd "cd ${PROJECT_DIR} && docker compose --env-file .env --env-file ${DEPLOY_ENV_FILE} ps frontend" || true
+        ssh_cmd "cd ${PROJECT_DIR} && docker compose --env-file .env --env-file ${DEPLOY_ENV_FILE} logs --tail=200 frontend" || true
+        return 1
+    fi
+
+    if [ "${FRONTEND_PUBLIC_HEALTHCHECK_ENABLED}" != "true" ]; then
+        log_info "Frontend public health check disabled."
+        return 0
+    fi
+
+    attempt=1
+    log_info "Waiting for frontend public health: ${FRONTEND_PUBLIC_HEALTHCHECK_URL}"
+    while [ "$attempt" -le "$FRONTEND_HEALTHCHECK_ATTEMPTS" ]; do
+        if curl -sf --max-time "${FRONTEND_HEALTHCHECK_CURL_TIMEOUT_SECONDS}" "${FRONTEND_PUBLIC_HEALTHCHECK_URL}" >/dev/null 2>&1; then
+            log_info "Frontend public health check passed on attempt ${attempt}/${FRONTEND_HEALTHCHECK_ATTEMPTS}"
+            return 0
+        fi
+
+        if [ "$attempt" -eq 1 ] || [ $((attempt % log_every)) -eq 0 ] || [ "$attempt" -eq "$FRONTEND_HEALTHCHECK_ATTEMPTS" ]; then
+            log_info "Frontend public health not ready (${attempt}/${FRONTEND_HEALTHCHECK_ATTEMPTS}). Retrying every ${FRONTEND_HEALTHCHECK_SLEEP_SECONDS}s..."
+        fi
+
+        sleep "${FRONTEND_HEALTHCHECK_SLEEP_SECONDS}"
+        attempt=$((attempt + 1))
+    done
+
+    log_error "Frontend public health check failed after ${FRONTEND_HEALTHCHECK_ATTEMPTS} attempts"
+    log_info "This usually means port 80 is not reachable from outside the VM. Check OCI Security List/NSG and host firewall."
+    return 1
+}
+
 warmup_frontend() {
     if ! service_selected frontend; then
         log_info "Skipping frontend warm-up because frontend is not being deployed."
@@ -376,18 +445,20 @@ deploy_staging() {
     recreate_app_services
 
     # Health check
-    if ! service_selected backend; then
-        log_info "Skipping backend health check because backend is not being deployed."
-        warmup_frontend
-        log_info "✅ Staging deployment completed successfully!"
-    elif wait_for_health; then
-        warmup_frontend
-        log_info "✅ Staging deployment completed successfully!"
-    else
+    if service_selected backend && ! wait_for_health; then
         log_error "Health check failed! Rolling back..."
         rollback
         exit 1
     fi
+
+    if service_selected frontend && ! wait_for_frontend_health; then
+        log_error "Frontend health check failed! Rolling back..."
+        rollback
+        exit 1
+    fi
+
+    warmup_frontend
+    log_info "✅ Staging deployment completed successfully!"
 }
 
 # Deploy production
@@ -419,18 +490,20 @@ deploy_production() {
     recreate_app_services
     
     # Health check
-    if ! service_selected backend; then
-        log_info "Skipping backend health check because backend is not being deployed."
-        warmup_frontend
-        log_info "✅ Production deployment completed successfully!"
-    elif wait_for_health; then
-        warmup_frontend
-        log_info "✅ Production deployment completed successfully!"
-    else
+    if service_selected backend && ! wait_for_health; then
         log_error "Health check failed! Rolling back..."
         rollback
         exit 1
     fi
+
+    if service_selected frontend && ! wait_for_frontend_health; then
+        log_error "Frontend health check failed! Rolling back..."
+        rollback
+        exit 1
+    fi
+
+    warmup_frontend
+    log_info "✅ Production deployment completed successfully!"
 }
 
 # Rollback to previous version
