@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-30 14:10:12 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): staging 배포 타임아웃 완화
+- Scope (In/Out): In: .github/workflows/ci.yml, .github/workflows/cd-staging.yml, HANDOFF.md / Out: 배포 스크립트 로직 추가 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M .github/workflows/cd-staging.yml,  M .github/workflows/ci.yml
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: git diff --check 통과
+- Open Risks: 현재 push는 진행 중인 run이 있으면 concurrency 정책상 이전 run을 취소할 수 있음; 새 run에서 30분 제한으로 재배포 확인 필요
+- Blockers: None
+- Next 3 Actions: 1) 새 Actions run에서 deploy-staging이 30분 timeout으로 동작하는지 확인, 2) 원격에서 컨테이너 Created 상태가 up -d로 정상 Started 되는지 확인, 3) 여전히 취소되면 Actions Summary에서 timeout/concurrency/manual cancel 여부 확인
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-30 09:56:05 +09:00
 - Agent Name: Codex
 - Branch: main
