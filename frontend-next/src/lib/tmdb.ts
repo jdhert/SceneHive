@@ -5,7 +5,6 @@ import {
   translateTextToKorean,
   translateTextsToKorean,
 } from '@/lib/translation';
-import { createServerMemoryCache, readPositiveNumber } from '@/lib/server-memory-cache';
 
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3';
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -19,24 +18,6 @@ const NOW_PLAYING_LOOKUP_PAGE_LIMIT = 5;
 const OMDB_RATINGS_CACHE_TTL_SECONDS = Number(
   process.env.OMDB_RATINGS_CACHE_TTL_SECONDS ?? 86400
 );
-const MEDIA_PRIMARY_CACHE_TTL_SECONDS = readPositiveNumber(
-  process.env.MEDIA_PRIMARY_CACHE_TTL_SECONDS,
-  24 * 60 * 60
-);
-const MEDIA_SUPPLEMENTAL_CACHE_TTL_SECONDS = readPositiveNumber(
-  process.env.MEDIA_SUPPLEMENTAL_CACHE_TTL_SECONDS,
-  6 * 60 * 60
-);
-const MEDIA_TRANSLATION_CACHE_TTL_SECONDS = readPositiveNumber(
-  process.env.MEDIA_TRANSLATION_CACHE_TTL_SECONDS,
-  7 * 24 * 60 * 60
-);
-const MEDIA_FULL_CACHE_TTL_SECONDS = Math.min(
-  MEDIA_PRIMARY_CACHE_TTL_SECONDS,
-  MEDIA_SUPPLEMENTAL_CACHE_TTL_SECONDS
-);
-
-const mediaEnrichmentCache = createServerMemoryCache('media-enrichment');
 
 export type TmdbMovie = {
   id: number;
@@ -1359,21 +1340,12 @@ async function fetchTvDetailsBase(
   }
 }
 
-async function loadTvDetailsPrimary(tvId: number) {
+export async function fetchTvDetailsPrimary(tvId: number) {
   const detail = await fetchTvDetailsBase(tvId, false, false);
   return pickTvPrimaryDetail(detail);
 }
 
-export async function fetchTvDetailsPrimary(tvId: number) {
-  return mediaEnrichmentCache.getOrLoad(
-    `tv:${tvId}:primary`,
-    MEDIA_PRIMARY_CACHE_TTL_SECONDS,
-    () => loadTvDetailsPrimary(tvId),
-    { allowStaleOnError: true }
-  );
-}
-
-async function loadTvDetailsSupplemental(tvId: number, baseDetail?: TmdbTvDetail) {
+export async function fetchTvDetailsSupplemental(tvId: number, baseDetail?: TmdbTvDetail) {
   const detail =
     baseDetail ??
     (await tmdbFetch<TmdbTvDetail>(`/tv/${tvId}`, {
@@ -1398,16 +1370,7 @@ async function loadTvDetailsSupplemental(tvId: number, baseDetail?: TmdbTvDetail
   };
 }
 
-export async function fetchTvDetailsSupplemental(tvId: number, baseDetail?: TmdbTvDetail) {
-  return mediaEnrichmentCache.getOrLoad(
-    `tv:${tvId}:supplemental`,
-    MEDIA_SUPPLEMENTAL_CACHE_TTL_SECONDS,
-    () => loadTvDetailsSupplemental(tvId, baseDetail),
-    { allowStaleOnError: true }
-  );
-}
-
-async function loadTvDetails(tvId: number) {
+export async function fetchTvDetails(tvId: number) {
   const detail = await fetchTvDetailsBase(tvId, true);
   const supplemental = await fetchTvDetailsSupplemental(tvId, detail);
 
@@ -1417,31 +1380,13 @@ async function loadTvDetails(tvId: number) {
   };
 }
 
-export async function fetchTvDetails(tvId: number) {
-  return mediaEnrichmentCache.getOrLoad(
-    `tv:${tvId}:full`,
-    MEDIA_FULL_CACHE_TTL_SECONDS,
-    () => loadTvDetails(tvId),
-    { allowStaleOnError: true }
-  );
-}
-
-async function loadTvDetailsTextTranslation(tvId: number) {
+export async function fetchTvDetailsTextTranslation(tvId: number) {
   const detail = await fetchTvDetailsBase(tvId, false, true);
 
   return {
     overview: detail.overview,
     tagline: detail.tagline,
   };
-}
-
-export async function fetchTvDetailsTextTranslation(tvId: number) {
-  return mediaEnrichmentCache.getOrLoad(
-    `tv:${tvId}:translation`,
-    MEDIA_TRANSLATION_CACHE_TTL_SECONDS,
-    () => loadTvDetailsTextTranslation(tvId),
-    { allowStaleOnError: true }
-  );
 }
 
 async function fetchSimilarMovies(movieId: number) {
@@ -1538,21 +1483,12 @@ async function fetchMovieDetailsBase(
   return mergedDetail;
 }
 
-async function loadMovieDetailsPrimary(movieId: number) {
+export async function fetchMovieDetailsPrimary(movieId: number) {
   const detail = await fetchMovieDetailsBase(movieId, false, false);
   return pickMoviePrimaryDetail(detail);
 }
 
-export async function fetchMovieDetailsPrimary(movieId: number) {
-  return mediaEnrichmentCache.getOrLoad(
-    `movie:${movieId}:primary`,
-    MEDIA_PRIMARY_CACHE_TTL_SECONDS,
-    () => loadMovieDetailsPrimary(movieId),
-    { allowStaleOnError: true }
-  );
-}
-
-async function loadMovieDetailsSupplemental(movieId: number, baseDetail?: TmdbMovieDetail) {
+export async function fetchMovieDetailsSupplemental(movieId: number, baseDetail?: TmdbMovieDetail) {
   const detail =
     baseDetail ??
     (await tmdbFetch<TmdbMovieDetail>(`/movie/${movieId}`, {
@@ -1616,16 +1552,7 @@ async function loadMovieDetailsSupplemental(movieId: number, baseDetail?: TmdbMo
   };
 }
 
-export async function fetchMovieDetailsSupplemental(movieId: number, baseDetail?: TmdbMovieDetail) {
-  return mediaEnrichmentCache.getOrLoad(
-    `movie:${movieId}:supplemental`,
-    MEDIA_SUPPLEMENTAL_CACHE_TTL_SECONDS,
-    () => loadMovieDetailsSupplemental(movieId, baseDetail),
-    { allowStaleOnError: true }
-  );
-}
-
-async function loadMovieDetails(movieId: number) {
+export async function fetchMovieDetails(movieId: number) {
   const detail = await fetchMovieDetailsBase(movieId, true);
   const supplemental = await fetchMovieDetailsSupplemental(movieId, detail);
 
@@ -1635,29 +1562,11 @@ async function loadMovieDetails(movieId: number) {
   };
 }
 
-export async function fetchMovieDetails(movieId: number) {
-  return mediaEnrichmentCache.getOrLoad(
-    `movie:${movieId}:full`,
-    MEDIA_FULL_CACHE_TTL_SECONDS,
-    () => loadMovieDetails(movieId),
-    { allowStaleOnError: true }
-  );
-}
-
-async function loadMovieDetailsTextTranslation(movieId: number) {
+export async function fetchMovieDetailsTextTranslation(movieId: number) {
   const detail = await fetchMovieDetailsBase(movieId, false, true);
 
   return {
     overview: detail.overview,
     tagline: detail.tagline,
   };
-}
-
-export async function fetchMovieDetailsTextTranslation(movieId: number) {
-  return mediaEnrichmentCache.getOrLoad(
-    `movie:${movieId}:translation`,
-    MEDIA_TRANSLATION_CACHE_TTL_SECONDS,
-    () => loadMovieDetailsTextTranslation(movieId),
-    { allowStaleOnError: true }
-  );
 }

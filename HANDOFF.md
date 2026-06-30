@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-30 09:34:51 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 918 상세 enrichment 런타임 변경 롤백
+- Scope (In/Out): In: frontend-next/src/lib/home-data.ts, frontend-next/src/lib/tmdb.ts, frontend-next/src/lib/server-memory-cache.ts, HANDOFF.md / Out: OCI 네트워크/방화벽 설정 직접 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/lib/home-data.ts,  D frontend-next/src/lib/server-memory-cache.ts,  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: rg 잔여 참조 없음; git diff --check 통과(LF/CRLF 경고만); npx tsc --noEmit 통과; npm run build 통과(기존 lint/themeColor 경고만)
+- Open Risks: 상세 페이지 속도 개선 1차 cache wrapper는 제거되었으므로 이후 영속 캐시는 Redis/DB 기반으로 재설계 필요
+- Blockers: None
+- Next 3 Actions: 1) GitHub Actions 배포 후 http://158.180.74.119/home 화면 로딩 확인, 2) OCI에서 docker logs scenehive-frontend --tail=100 로 Next 런타임 오류 확인, 3) 필요 시 91853e5 이후 상세 API 응답시간을 서버 로그/브라우저 Network 기준으로 다시 측정
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-30 09:21:32 +09:00
 - Agent Name: Codex
 - Branch: main
