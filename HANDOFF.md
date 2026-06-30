@@ -12,6 +12,38 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-06-30 09:21:32 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 프론트 배포 health check 보강
+- Scope (In/Out): In: deploy.sh, frontend-next/src/app/api/health/route.ts, HANDOFF.md / Out: OCI 보안목록/방화벽 직접 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M HANDOFF.md
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: 외부 curl/Test-NetConnection 80 timeout 재현; npx tsc --noEmit 통과; npm run build 통과(기존 lint/themeColor 경고만); 로컬 bash 부재로 bash -n 미실행
+- Open Risks: 외부 public health가 계속 실패하면 애플리케이션이 아니라 OCI Security List/NSG 또는 VM 방화벽/네트워크 문제 가능성이 높음
+- Blockers: None
+- Next 3 Actions: 1) GitHub Actions에서 frontend local/public health check 결과 확인, 2) 실패 시 OCI 서버에서 docker ps/logs와 sudo ss -lntp, iptables/ufw, Security List 80 확인, 3) 배포 성공 후 http://158.180.74.119/api/health 와 /home 확인
+- Resume Command: git status --short; git branch --show-current
+
+## Handoff Snapshot
+- Timestamp (KST): 2026-06-30 09:14:31 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 프론트 배포 health check 보강
+- Scope (In/Out): In: deploy.sh, frontend-next/src/app/api/health/route.ts / Out: OCI 보안목록/방화벽 직접 변경
+- Current Status: in progress
+- Percent Complete: 10%
+- Files Changed: None
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: curl/Test-NetConnection 외부 80 timeout 확인
+- Open Risks: 외부 80 timeout이 OCI 보안목록 또는 VM 방화벽이면 코드 배포만으로는 복구 불가
+- Blockers: None
+- Next 3 Actions: 1) Next frontend health route 추가, 2) deploy.sh에 frontend local/public health check 추가, 3) 검증 후 커밋 및 push
+- Resume Command: git status --short; git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-29 17:51:39 +09:00
 - Agent Name: Codex
 - Branch: main
