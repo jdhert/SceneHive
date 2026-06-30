@@ -83,7 +83,7 @@ jobs:
           docker manifest inspect "$frontend_image" > /dev/null
 
       - name: Checkout deploy script
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
           sparse-checkout: |

@@ -120,7 +120,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Normalize image name
         id: image_name
@@ -197,7 +197,7 @@ jobs:
 
     steps:
       - name: Checkout deploy script
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           sparse-checkout: |
             deploy.sh
