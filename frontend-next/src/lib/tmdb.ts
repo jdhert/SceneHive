@@ -188,6 +188,7 @@ export type TmdbMovieDetail = {
   id: number;
   title: string;
   original_title: string;
+  original_language: string;
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
@@ -314,6 +315,7 @@ export type TmdbSearchMultiItem = {
   original_title?: string;
   name?: string;
   original_name?: string;
+  original_language?: string;
   overview?: string;
   poster_path?: string | null;
   backdrop_path?: string | null;
@@ -374,6 +376,7 @@ export type TmdbTvDetail = {
   id: number;
   name: string;
   original_name: string;
+  original_language: string;
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
@@ -734,18 +737,93 @@ function needsKoreanTextFallback(text: string | null | undefined) {
   return !hasOverview(text) || !hasKoreanText(text);
 }
 
+function isEnglishOriginal(language: string | null | undefined) {
+  return language?.toLowerCase() === 'en';
+}
+
+function needsMovieTitleFallback(
+  movie: {
+    title?: string | null;
+    original_language?: string | null;
+  }
+) {
+  return Boolean(
+    movie.original_language &&
+    !isEnglishOriginal(movie.original_language) &&
+    !hasKoreanText(movie.title)
+  );
+}
+
+function needsTvTitleFallback(
+  show: {
+    name?: string | null;
+    original_language?: string | null;
+  }
+) {
+  return Boolean(
+    show.original_language &&
+    !isEnglishOriginal(show.original_language) &&
+    !hasKoreanText(show.name)
+  );
+}
+
+function resolveMovieTitle(
+  movie: {
+    title?: string | null;
+    original_title?: string | null;
+    original_language?: string | null;
+  },
+  fallback?: {
+    title?: string | null;
+    original_title?: string | null;
+  }
+) {
+  const title = movie.title?.trim();
+  const originalTitle = movie.original_title?.trim();
+
+  if (hasKoreanText(title) || isEnglishOriginal(movie.original_language)) {
+    return title || originalTitle || '';
+  }
+
+  return fallback?.title?.trim() || title || fallback?.original_title?.trim() || originalTitle || '';
+}
+
+function resolveTvTitle(
+  show: {
+    name?: string | null;
+    original_name?: string | null;
+    original_language?: string | null;
+  },
+  fallback?: {
+    name?: string | null;
+    original_name?: string | null;
+  }
+) {
+  const name = show.name?.trim();
+  const originalName = show.original_name?.trim();
+
+  if (hasKoreanText(name) || isEnglishOriginal(show.original_language)) {
+    return name || originalName || '';
+  }
+
+  return fallback?.name?.trim() || name || fallback?.original_name?.trim() || originalName || '';
+}
+
 async function fillMissingMovieOverviews(
   path: string,
   params: Record<string, string | number | undefined>,
   source: TmdbMovieListResponse
 ) {
-  const needsFallback = source.results.some((movie) => needsKoreanTextFallback(movie.overview));
+  const needsFallback = source.results.some(
+    (movie) => needsKoreanTextFallback(movie.overview) || needsMovieTitleFallback(movie)
+  );
   if (!needsFallback) {
     return source;
   }
 
   try {
     const fallbackEn = await tmdbFetch<TmdbMovieListResponse>(path, params, { language: 'en-US' });
+    const fallbackMovieMap = new Map((fallbackEn.results ?? []).map((movie) => [movie.id, movie]));
     const fallbackEntries = (fallbackEn.results ?? [])
       .filter((movie) => hasOverview(movie.overview))
       .map((movie) => ({
@@ -761,18 +839,15 @@ async function fillMissingMovieOverviews(
     return {
       ...source,
       results: source.results.map((movie) => {
-        if (hasKoreanText(movie.overview)) {
-          return movie;
-        }
-
+        const fallbackMovie = fallbackMovieMap.get(movie.id);
         const overviewEn = fallbackMap.get(movie.id);
-        if (!hasOverview(overviewEn)) {
-          return movie;
-        }
 
         return {
           ...movie,
-          overview: overviewEn,
+          title: resolveMovieTitle(movie, fallbackMovie),
+          overview: hasKoreanText(movie.overview) || !hasOverview(overviewEn)
+            ? movie.overview
+            : overviewEn,
         };
       }),
     };
@@ -824,13 +899,16 @@ async function fillMissingTvOverviews(
   params: Record<string, string | number | undefined>,
   source: TmdbTvListResponse
 ) {
-  const needsFallback = source.results.some((show) => needsKoreanTextFallback(show.overview));
+  const needsFallback = source.results.some(
+    (show) => needsKoreanTextFallback(show.overview) || needsTvTitleFallback(show)
+  );
   if (!needsFallback) {
     return source;
   }
 
   try {
     const fallbackEn = await tmdbFetch<TmdbTvListResponse>(path, params, { language: 'en-US' });
+    const fallbackTvMap = new Map((fallbackEn.results ?? []).map((show) => [show.id, show]));
     const fallbackEntries = (fallbackEn.results ?? [])
       .filter((show) => hasOverview(show.overview))
       .map((show) => ({
@@ -846,18 +924,15 @@ async function fillMissingTvOverviews(
     return {
       ...source,
       results: source.results.map((show) => {
-        if (hasKoreanText(show.overview)) {
-          return show;
-        }
-
+        const fallbackShow = fallbackTvMap.get(show.id);
         const overviewEn = fallbackMap.get(show.id);
-        if (!hasOverview(overviewEn)) {
-          return show;
-        }
 
         return {
           ...show,
-          overview: overviewEn,
+          name: resolveTvTitle(show, fallbackShow),
+          overview: hasKoreanText(show.overview) || !hasOverview(overviewEn)
+            ? show.overview
+            : overviewEn,
         };
       }),
     };
@@ -870,7 +945,10 @@ async function fillMissingTrendingAllOverviews(source: TmdbTrendingAllResponse) 
   const needsFallback = source.results.some(
     (item) =>
       (item.media_type === 'movie' || item.media_type === 'tv') &&
-      needsKoreanTextFallback(item.overview)
+      (needsKoreanTextFallback(item.overview) ||
+        (item.media_type === 'movie'
+          ? needsMovieTitleFallback(item)
+          : needsTvTitleFallback(item)))
   );
 
   if (!needsFallback) {
@@ -906,6 +984,11 @@ async function fillMissingTrendingAllOverviews(source: TmdbTrendingAllResponse) 
     }
 
     const translatedOverviews = await translateTextsToKorean(fallbackEntries);
+    const fallbackItemMap = new Map(
+      (fallbackEn.results ?? [])
+        .filter((item) => item.media_type === 'movie' || item.media_type === 'tv')
+        .map((item) => [`${item.media_type}:${item.id}`, item])
+    );
     const fallbackMap = new Map(
       fallbackEntries.map((entry) => [
         `${entry.mediaType}:${entry.id}`,
@@ -920,18 +1003,31 @@ async function fillMissingTrendingAllOverviews(source: TmdbTrendingAllResponse) 
           return item;
         }
 
-        if (hasKoreanText(item.overview)) {
-          return item;
-        }
-
+        const fallbackItem = fallbackItemMap.get(`${item.media_type}:${item.id}`);
         const overviewEn = fallbackMap.get(`${item.media_type}:${item.id}`);
-        if (!hasOverview(overviewEn)) {
-          return item;
+
+        if (item.media_type === 'movie') {
+          return {
+            ...item,
+            title: resolveMovieTitle(
+              item,
+              fallbackItem?.media_type === 'movie' ? fallbackItem : undefined
+            ),
+            overview: hasKoreanText(item.overview) || !hasOverview(overviewEn)
+              ? item.overview
+              : overviewEn,
+          };
         }
 
         return {
           ...item,
-          overview: overviewEn,
+          name: resolveTvTitle(
+            item,
+            fallbackItem?.media_type === 'tv' ? fallbackItem : undefined
+          ),
+          overview: hasKoreanText(item.overview) || !hasOverview(overviewEn)
+            ? item.overview
+            : overviewEn,
         };
       }),
     };
@@ -1197,13 +1293,16 @@ export async function fetchSearchMulti(query: string, page = 1) {
   };
 
   const primary = await tmdbFetch<TmdbMultiSearchResponse>('/search/multi', params);
-  const needOverviewFallback = (primary.results ?? []).some(
+  const needFallback = (primary.results ?? []).some(
     (item) =>
       (item.media_type === 'movie' || item.media_type === 'tv') &&
-      needsKoreanTextFallback(item.overview)
+      (needsKoreanTextFallback(item.overview) ||
+        (item.media_type === 'movie'
+          ? needsMovieTitleFallback(item)
+          : needsTvTitleFallback(item)))
   );
 
-  if (!needOverviewFallback) {
+  if (!needFallback) {
     return primary;
   }
 
@@ -1212,6 +1311,11 @@ export async function fetchSearchMulti(query: string, page = 1) {
       '/search/multi',
       params,
       { language: 'en-US' }
+    );
+    const fallbackItemMap = new Map(
+      (fallbackEn.results ?? [])
+        .filter((item) => item.media_type === 'movie' || item.media_type === 'tv')
+        .map((item) => [`${item.media_type}:${item.id}`, item])
     );
     const fallbackEntries = (fallbackEn.results ?? [])
       .filter(
@@ -1247,16 +1351,31 @@ export async function fetchSearchMulti(query: string, page = 1) {
         ) {
           return item;
         }
-        if (hasKoreanText(item.overview)) {
-          return item;
-        }
+        const fallbackItem = fallbackItemMap.get(`${item.media_type}:${item.id}`);
         const fallbackOverview = fallbackMap.get(`${item.media_type}:${item.id}`);
-        if (!hasOverview(fallbackOverview)) {
-          return item;
+
+        if (item.media_type === 'movie') {
+          return {
+            ...item,
+            title: resolveMovieTitle(
+              item,
+              fallbackItem?.media_type === 'movie' ? fallbackItem : undefined
+            ),
+            overview: hasKoreanText(item.overview) || !hasOverview(fallbackOverview)
+              ? item.overview
+              : fallbackOverview,
+          };
         }
+
         return {
           ...item,
-          overview: fallbackOverview,
+          name: resolveTvTitle(
+            item,
+            fallbackItem?.media_type === 'tv' ? fallbackItem : undefined
+          ),
+          overview: hasKoreanText(item.overview) || !hasOverview(fallbackOverview)
+            ? item.overview
+            : fallbackOverview,
         };
       }),
     };
@@ -1310,6 +1429,7 @@ async function fetchTvDetailsBase(
     append_to_response: appendToResponse,
   });
 
+  const needTitleFallback = needsTvTitleFallback(detail);
   const needOverview = needsKoreanTextFallback(detail.overview);
   const needTagline = needsKoreanTextFallback(detail.tagline);
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
@@ -1317,7 +1437,7 @@ async function fetchTvDetailsBase(
   );
   const needTrailerFallback = !hasKoreanTrailer;
 
-  if (!needOverview && !needTagline && !needTrailerFallback) {
+  if (!needTitleFallback && !needOverview && !needTagline && !needTrailerFallback) {
     return detail;
   }
 
@@ -1357,6 +1477,7 @@ async function fetchTvDetailsBase(
 
     return {
       ...detail,
+      name: needTitleFallback ? resolveTvTitle(detail, fallbackEn) : detail.name,
       overview: needOverview ? translatedOverview : detail.overview,
       tagline: needTagline ? translatedTagline : detail.tagline,
       videos: {
@@ -1501,6 +1622,7 @@ async function fetchMovieDetailsBase(
     append_to_response: appendToResponse,
   });
   let mergedDetail = detail;
+  const needTitleFallback = needsMovieTitleFallback(detail);
   const needOverview = needsKoreanTextFallback(detail.overview);
   const needTagline = needsKoreanTextFallback(detail.tagline);
   const hasKoreanTrailer = (detail.videos?.results ?? []).some(
@@ -1508,7 +1630,7 @@ async function fetchMovieDetailsBase(
   );
   const needTrailerFallback = !hasKoreanTrailer;
 
-  if (needOverview || needTagline || needTrailerFallback) {
+  if (needTitleFallback || needOverview || needTagline || needTrailerFallback) {
     try {
       const fallbackEn = await tmdbFetch<TmdbMovieDetail>(
         `/movie/${movieId}`,
@@ -1545,6 +1667,7 @@ async function fetchMovieDetailsBase(
 
       mergedDetail = {
         ...detail,
+        title: needTitleFallback ? resolveMovieTitle(detail, fallbackEn) : detail.title,
         overview: needOverview ? translatedOverview : detail.overview,
         tagline: needTagline ? translatedTagline : detail.tagline,
         videos: {

@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-07-01 11:47:58 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): 제목 fallback은 영어 원문 유지
+- Scope (In/Out): In: frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: 번역 API 정책 변경, UI 레이아웃 변경, 상세 페이지 데이터 구조 변경
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/lib/tmdb.ts
+- Commands Run: git branch --show-current, git status --short, .\scripts\agent-checkpoint.ps1 -AgentName "Codex" -Goal "제목 fallback은 영어 원문 유지" -ScopeIn "frontend-next/src/lib/tmdb.ts, HANDOFF.md" -ScopeOut "번역 API 정책 변경, UI 레이아웃 변경, 상세 페이지 데이터 구조 변경" -Status "done" -PercentComplete "100%" -TestsResult "npx tsc --noEmit 통과; git diff --check 통과(LF/CRLF 경고만); npm run build 통과(기존 img/themeColor 경고만)" -OpenRisks "한국어 title이 존재하는 작품은 한국어 title을 그대로 유지함; 한국어 title이 없고 원본 언어가 비영어권이면 TMDB en-US title fallback을 사용함" -Blockers "None" -NextAction1 "로컬/OCI에서 한국어 제목 없는 영화가 영어 제목으로 표시되는지 확인" -NextAction2 "의도와 다르게 모든 제목을 영어로 고정해야 하면 정책 재조정" -NextAction3 "확정 시 커밋 및 원격 push"
+- Tests Run + Result: npx tsc --noEmit 통과; git diff --check 통과(LF/CRLF 경고만); npm run build 통과(기존 img/themeColor 경고만)
+- Open Risks: 한국어 title이 존재하는 작품은 한국어 title을 그대로 유지함; 한국어 title이 없고 원본 언어가 비영어권이면 TMDB en-US title fallback을 사용함
+- Blockers: None
+- Next 3 Actions: 1) 로컬/OCI에서 한국어 제목 없는 영화가 영어 제목으로 표시되는지 확인, 2) 의도와 다르게 모든 제목을 영어로 고정해야 하면 정책 재조정, 3) 확정 시 커밋 및 원격 push
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-07-01 11:28:43 +09:00
 - Agent Name: Codex
 - Branch: main
