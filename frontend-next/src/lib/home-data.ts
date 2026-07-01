@@ -3,9 +3,15 @@ import 'server-only';
 import {
   fetchAiringTodayTv,
   fetchGenres,
+  fetchMovieDetailsPrimary,
+  fetchMovieDetailsSupplemental,
+  fetchMovieDetailsTextTranslation,
   fetchNowPlayingMovies,
   fetchPopularMovies,
   fetchPopularTv,
+  fetchTvDetailsPrimary,
+  fetchTvDetailsSupplemental,
+  fetchTvDetailsTextTranslation,
   fetchTrendingAll,
   fetchTrendingMovies,
   fetchTrendingPeople,
@@ -16,9 +22,25 @@ import {
   type TmdbTrendingAllItem,
   type TmdbTv,
 } from '@/lib/tmdb';
+import { readPositiveNumber, runWithConcurrency } from '@/lib/server-memory-cache';
 import type { HomePayload, Movie } from '@/types/home';
 
-const HOME_CACHE_TTL_MS = 10 * 60 * 1000;
+const HOME_CACHE_TTL_MS = readPositiveNumber(
+  process.env.HOME_FEED_SNAPSHOT_TTL_SECONDS,
+  10 * 60
+) * 1000;
+const HOME_BACKGROUND_ENRICHMENT_ENABLED =
+  process.env.HOME_BACKGROUND_ENRICHMENT_ENABLED !== 'false';
+const HOME_BACKGROUND_ENRICHMENT_LIMIT = Math.floor(
+  readPositiveNumber(process.env.HOME_BACKGROUND_ENRICHMENT_LIMIT, 2)
+);
+const HOME_BACKGROUND_ENRICHMENT_CONCURRENCY = Math.floor(
+  readPositiveNumber(process.env.HOME_BACKGROUND_ENRICHMENT_CONCURRENCY, 1)
+);
+const HOME_BACKGROUND_ENRICHMENT_DELAY_MS = readPositiveNumber(
+  process.env.HOME_BACKGROUND_ENRICHMENT_DELAY_MS,
+  1000
+);
 
 let cachedHomePayload: {
   data: HomePayload;
@@ -82,6 +104,88 @@ function trendingToCard(item: TmdbTrendingAllItem): Movie {
   return personToCard(item);
 }
 
+type EnrichmentCandidate = {
+  id: number;
+  mediaType: 'movie' | 'tv';
+};
+
+function collectHomeEnrichmentCandidates(data: HomePayload) {
+  const candidates = new Map<string, EnrichmentCandidate>();
+
+  function add(item: Pick<Movie, 'id' | 'media_type'> | TmdbTv, mediaType?: 'movie' | 'tv') {
+    const resolvedMediaType = mediaType ?? (item as Movie).media_type;
+    if (resolvedMediaType !== 'movie' && resolvedMediaType !== 'tv') {
+      return;
+    }
+
+    const key = `${resolvedMediaType}:${item.id}`;
+    if (!candidates.has(key)) {
+      candidates.set(key, {
+        id: item.id,
+        mediaType: resolvedMediaType,
+      });
+    }
+  }
+
+  data.trendingNow.results.forEach((item) => add(item));
+
+  if (candidates.size < HOME_BACKGROUND_ENRICHMENT_LIMIT) {
+    data.trending.results.forEach((item) => add(item, 'movie'));
+  }
+
+  if (candidates.size < HOME_BACKGROUND_ENRICHMENT_LIMIT) {
+    data.trendingTv.results.forEach((item) => add(item, 'tv'));
+  }
+
+  return Array.from(candidates.values()).slice(0, HOME_BACKGROUND_ENRICHMENT_LIMIT);
+}
+
+async function ignoreFailure(task: Promise<unknown>) {
+  await task.catch(() => {
+    // Background enrichment must never affect foreground rendering.
+  });
+}
+
+async function warmHomeMediaEnrichment(data: HomePayload) {
+  if (!HOME_BACKGROUND_ENRICHMENT_ENABLED || HOME_BACKGROUND_ENRICHMENT_LIMIT < 1) {
+    return;
+  }
+
+  const candidates = collectHomeEnrichmentCandidates(data);
+  if (!candidates.length) {
+    return;
+  }
+
+  await runWithConcurrency(
+    candidates,
+    HOME_BACKGROUND_ENRICHMENT_CONCURRENCY,
+    async ({ id, mediaType }) => {
+      if (mediaType === 'movie') {
+        await ignoreFailure(fetchMovieDetailsPrimary(id));
+        await ignoreFailure(fetchMovieDetailsSupplemental(id));
+        await ignoreFailure(fetchMovieDetailsTextTranslation(id));
+        return;
+      }
+
+      await ignoreFailure(fetchTvDetailsPrimary(id));
+      await ignoreFailure(fetchTvDetailsSupplemental(id));
+      await ignoreFailure(fetchTvDetailsTextTranslation(id));
+    }
+  );
+}
+
+function scheduleHomeMediaEnrichment(data: HomePayload) {
+  if (!HOME_BACKGROUND_ENRICHMENT_ENABLED || HOME_BACKGROUND_ENRICHMENT_LIMIT < 1) {
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    void warmHomeMediaEnrichment(data);
+  }, HOME_BACKGROUND_ENRICHMENT_DELAY_MS);
+
+  (timer as NodeJS.Timeout).unref?.();
+}
+
 async function loadHomePayload(): Promise<HomePayload> {
   const [
     trendingNow,
@@ -138,6 +242,7 @@ export async function fetchHomePayload(): Promise<HomePayload> {
         data,
         expiresAt: Date.now() + HOME_CACHE_TTL_MS,
       };
+      scheduleHomeMediaEnrichment(data);
       return data;
     })
     .catch((error) => {

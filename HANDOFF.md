@@ -12,6 +12,22 @@
 ## Handoff Snapshot Log (Auto)
 <!-- HANDOFF_LOG_START -->
 ## Handoff Snapshot
+- Timestamp (KST): 2026-07-01 11:28:43 +09:00
+- Agent Name: Codex
+- Branch: main
+- Goal (1 line): Background Enrichment Pipeline 보수적 복구
+- Scope (In/Out): In: frontend-next/src/lib/server-memory-cache.ts, frontend-next/src/lib/home-data.ts, frontend-next/src/lib/tmdb.ts, HANDOFF.md / Out: Redis/DB 영속 캐시, 외부 worker/scheduler
+- Current Status: done
+- Percent Complete: 100%
+- Files Changed:  M frontend-next/src/lib/home-data.ts,  M frontend-next/src/lib/tmdb.ts, ?? frontend-next/src/lib/server-memory-cache.ts
+- Commands Run: git branch --show-current, git status --short, & "$PSScriptRoot\agent-checkpoint.ps1" @args
+- Tests Run + Result: rg 참조 확인; git diff --check 통과; npx tsc --noEmit 통과; npm run build 통과(기존 img/themeColor 경고만)
+- Open Risks: 메모리 캐시는 컨테이너 재시작 시 초기화됨; 운영에서 부담 시 HOME_BACKGROUND_ENRICHMENT_ENABLED=false 또는 LIMIT/CONCURRENCY 조정 필요
+- Blockers: None
+- Next 3 Actions: 1) OCI 배포 후 /home 첫 진입과 두 번째 진입 응답 체감 비교, 2) docker logs scenehive-frontend에서 enrichment 관련 런타임 오류 여부 확인, 3) 장기적으로 Redis/DB 기반 영속 enrichment cache 검토
+- Resume Command: git status --short && git branch --show-current
+
+## Handoff Snapshot
 - Timestamp (KST): 2026-06-30 14:10:12 +09:00
 - Agent Name: Codex
 - Branch: main
